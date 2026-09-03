@@ -1,0 +1,286 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Role {
+  roleId      Int     @id @default(autoincrement()) @map("role_id")
+  name        String  @db.VarChar(50)
+  description String? @db.VarChar(255)
+
+  users User[]
+
+  @@map("roles")
+}
+
+model User {
+  userId       Int      @id @default(autoincrement()) @map("user_id")
+  roleId       Int      @map("role_id")
+  name         String   @db.VarChar(100)
+  lastname     String   @db.VarChar(100)
+  email        String   @unique @db.VarChar(150)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  phone        String?  @db.VarChar(30)
+  avatarUrl    String?  @map("avatar_url") @db.VarChar(500)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  role Role @relation(fields: [roleId], references: [roleId])
+
+  courses         Course[]
+  products        Product[]
+  carts           Cart[]
+  orders          Order[]
+  enrollments     Enrollment[]
+  certificates    Certificate[]
+  companies       Company[]
+  formSubmissions FormSubmission[]
+
+  @@map("users")
+}
+
+model Course {
+  courseId        Int      @id @default(autoincrement()) @map("course_id")
+  ownerId         Int      @map("owner_id")
+  name            String   @db.VarChar(200)
+  description     String?  @db.Text
+  videoUrl        String?  @map("video_url") @db.VarChar(500)
+  thumbnailUrl    String?  @map("thumbnail_url") @db.VarChar(500)
+  durationMinutes Int?     @map("duration_minutes")
+  price           Decimal  @db.Decimal(10, 2)
+  discountPrice   Decimal? @map("discount_price") @db.Decimal(10, 2)
+  status          String   @default("active") @db.VarChar(20)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  owner User @relation(fields: [ownerId], references: [userId])
+
+  cartItems    CartItem[]
+  orderItems   OrderItem[]
+  enrollments  Enrollment[]
+  certificates Certificate[]
+
+  @@map("courses")
+}
+
+model Product {
+  productId     Int      @id @default(autoincrement()) @map("product_id")
+  ownerId       Int      @map("owner_id")
+  name          String   @db.VarChar(200)
+  description   String?  @db.Text
+  brand         String?  @db.VarChar(100)
+  model         String?  @db.VarChar(100)
+  price         Decimal  @db.Decimal(10, 2)
+  discountPrice Decimal? @map("discount_price") @db.Decimal(10, 2)
+  stock         Int      @default(0)
+  status        String   @default("active") @db.VarChar(20)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  owner User @relation(fields: [ownerId], references: [userId])
+
+  images     ProductImage[]
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+
+  @@map("products")
+}
+
+model ProductImage {
+  imageId     Int     @id @default(autoincrement()) @map("image_id")
+  productId   Int     @map("product_id")
+  imageUrl    String  @map("image_url") @db.VarChar(500)
+  isThumbnail Boolean @default(false) @map("is_thumbnail")
+  sortOrder   Int?    @map("sort_order")
+
+  product Product @relation(fields: [productId], references: [productId])
+
+  @@map("product_images")
+}
+
+model Cart {
+  cartId    Int      @id @default(autoincrement()) @map("cart_id")
+  userId    Int      @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user  User       @relation(fields: [userId], references: [userId])
+  items CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  cartItemId Int     @id @default(autoincrement()) @map("cart_item_id")
+  cartId     Int     @map("cart_id")
+  itemType   String  @map("item_type") @db.VarChar(20) // 'course' | 'product'
+  courseId   Int?    @map("course_id")
+  productId  Int?    @map("product_id")
+  quantity   Int
+  price      Decimal @db.Decimal(10, 2)
+
+  cart    Cart     @relation(fields: [cartId], references: [cartId])
+  course  Course?  @relation(fields: [courseId], references: [courseId])
+  product Product? @relation(fields: [productId], references: [productId])
+
+  @@map("cart_items")
+}
+
+model Order {
+  orderId         Int      @id @default(autoincrement()) @map("order_id")
+  userId          Int      @map("user_id")
+  subtotal        Decimal  @db.Decimal(10, 2)
+  discount        Decimal  @db.Decimal(10, 2)
+  total           Decimal  @db.Decimal(10, 2)
+  paymentStatus   String   @map("payment_status") @db.VarChar(30)
+  shippingCompany String?  @map("shipping_company") @db.VarChar(100)
+  shippingAddress String?  @map("shipping_address") @db.Text
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [userId])
+
+  items       OrderItem[]
+  payments    Payment[]
+  enrollments Enrollment[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  orderItemId Int     @id @default(autoincrement()) @map("order_item_id")
+  orderId     Int     @map("order_id")
+  itemType    String  @map("item_type") @db.VarChar(20) // 'course' | 'product'
+  courseId    Int?    @map("course_id")
+  productId   Int?    @map("product_id")
+  quantity    Int
+  price       Decimal @db.Decimal(10, 2)
+
+  order   Order    @relation(fields: [orderId], references: [orderId])
+  course  Course?  @relation(fields: [courseId], references: [courseId])
+  product Product? @relation(fields: [productId], references: [productId])
+
+  @@map("order_items")
+}
+
+model Payment {
+  paymentId     Int      @id @default(autoincrement()) @map("payment_id")
+  orderId       Int      @map("order_id")
+  provider      String   @db.VarChar(50)
+  transactionId String?  @map("transaction_id") @db.VarChar(150)
+  amount        Decimal  @db.Decimal(10, 2)
+  status        String   @db.VarChar(30)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  order Order @relation(fields: [orderId], references: [orderId])
+
+  @@map("payments")
+}
+
+model Enrollment {
+  enrollmentId Int       @id @default(autoincrement()) @map("enrollment_id")
+  userId       Int       @map("user_id")
+  courseId     Int       @map("course_id")
+  orderId      Int?      @map("order_id")
+  status       String    @db.VarChar(30) // active, completed, cancelled
+  createdAt    DateTime  @default(now()) @map("created_at")
+  completedAt  DateTime? @map("completed_at")
+
+  user   User   @relation(fields: [userId], references: [userId])
+  course Course @relation(fields: [courseId], references: [courseId])
+  order  Order? @relation(fields: [orderId], references: [orderId])
+
+  progress CourseProgress[]
+
+  @@map("enrollments")
+}
+
+model CourseProgress {
+  progressId     Int      @id @default(autoincrement()) @map("progress_id")
+  enrollmentId   Int      @map("enrollment_id")
+  watchedSeconds Int      @default(0) @map("watched_seconds")
+  completed      Boolean  @default(false)
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [enrollmentId])
+
+  @@map("course_progress")
+}
+
+model Certificate {
+  certificateId   Int      @id @default(autoincrement()) @map("certificate_id")
+  userId          Int      @map("user_id")
+  courseId        Int      @map("course_id")
+  certificateCode String   @unique @map("certificate_code") @db.VarChar(100)
+  templateUrl     String?  @map("template_url") @db.VarChar(500)
+  pdfUrl          String?  @map("pdf_url") @db.VarChar(500)
+  issuedAt        DateTime @default(now()) @map("issued_at")
+
+  user   User   @relation(fields: [userId], references: [userId])
+  course Course @relation(fields: [courseId], references: [courseId])
+
+  @@map("certificates")
+}
+
+// ==========================================
+// ERGO WEB (Formularios)
+// ==========================================
+
+model Company {
+  companyId Int      @id @default(autoincrement()) @map("company_id")
+  userId    Int      @map("user_id")
+  name      String   @db.VarChar(150)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user  User   @relation(fields: [userId], references: [userId])
+  forms Form[]
+
+  @@map("companies")
+}
+
+model Form {
+  formId      Int      @id @default(autoincrement()) @map("form_id")
+  companyId   Int      @map("company_id")
+  name        String   @db.VarChar(200)
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  company     Company          @relation(fields: [companyId], references: [companyId])
+  submissions FormSubmission[]
+
+  @@map("forms")
+}
+
+model FormSubmission {
+  submissionId Int      @id @default(autoincrement()) @map("submission_id")
+  formId       Int      @map("form_id")
+  submittedBy  Int      @map("submitted_by")
+  submittedAt  DateTime @default(now()) @map("submitted_at")
+
+  form Form @relation(fields: [formId], references: [formId])
+  user User @relation(fields: [submittedBy], references: [userId])
+
+  answers FormAnswer[]
+
+  @@map("form_submissions")
+}
+
+model FormAnswer {
+  answerId     Int    @id @default(autoincrement()) @map("answer_id")
+  submissionId Int    @map("submission_id")
+  fieldName    String @map("field_name") @db.VarChar(100)
+  fieldType    String @map("field_type") @db.VarChar(50) // text, number, date, select, etc.
+  value        String @db.Text
+
+  submission FormSubmission @relation(fields: [submissionId], references: [submissionId])
+
+  @@map("form_answers")
+}
