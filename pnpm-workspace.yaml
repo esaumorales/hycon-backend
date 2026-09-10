@@ -1,0 +1,5 @@
+# Dependencias autorizadas a ejecutar scripts de instalacion
+allowBuilds:
+  '@prisma/engines': true
+  esbuild: true
+  prisma: true

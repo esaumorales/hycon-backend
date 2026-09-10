@@ -2,6 +2,7 @@ import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import { env } from './core/config/env';
 
 // Import Middlewares
 import { errorHandler } from './core/middlewares/error.middleware';
@@ -36,7 +37,19 @@ app.use(
     },
   })
 );
-app.use(cors());
+// Solo se aceptan peticiones desde los origenes declarados en CORS_ORIGINS.
+// Se permiten las peticiones sin origen (curl, Postman, health checks).
+app.use(
+  cors({
+    origin: (origen, callback) => {
+      if (!origen || env.CORS_ORIGINS.includes(origen)) {
+        return callback(null, true);
+      }
+      return callback(new Error(`Origen no permitido por CORS: ${origen}`));
+    },
+    credentials: true,
+  })
+);
 
 // Logging Middleware
 app.use(morgan('dev'));
@@ -57,6 +70,11 @@ app.use(
     },
   })
 );
+
+// Sonda de salud para comprobar que el servidor responde
+app.get('/health', (_req, res) => {
+  res.status(200).json({ success: true, estado: 'ok', entorno: env.NODE_ENV });
+});
 
 app.use(`${API_PREFIX}/auth`, authRoutes);
 app.use(`${API_PREFIX}/catalog`, catalogRoutes);

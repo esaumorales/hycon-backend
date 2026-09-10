@@ -10,3 +10,6 @@ src/generated/
 .agents/
 generated/
 skills-lock.json
+
+# Salida de compilacion
+dist
