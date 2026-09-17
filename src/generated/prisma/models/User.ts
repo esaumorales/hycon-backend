@@ -29,11 +29,13 @@ export type AggregateUser = {
 export type UserAvgAggregateOutputType = {
   userId: number | null
   roleId: number | null
+  failedLoginAttempts: number | null
 }
 
 export type UserSumAggregateOutputType = {
   userId: number | null
   roleId: number | null
+  failedLoginAttempts: number | null
 }
 
 export type UserMinAggregateOutputType = {
@@ -47,6 +49,9 @@ export type UserMinAggregateOutputType = {
   avatarUrl: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  failedLoginAttempts: number | null
+  lockedUntil: Date | null
+  lastLoginAt: Date | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -60,6 +65,9 @@ export type UserMaxAggregateOutputType = {
   avatarUrl: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  failedLoginAttempts: number | null
+  lockedUntil: Date | null
+  lastLoginAt: Date | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -73,6 +81,9 @@ export type UserCountAggregateOutputType = {
   avatarUrl: number
   createdAt: number
   updatedAt: number
+  failedLoginAttempts: number
+  lockedUntil: number
+  lastLoginAt: number
   _all: number
 }
 
@@ -80,11 +91,13 @@ export type UserCountAggregateOutputType = {
 export type UserAvgAggregateInputType = {
   userId?: true
   roleId?: true
+  failedLoginAttempts?: true
 }
 
 export type UserSumAggregateInputType = {
   userId?: true
   roleId?: true
+  failedLoginAttempts?: true
 }
 
 export type UserMinAggregateInputType = {
@@ -98,6 +111,9 @@ export type UserMinAggregateInputType = {
   avatarUrl?: true
   createdAt?: true
   updatedAt?: true
+  failedLoginAttempts?: true
+  lockedUntil?: true
+  lastLoginAt?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -111,6 +127,9 @@ export type UserMaxAggregateInputType = {
   avatarUrl?: true
   createdAt?: true
   updatedAt?: true
+  failedLoginAttempts?: true
+  lockedUntil?: true
+  lastLoginAt?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -124,6 +143,9 @@ export type UserCountAggregateInputType = {
   avatarUrl?: true
   createdAt?: true
   updatedAt?: true
+  failedLoginAttempts?: true
+  lockedUntil?: true
+  lastLoginAt?: true
   _all?: true
 }
 
@@ -224,6 +246,9 @@ export type UserGroupByOutputType = {
   avatarUrl: string | null
   createdAt: Date
   updatedAt: Date
+  failedLoginAttempts: number
+  lockedUntil: Date | null
+  lastLoginAt: Date | null
   _count: UserCountAggregateOutputType | null
   _avg: UserAvgAggregateOutputType | null
   _sum: UserSumAggregateOutputType | null
@@ -260,7 +285,12 @@ export type UserWhereInput = {
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  failedLoginAttempts?: Prisma.IntFilter<"User"> | number
+  lockedUntil?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   role?: Prisma.XOR<Prisma.RoleScalarRelationFilter, Prisma.RoleWhereInput>
+  sessions?: Prisma.SessionListRelationFilter
+  authEvents?: Prisma.AuthEventListRelationFilter
   courses?: Prisma.CourseListRelationFilter
   products?: Prisma.ProductListRelationFilter
   posts?: Prisma.PostListRelationFilter
@@ -283,7 +313,12 @@ export type UserOrderByWithRelationInput = {
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  failedLoginAttempts?: Prisma.SortOrder
+  lockedUntil?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastLoginAt?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.RoleOrderByWithRelationInput
+  sessions?: Prisma.SessionOrderByRelationAggregateInput
+  authEvents?: Prisma.AuthEventOrderByRelationAggregateInput
   courses?: Prisma.CourseOrderByRelationAggregateInput
   products?: Prisma.ProductOrderByRelationAggregateInput
   posts?: Prisma.PostOrderByRelationAggregateInput
@@ -309,7 +344,12 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  failedLoginAttempts?: Prisma.IntFilter<"User"> | number
+  lockedUntil?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   role?: Prisma.XOR<Prisma.RoleScalarRelationFilter, Prisma.RoleWhereInput>
+  sessions?: Prisma.SessionListRelationFilter
+  authEvents?: Prisma.AuthEventListRelationFilter
   courses?: Prisma.CourseListRelationFilter
   products?: Prisma.ProductListRelationFilter
   posts?: Prisma.PostListRelationFilter
@@ -332,6 +372,9 @@ export type UserOrderByWithAggregationInput = {
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  failedLoginAttempts?: Prisma.SortOrder
+  lockedUntil?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastLoginAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
@@ -353,6 +396,9 @@ export type UserScalarWhereWithAggregatesInput = {
   avatarUrl?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
+  failedLoginAttempts?: Prisma.IntWithAggregatesFilter<"User"> | number
+  lockedUntil?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+  lastLoginAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
 }
 
 export type UserCreateInput = {
@@ -364,7 +410,12 @@ export type UserCreateInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  authEvents?: Prisma.AuthEventCreateNestedManyWithoutUserInput
   courses?: Prisma.CourseCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
@@ -387,6 +438,11 @@ export type UserUncheckedCreateInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  authEvents?: Prisma.AuthEventUncheckedCreateNestedManyWithoutUserInput
   courses?: Prisma.CourseUncheckedCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
@@ -407,7 +463,12 @@ export type UserUpdateInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  authEvents?: Prisma.AuthEventUpdateManyWithoutUserNestedInput
   courses?: Prisma.CourseUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
@@ -430,6 +491,11 @@ export type UserUncheckedUpdateInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  authEvents?: Prisma.AuthEventUncheckedUpdateManyWithoutUserNestedInput
   courses?: Prisma.CourseUncheckedUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
@@ -452,6 +518,9 @@ export type UserCreateManyInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
 }
 
 export type UserUpdateManyMutationInput = {
@@ -463,6 +532,9 @@ export type UserUpdateManyMutationInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -476,6 +548,9 @@ export type UserUncheckedUpdateManyInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UserListRelationFilter = {
@@ -499,11 +574,15 @@ export type UserCountOrderByAggregateInput = {
   avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  failedLoginAttempts?: Prisma.SortOrder
+  lockedUntil?: Prisma.SortOrder
+  lastLoginAt?: Prisma.SortOrder
 }
 
 export type UserAvgOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   roleId?: Prisma.SortOrder
+  failedLoginAttempts?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -517,6 +596,9 @@ export type UserMaxOrderByAggregateInput = {
   avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  failedLoginAttempts?: Prisma.SortOrder
+  lockedUntil?: Prisma.SortOrder
+  lastLoginAt?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -530,16 +612,25 @@ export type UserMinOrderByAggregateInput = {
   avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  failedLoginAttempts?: Prisma.SortOrder
+  lockedUntil?: Prisma.SortOrder
+  lastLoginAt?: Prisma.SortOrder
 }
 
 export type UserSumOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   roleId?: Prisma.SortOrder
+  failedLoginAttempts?: Prisma.SortOrder
 }
 
 export type UserScalarRelationFilter = {
   is?: Prisma.UserWhereInput
   isNot?: Prisma.UserWhereInput
+}
+
+export type UserNullableScalarRelationFilter = {
+  is?: Prisma.UserWhereInput | null
+  isNot?: Prisma.UserWhereInput | null
 }
 
 export type UserCreateNestedManyWithoutRoleInput = {
@@ -586,6 +677,10 @@ export type UserUncheckedUpdateManyWithoutRoleNestedInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
 }
 
 export type UserCreateNestedOneWithoutCoursesInput = {
@@ -714,6 +809,36 @@ export type UserUpdateOneRequiredWithoutFormSubmissionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutFormSubmissionsInput, Prisma.UserUpdateWithoutFormSubmissionsInput>, Prisma.UserUncheckedUpdateWithoutFormSubmissionsInput>
 }
 
+export type UserCreateNestedOneWithoutSessionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSessionsInput, Prisma.UserUncheckedCreateWithoutSessionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSessionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSessionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSessionsInput, Prisma.UserUncheckedCreateWithoutSessionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSessionsInput
+  upsert?: Prisma.UserUpsertWithoutSessionsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSessionsInput, Prisma.UserUpdateWithoutSessionsInput>, Prisma.UserUncheckedUpdateWithoutSessionsInput>
+}
+
+export type UserCreateNestedOneWithoutAuthEventsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAuthEventsInput, Prisma.UserUncheckedCreateWithoutAuthEventsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAuthEventsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutAuthEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAuthEventsInput, Prisma.UserUncheckedCreateWithoutAuthEventsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAuthEventsInput
+  upsert?: Prisma.UserUpsertWithoutAuthEventsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAuthEventsInput, Prisma.UserUpdateWithoutAuthEventsInput>, Prisma.UserUncheckedUpdateWithoutAuthEventsInput>
+}
+
 export type UserCreateWithoutRoleInput = {
   name: string
   lastname: string
@@ -723,6 +848,11 @@ export type UserCreateWithoutRoleInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  authEvents?: Prisma.AuthEventCreateNestedManyWithoutUserInput
   courses?: Prisma.CourseCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
@@ -744,6 +874,11 @@ export type UserUncheckedCreateWithoutRoleInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  authEvents?: Prisma.AuthEventUncheckedCreateNestedManyWithoutUserInput
   courses?: Prisma.CourseUncheckedCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
@@ -795,6 +930,9 @@ export type UserScalarWhereInput = {
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  failedLoginAttempts?: Prisma.IntFilter<"User"> | number
+  lockedUntil?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
 }
 
 export type UserCreateWithoutCoursesInput = {
@@ -806,7 +944,12 @@ export type UserCreateWithoutCoursesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  authEvents?: Prisma.AuthEventCreateNestedManyWithoutUserInput
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
@@ -828,6 +971,11 @@ export type UserUncheckedCreateWithoutCoursesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  authEvents?: Prisma.AuthEventUncheckedCreateNestedManyWithoutUserInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
@@ -863,7 +1011,12 @@ export type UserUpdateWithoutCoursesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  authEvents?: Prisma.AuthEventUpdateManyWithoutUserNestedInput
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
@@ -885,6 +1038,11 @@ export type UserUncheckedUpdateWithoutCoursesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  authEvents?: Prisma.AuthEventUncheckedUpdateManyWithoutUserNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
@@ -904,7 +1062,12 @@ export type UserCreateWithoutProductsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  authEvents?: Prisma.AuthEventCreateNestedManyWithoutUserInput
   courses?: Prisma.CourseCreateNestedManyWithoutOwnerInput
   posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
@@ -926,6 +1089,11 @@ export type UserUncheckedCreateWithoutProductsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  authEvents?: Prisma.AuthEventUncheckedCreateNestedManyWithoutUserInput
   courses?: Prisma.CourseUncheckedCreateNestedManyWithoutOwnerInput
   posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
@@ -961,7 +1129,12 @@ export type UserUpdateWithoutProductsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  authEvents?: Prisma.AuthEventUpdateManyWithoutUserNestedInput
   courses?: Prisma.CourseUpdateManyWithoutOwnerNestedInput
   posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
@@ -983,6 +1156,11 @@ export type UserUncheckedUpdateWithoutProductsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  authEvents?: Prisma.AuthEventUncheckedUpdateManyWithoutUserNestedInput
   courses?: Prisma.CourseUncheckedUpdateManyWithoutOwnerNestedInput
   posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
@@ -1002,7 +1180,12 @@ export type UserCreateWithoutCartsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  authEvents?: Prisma.AuthEventCreateNestedManyWithoutUserInput
   courses?: Prisma.CourseCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
@@ -1024,6 +1207,11 @@ export type UserUncheckedCreateWithoutCartsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  authEvents?: Prisma.AuthEventUncheckedCreateNestedManyWithoutUserInput
   courses?: Prisma.CourseUncheckedCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
@@ -1059,7 +1247,12 @@ export type UserUpdateWithoutCartsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  authEvents?: Prisma.AuthEventUpdateManyWithoutUserNestedInput
   courses?: Prisma.CourseUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
@@ -1081,6 +1274,11 @@ export type UserUncheckedUpdateWithoutCartsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  authEvents?: Prisma.AuthEventUncheckedUpdateManyWithoutUserNestedInput
   courses?: Prisma.CourseUncheckedUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
@@ -1100,7 +1298,12 @@ export type UserCreateWithoutOrdersInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  authEvents?: Prisma.AuthEventCreateNestedManyWithoutUserInput
   courses?: Prisma.CourseCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
@@ -1122,6 +1325,11 @@ export type UserUncheckedCreateWithoutOrdersInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  authEvents?: Prisma.AuthEventUncheckedCreateNestedManyWithoutUserInput
   courses?: Prisma.CourseUncheckedCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
@@ -1157,7 +1365,12 @@ export type UserUpdateWithoutOrdersInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  authEvents?: Prisma.AuthEventUpdateManyWithoutUserNestedInput
   courses?: Prisma.CourseUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
@@ -1179,6 +1392,11 @@ export type UserUncheckedUpdateWithoutOrdersInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  authEvents?: Prisma.AuthEventUncheckedUpdateManyWithoutUserNestedInput
   courses?: Prisma.CourseUncheckedUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
@@ -1198,7 +1416,12 @@ export type UserCreateWithoutEnrollmentsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  authEvents?: Prisma.AuthEventCreateNestedManyWithoutUserInput
   courses?: Prisma.CourseCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
@@ -1220,6 +1443,11 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  authEvents?: Prisma.AuthEventUncheckedCreateNestedManyWithoutUserInput
   courses?: Prisma.CourseUncheckedCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
@@ -1255,7 +1483,12 @@ export type UserUpdateWithoutEnrollmentsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  authEvents?: Prisma.AuthEventUpdateManyWithoutUserNestedInput
   courses?: Prisma.CourseUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
@@ -1277,6 +1510,11 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  authEvents?: Prisma.AuthEventUncheckedUpdateManyWithoutUserNestedInput
   courses?: Prisma.CourseUncheckedUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
@@ -1296,7 +1534,12 @@ export type UserCreateWithoutCertificatesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  authEvents?: Prisma.AuthEventCreateNestedManyWithoutUserInput
   courses?: Prisma.CourseCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
@@ -1318,6 +1561,11 @@ export type UserUncheckedCreateWithoutCertificatesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  authEvents?: Prisma.AuthEventUncheckedCreateNestedManyWithoutUserInput
   courses?: Prisma.CourseUncheckedCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
@@ -1353,7 +1601,12 @@ export type UserUpdateWithoutCertificatesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  authEvents?: Prisma.AuthEventUpdateManyWithoutUserNestedInput
   courses?: Prisma.CourseUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
@@ -1375,6 +1628,11 @@ export type UserUncheckedUpdateWithoutCertificatesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  authEvents?: Prisma.AuthEventUncheckedUpdateManyWithoutUserNestedInput
   courses?: Prisma.CourseUncheckedUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
@@ -1394,7 +1652,12 @@ export type UserCreateWithoutPostsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  authEvents?: Prisma.AuthEventCreateNestedManyWithoutUserInput
   courses?: Prisma.CourseCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
@@ -1416,6 +1679,11 @@ export type UserUncheckedCreateWithoutPostsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  authEvents?: Prisma.AuthEventUncheckedCreateNestedManyWithoutUserInput
   courses?: Prisma.CourseUncheckedCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
@@ -1451,7 +1719,12 @@ export type UserUpdateWithoutPostsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  authEvents?: Prisma.AuthEventUpdateManyWithoutUserNestedInput
   courses?: Prisma.CourseUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
@@ -1473,6 +1746,11 @@ export type UserUncheckedUpdateWithoutPostsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  authEvents?: Prisma.AuthEventUncheckedUpdateManyWithoutUserNestedInput
   courses?: Prisma.CourseUncheckedUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
@@ -1492,7 +1770,12 @@ export type UserCreateWithoutCompaniesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  authEvents?: Prisma.AuthEventCreateNestedManyWithoutUserInput
   courses?: Prisma.CourseCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
@@ -1514,6 +1797,11 @@ export type UserUncheckedCreateWithoutCompaniesInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  authEvents?: Prisma.AuthEventUncheckedCreateNestedManyWithoutUserInput
   courses?: Prisma.CourseUncheckedCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
@@ -1549,7 +1837,12 @@ export type UserUpdateWithoutCompaniesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  authEvents?: Prisma.AuthEventUpdateManyWithoutUserNestedInput
   courses?: Prisma.CourseUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
@@ -1571,6 +1864,11 @@ export type UserUncheckedUpdateWithoutCompaniesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  authEvents?: Prisma.AuthEventUncheckedUpdateManyWithoutUserNestedInput
   courses?: Prisma.CourseUncheckedUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
@@ -1590,7 +1888,12 @@ export type UserCreateWithoutFormSubmissionsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  authEvents?: Prisma.AuthEventCreateNestedManyWithoutUserInput
   courses?: Prisma.CourseCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
@@ -1612,6 +1915,11 @@ export type UserUncheckedCreateWithoutFormSubmissionsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  authEvents?: Prisma.AuthEventUncheckedCreateNestedManyWithoutUserInput
   courses?: Prisma.CourseUncheckedCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
@@ -1647,7 +1955,12 @@ export type UserUpdateWithoutFormSubmissionsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  authEvents?: Prisma.AuthEventUpdateManyWithoutUserNestedInput
   courses?: Prisma.CourseUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
@@ -1669,6 +1982,11 @@ export type UserUncheckedUpdateWithoutFormSubmissionsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  authEvents?: Prisma.AuthEventUncheckedUpdateManyWithoutUserNestedInput
   courses?: Prisma.CourseUncheckedUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
@@ -1677,6 +1995,242 @@ export type UserUncheckedUpdateWithoutFormSubmissionsInput = {
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutUserNestedInput
   certificates?: Prisma.CertificateUncheckedUpdateManyWithoutUserNestedInput
   companies?: Prisma.CompanyUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutSessionsInput = {
+  name: string
+  lastname: string
+  email: string
+  passwordHash: string
+  phone?: string | null
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
+  role: Prisma.RoleCreateNestedOneWithoutUsersInput
+  authEvents?: Prisma.AuthEventCreateNestedManyWithoutUserInput
+  courses?: Prisma.CourseCreateNestedManyWithoutOwnerInput
+  products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
+  carts?: Prisma.CartCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderCreateNestedManyWithoutUserInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutUserInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutUserInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutUserInput
+  formSubmissions?: Prisma.FormSubmissionCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutSessionsInput = {
+  userId?: number
+  roleId: number
+  name: string
+  lastname: string
+  email: string
+  passwordHash: string
+  phone?: string | null
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
+  authEvents?: Prisma.AuthEventUncheckedCreateNestedManyWithoutUserInput
+  courses?: Prisma.CourseUncheckedCreateNestedManyWithoutOwnerInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
+  carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutUserInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutUserInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutUserInput
+  formSubmissions?: Prisma.FormSubmissionUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutSessionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSessionsInput, Prisma.UserUncheckedCreateWithoutSessionsInput>
+}
+
+export type UserUpsertWithoutSessionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSessionsInput, Prisma.UserUncheckedUpdateWithoutSessionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSessionsInput, Prisma.UserUncheckedCreateWithoutSessionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSessionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSessionsInput, Prisma.UserUncheckedUpdateWithoutSessionsInput>
+}
+
+export type UserUpdateWithoutSessionsInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  lastname?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
+  authEvents?: Prisma.AuthEventUpdateManyWithoutUserNestedInput
+  courses?: Prisma.CourseUpdateManyWithoutOwnerNestedInput
+  products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
+  carts?: Prisma.CartUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutUserNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutUserNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutUserNestedInput
+  formSubmissions?: Prisma.FormSubmissionUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSessionsInput = {
+  userId?: Prisma.IntFieldUpdateOperationsInput | number
+  roleId?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  lastname?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  authEvents?: Prisma.AuthEventUncheckedUpdateManyWithoutUserNestedInput
+  courses?: Prisma.CourseUncheckedUpdateManyWithoutOwnerNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
+  carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutUserNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutUserNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutUserNestedInput
+  formSubmissions?: Prisma.FormSubmissionUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutAuthEventsInput = {
+  name: string
+  lastname: string
+  email: string
+  passwordHash: string
+  phone?: string | null
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
+  role: Prisma.RoleCreateNestedOneWithoutUsersInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  courses?: Prisma.CourseCreateNestedManyWithoutOwnerInput
+  products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
+  carts?: Prisma.CartCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderCreateNestedManyWithoutUserInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutUserInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutUserInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutUserInput
+  formSubmissions?: Prisma.FormSubmissionCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutAuthEventsInput = {
+  userId?: number
+  roleId: number
+  name: string
+  lastname: string
+  email: string
+  passwordHash: string
+  phone?: string | null
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  courses?: Prisma.CourseUncheckedCreateNestedManyWithoutOwnerInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
+  carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutUserInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutUserInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutUserInput
+  formSubmissions?: Prisma.FormSubmissionUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutAuthEventsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAuthEventsInput, Prisma.UserUncheckedCreateWithoutAuthEventsInput>
+}
+
+export type UserUpsertWithoutAuthEventsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAuthEventsInput, Prisma.UserUncheckedUpdateWithoutAuthEventsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAuthEventsInput, Prisma.UserUncheckedCreateWithoutAuthEventsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAuthEventsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAuthEventsInput, Prisma.UserUncheckedUpdateWithoutAuthEventsInput>
+}
+
+export type UserUpdateWithoutAuthEventsInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  lastname?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  courses?: Prisma.CourseUpdateManyWithoutOwnerNestedInput
+  products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
+  carts?: Prisma.CartUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutUserNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutUserNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutUserNestedInput
+  formSubmissions?: Prisma.FormSubmissionUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAuthEventsInput = {
+  userId?: Prisma.IntFieldUpdateOperationsInput | number
+  roleId?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  lastname?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  courses?: Prisma.CourseUncheckedUpdateManyWithoutOwnerNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
+  carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutUserNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutUserNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutUserNestedInput
+  formSubmissions?: Prisma.FormSubmissionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyRoleInput = {
@@ -1689,6 +2243,9 @@ export type UserCreateManyRoleInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastLoginAt?: Date | string | null
 }
 
 export type UserUpdateWithoutRoleInput = {
@@ -1700,6 +2257,11 @@ export type UserUpdateWithoutRoleInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  authEvents?: Prisma.AuthEventUpdateManyWithoutUserNestedInput
   courses?: Prisma.CourseUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
@@ -1721,6 +2283,11 @@ export type UserUncheckedUpdateWithoutRoleInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  authEvents?: Prisma.AuthEventUncheckedUpdateManyWithoutUserNestedInput
   courses?: Prisma.CourseUncheckedUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
@@ -1742,6 +2309,9 @@ export type UserUncheckedUpdateManyWithoutRoleInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -1750,6 +2320,8 @@ export type UserUncheckedUpdateManyWithoutRoleInput = {
  */
 
 export type UserCountOutputType = {
+  sessions: number
+  authEvents: number
   courses: number
   products: number
   posts: number
@@ -1762,6 +2334,8 @@ export type UserCountOutputType = {
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  sessions?: boolean | UserCountOutputTypeCountSessionsArgs
+  authEvents?: boolean | UserCountOutputTypeCountAuthEventsArgs
   courses?: boolean | UserCountOutputTypeCountCoursesArgs
   products?: boolean | UserCountOutputTypeCountProductsArgs
   posts?: boolean | UserCountOutputTypeCountPostsArgs
@@ -1781,6 +2355,20 @@ export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
    * Select specific fields to fetch from the UserCountOutputType
    */
   select?: Prisma.UserCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SessionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAuthEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AuthEventWhereInput
 }
 
 /**
@@ -1858,7 +2446,12 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   avatarUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  failedLoginAttempts?: boolean
+  lockedUntil?: boolean
+  lastLoginAt?: boolean
   role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
+  sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  authEvents?: boolean | Prisma.User$authEventsArgs<ExtArgs>
   courses?: boolean | Prisma.User$coursesArgs<ExtArgs>
   products?: boolean | Prisma.User$productsArgs<ExtArgs>
   posts?: boolean | Prisma.User$postsArgs<ExtArgs>
@@ -1882,6 +2475,9 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   avatarUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  failedLoginAttempts?: boolean
+  lockedUntil?: boolean
+  lastLoginAt?: boolean
   role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1896,6 +2492,9 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   avatarUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  failedLoginAttempts?: boolean
+  lockedUntil?: boolean
+  lastLoginAt?: boolean
   role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1910,11 +2509,16 @@ export type UserSelectScalar = {
   avatarUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  failedLoginAttempts?: boolean
+  lockedUntil?: boolean
+  lastLoginAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "roleId" | "name" | "lastname" | "email" | "passwordHash" | "phone" | "avatarUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "roleId" | "name" | "lastname" | "email" | "passwordHash" | "phone" | "avatarUrl" | "createdAt" | "updatedAt" | "failedLoginAttempts" | "lockedUntil" | "lastLoginAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
+  sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  authEvents?: boolean | Prisma.User$authEventsArgs<ExtArgs>
   courses?: boolean | Prisma.User$coursesArgs<ExtArgs>
   products?: boolean | Prisma.User$productsArgs<ExtArgs>
   posts?: boolean | Prisma.User$postsArgs<ExtArgs>
@@ -1937,6 +2541,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "User"
   objects: {
     role: Prisma.$RolePayload<ExtArgs>
+    sessions: Prisma.$SessionPayload<ExtArgs>[]
+    authEvents: Prisma.$AuthEventPayload<ExtArgs>[]
     courses: Prisma.$CoursePayload<ExtArgs>[]
     products: Prisma.$ProductPayload<ExtArgs>[]
     posts: Prisma.$PostPayload<ExtArgs>[]
@@ -1958,6 +2564,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     avatarUrl: string | null
     createdAt: Date
     updatedAt: Date
+    failedLoginAttempts: number
+    lockedUntil: Date | null
+    lastLoginAt: Date | null
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -2353,6 +2962,8 @@ readonly fields: UserFieldRefs;
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   role<T extends Prisma.RoleDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RoleDefaultArgs<ExtArgs>>): Prisma.Prisma__RoleClient<runtime.Types.Result.GetResult<Prisma.$RolePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  authEvents<T extends Prisma.User$authEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$authEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuthEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   courses<T extends Prisma.User$coursesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$coursesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   products<T extends Prisma.User$productsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$productsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   posts<T extends Prisma.User$postsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$postsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2401,6 +3012,9 @@ export interface UserFieldRefs {
   readonly avatarUrl: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly failedLoginAttempts: Prisma.FieldRef<"User", 'Int'>
+  readonly lockedUntil: Prisma.FieldRef<"User", 'DateTime'>
+  readonly lastLoginAt: Prisma.FieldRef<"User", 'DateTime'>
 }
     
 
@@ -2799,6 +3413,54 @@ export type UserDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Limit how many Users to delete.
    */
   limit?: number
+}
+
+/**
+ * User.sessions
+ */
+export type User$sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Session
+   */
+  select?: Prisma.SessionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Session
+   */
+  omit?: Prisma.SessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SessionInclude<ExtArgs> | null
+  where?: Prisma.SessionWhereInput
+  orderBy?: Prisma.SessionOrderByWithRelationInput | Prisma.SessionOrderByWithRelationInput[]
+  cursor?: Prisma.SessionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SessionScalarFieldEnum | Prisma.SessionScalarFieldEnum[]
+}
+
+/**
+ * User.authEvents
+ */
+export type User$authEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AuthEvent
+   */
+  select?: Prisma.AuthEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AuthEvent
+   */
+  omit?: Prisma.AuthEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuthEventInclude<ExtArgs> | null
+  where?: Prisma.AuthEventWhereInput
+  orderBy?: Prisma.AuthEventOrderByWithRelationInput | Prisma.AuthEventOrderByWithRelationInput[]
+  cursor?: Prisma.AuthEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AuthEventScalarFieldEnum | Prisma.AuthEventScalarFieldEnum[]
 }
 
 /**

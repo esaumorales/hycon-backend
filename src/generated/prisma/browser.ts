@@ -107,3 +107,13 @@ export type FormSubmission = Prisma.FormSubmissionModel
  * 
  */
 export type FormAnswer = Prisma.FormAnswerModel
+/**
+ * Model Session
+ * 
+ */
+export type Session = Prisma.SessionModel
+/**
+ * Model AuthEvent
+ * 
+ */
+export type AuthEvent = Prisma.AuthEventModel

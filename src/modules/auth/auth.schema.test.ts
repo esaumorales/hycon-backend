@@ -6,7 +6,7 @@ describe('registroSchema', () => {
     name: 'Ana',
     lastname: 'Quispe',
     email: 'Ana@Hycon.com',
-    password: 'Cliente2026',
+    password: 'cafe con leche y pan',
   };
 
   it('normaliza el correo a minusculas y recorta espacios', () => {
@@ -18,14 +18,20 @@ describe('registroSchema', () => {
     expect(registroSchema.safeParse({ ...base, email: 'ana-arroba-hycon' }).success).toBe(false);
   });
 
-  it('exige al menos 8 caracteres en la contrasena', () => {
-    expect(registroSchema.safeParse({ ...base, password: 'Abc123' }).success).toBe(false);
+  it('aplica la politica de contrasenas indicando el campo', () => {
+    const corta = registroSchema.safeParse({ ...base, password: 'Cliente2026' });
+    expect(corta.success).toBe(false);
+    expect(corta.error?.issues[0]).toMatchObject({ path: ['password'] });
+
+    expect(registroSchema.safeParse({ ...base, password: 'contrasena123' }).success).toBe(false);
   });
 
-  it('exige que la contrasena mezcle letras y numeros', () => {
-    expect(registroSchema.safeParse({ ...base, password: 'solotexto' }).success).toBe(false);
-    expect(registroSchema.safeParse({ ...base, password: '123456789' }).success).toBe(false);
-    expect(registroSchema.safeParse({ ...base, password: 'Cliente2026' }).success).toBe(true);
+  it('rechaza una contrasena con el apellido de quien se registra', () => {
+    expect(registroSchema.safeParse({ ...base, password: 'quispe-quispe-99' }).success).toBe(false);
+  });
+
+  it('recordar es falso si no se indica', () => {
+    expect(registroSchema.parse(base).recordar).toBe(false);
   });
 
   it('rechaza nombres de un solo caracter', () => {
@@ -34,12 +40,21 @@ describe('registroSchema', () => {
 });
 
 describe('loginSchema', () => {
-  it('acepta cualquier contrasena no vacia', () => {
-    // El login no valida fortaleza: solo comprueba que la credencial venga completa
-    expect(loginSchema.safeParse({ email: 'a@b.com', password: 'x' }).success).toBe(true);
+  it('no aplica la politica: las cuentas antiguas pueden seguir entrando', () => {
+    expect(loginSchema.safeParse({ email: 'a@b.com', password: '123456' }).success).toBe(true);
   });
 
-  it('rechaza contrasena vacia', () => {
-    expect(loginSchema.safeParse({ email: 'a@b.com', password: '' }).success).toBe(false);
+  it('exige correo y contrasena', () => {
+    expect(loginSchema.safeParse({ email: '', password: '' }).success).toBe(false);
+  });
+
+  it('acota el tamano de la contrasena para no gastar CPU en bcrypt', () => {
+    expect(loginSchema.safeParse({ email: 'a@b.com', password: 'x'.repeat(5000) }).success).toBe(false);
+  });
+
+  it('acepta recordar como booleano y lo deja en falso por defecto', () => {
+    expect(loginSchema.parse({ email: 'a@b.com', password: 'x' }).recordar).toBe(false);
+    expect(loginSchema.parse({ email: 'a@b.com', password: 'x', recordar: true }).recordar).toBe(true);
+    expect(loginSchema.safeParse({ email: 'a@b.com', password: 'x', recordar: 'si' }).success).toBe(false);
   });
 });

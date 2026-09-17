@@ -93,7 +93,24 @@ const schemas = {
   Usuario: usuarioSchema,
   Sesion: {
     type: 'object',
-    properties: { token: { type: 'string' }, usuario: ref('Usuario') },
+    description:
+      'El token de acceso dura poco y se envia en Authorization: Bearer. La sesion larga NO va en el cuerpo: llega en la cookie httpOnly hycon_sesion (Path=/api/v1/auth), inaccesible desde JavaScript.',
+    properties: {
+      token: { type: 'string', description: 'JWT de acceso (HS256, emisor hycon-api)' },
+      expiraEn: { type: 'integer', description: 'Segundos de vida del token de acceso', example: 900 },
+      usuario: ref('Usuario'),
+    },
+  },
+  ErrorBloqueo: {
+    type: 'object',
+    properties: {
+      success: { type: 'boolean', example: false },
+      error: {
+        type: 'string',
+        example: 'Demasiados intentos fallidos. Por seguridad el acceso esta bloqueado. Intenta de nuevo en 14 min',
+      },
+      reintentarEnSegundos: { type: 'integer', example: 840 },
+    },
   },
   Paginacion: {
     type: 'object',
@@ -373,7 +390,7 @@ export const openApiSpec = {
     title: 'Hycon API',
     version: '1.1.0',
     description:
-      'Documentacion interactiva del backend de Hycon.\n\nLas respuestas correctas llegan como `{ success: true, data }` y los errores como `{ success: false, error }`. Para las rutas de ADMIN inicia sesion en **POST /auth/login** y pega el token en el boton de autenticacion.',
+      'Documentacion interactiva del backend de Hycon.\n\nLas respuestas correctas llegan como `{ success: true, data }` y los errores como `{ success: false, error }`. Para las rutas de ADMIN inicia sesion en **POST /auth/login** y pega el token en el boton de autenticacion. El token de acceso dura 15 minutos.',
   },
   servers: [{ url: `${env.PUBLIC_URL}/api/v1`, description: 'Servidor configurado en PUBLIC_URL' }],
   tags: [
@@ -392,7 +409,9 @@ export const openApiSpec = {
     '/auth/register': {
       post: {
         tags: ['Auth'],
-        summary: 'Registra una cuenta nueva con rol CLIENTE',
+        summary: 'Registra una cuenta nueva con rol CLIENTE e inicia sesion',
+        description:
+          'Politica de contrasenas (NIST SP 800-63B / OWASP ASVS 2.1): minimo 12 y maximo 128 caracteres, sin reglas de composicion obligatorias. Se rechazan contrasenas comunes o filtradas (tambien con numeros o signos al final), repeticiones, secuencias y las que contienen el nombre, el apellido o el correo. Se guarda con bcrypt (coste 12).',
         requestBody: {
           required: true,
           content: {
@@ -404,24 +423,28 @@ export const openApiSpec = {
                   name: { type: 'string', example: 'Ana' },
                   lastname: { type: 'string', example: 'Quispe' },
                   email: { type: 'string', example: 'ana@hycon.com' },
-                  password: { type: 'string', example: 'Cliente2026' },
+                  password: { type: 'string', minLength: 12, maxLength: 128, example: 'cafe con leche en el misti' },
                   phone: { type: 'string', example: '999888777' },
+                  recordar: { type: 'boolean', default: false, description: 'Mantener la sesion 30 dias' },
                 },
               },
             },
           },
         },
         responses: {
-          '201': sobre(ref('Sesion'), 'Cuenta creada y sesion iniciada'),
+          '201': sobre(ref('Sesion'), 'Cuenta creada, sesion iniciada y cookie hycon_sesion enviada'),
           '409': error('El correo ya esta registrado'),
-          '422': error('Datos invalidos'),
+          '422': error('Datos invalidos o contrasena que no cumple la politica'),
+          '429': error('Demasiadas solicitudes desde la misma IP'),
         },
       },
     },
     '/auth/login': {
       post: {
         tags: ['Auth'],
-        summary: 'Inicia sesion y devuelve el token JWT',
+        summary: 'Inicia sesion',
+        description:
+          'Proteccion contra fuerza bruta: tras LOGIN_MAX_INTENTOS fallos seguidos (5 por defecto) el acceso se bloquea LOGIN_BLOQUEO_MINUTOS (15). El bloqueo se aplica igual a correos inexistentes, y el mensaje de error es el mismo exista o no la cuenta, para no revelar que correos estan registrados. Ademas hay un limite de peticiones por IP. Cada intento queda en el registro de auditoria (auth_events) con IP y navegador, nunca con la contrasena.',
         requestBody: {
           required: true,
           content: {
@@ -432,14 +455,48 @@ export const openApiSpec = {
                 properties: {
                   email: { type: 'string', example: 'info@hycon.lat' },
                   password: { type: 'string', example: '123456' },
+                  recordar: {
+                    type: 'boolean',
+                    default: false,
+                    description: 'true: sesion de 30 dias. false: la cookie se borra al cerrar el navegador (maximo 12 h)',
+                  },
                 },
               },
             },
           },
         },
         responses: {
-          '200': sobre(ref('Sesion'), 'Sesion iniciada'),
-          '401': error('Credenciales incorrectas'),
+          '200': sobre(ref('Sesion'), 'Sesion iniciada y cookie hycon_sesion enviada'),
+          '401': error('Correo o contrasena incorrectos'),
+          '422': error('Datos invalidos'),
+          '429': {
+            description: 'Acceso bloqueado por intentos fallidos. Incluye la cabecera Retry-After',
+            content: { 'application/json': { schema: ref('ErrorBloqueo') } },
+          },
+        },
+      },
+    },
+    '/auth/refresh': {
+      post: {
+        tags: ['Auth'],
+        summary: 'Renueva el token de acceso con la cookie de sesion',
+        description:
+          'Usa la cookie hycon_sesion (enviar con credentials: include). Cada uso rota la sesion: el token anterior deja de valer y llega uno nuevo en la cookie. Si un token ya rotado se vuelve a usar se considera robado y se cierran todas las sesiones de esa familia. Solo acepta peticiones desde los origenes de CORS_ORIGINS (proteccion CSRF). La rotacion no amplia la duracion maxima de la sesion.',
+        responses: {
+          '200': sobre(ref('Sesion'), 'Token renovado'),
+          '401': error('Sesion inexistente, caducada o revocada'),
+          '403': error('Origen no permitido'),
+        },
+      },
+    },
+    '/auth/logout': {
+      post: {
+        tags: ['Auth'],
+        summary: 'Cierra la sesion',
+        description: 'Revoca la sesion en el servidor (no basta con olvidar el token) y borra la cookie.',
+        responses: {
+          '204': { description: 'Sesion cerrada' },
+          '403': error('Origen no permitido'),
         },
       },
     },
@@ -450,7 +507,7 @@ export const openApiSpec = {
         security: [{ bearerAuth: [] }],
         responses: {
           '200': sobre({ type: 'object', properties: { usuario: ref('Usuario') } }, 'Usuario autenticado'),
-          '401': error('Falta el token o no es valido'),
+          '401': error('Falta el token, no es valido o expiro'),
         },
       },
     },

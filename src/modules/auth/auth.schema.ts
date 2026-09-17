@@ -1,33 +1,39 @@
 import { z } from 'zod';
+import { evaluarPassword, LARGO_MAXIMO_PASSWORD } from './auth.politica';
 
-// Reglas compartidas por registro e inicio de sesion
 const email = z
-  .string()
+  .string({ message: 'El correo es obligatorio' })
   .trim()
   .min(1, 'El correo es obligatorio')
   .max(150, 'El correo es demasiado largo')
   .email('El correo no tiene un formato valido')
   .toLowerCase();
 
-const password = z
-  .string()
-  .min(8, 'La contrasena debe tener al menos 8 caracteres')
-  .max(72, 'La contrasena no puede superar los 72 caracteres')
-  .regex(/[A-Za-z]/, 'La contrasena debe incluir al menos una letra')
-  .regex(/[0-9]/, 'La contrasena debe incluir al menos un numero');
-
-export const registroSchema = z.object({
-  name: z.string().trim().min(2, 'El nombre debe tener al menos 2 caracteres').max(100),
-  lastname: z.string().trim().min(2, 'El apellido debe tener al menos 2 caracteres').max(100),
-  email,
-  password,
-  phone: z.string().trim().max(30).optional(),
-});
+export const registroSchema = z
+  .object({
+    name: z.string().trim().min(2, 'El nombre debe tener al menos 2 caracteres').max(100),
+    lastname: z.string().trim().min(2, 'El apellido debe tener al menos 2 caracteres').max(100),
+    email,
+    password: z.string({ message: 'La contrasena es obligatoria' }),
+    phone: z.string().trim().max(30).optional(),
+    recordar: z.boolean().default(false),
+  })
+  // La politica necesita el nombre y el correo para rechazar contrasenas que los contengan
+  .superRefine((datos, contexto) => {
+    const motivo = evaluarPassword(datos.password, datos);
+    if (motivo) contexto.addIssue({ code: 'custom', path: ['password'], message: motivo });
+  });
 
 export const loginSchema = z.object({
   email,
-  // En login no se aplican las reglas de fortaleza: la credencial simplemente coincide o no
-  password: z.string().min(1, 'La contrasena es obligatoria'),
+  // En login no se aplica la politica: la credencial coincide o no. Solo se acota el
+  // tamano para no gastar CPU de bcrypt con cuerpos enormes.
+  password: z
+    .string({ message: 'La contrasena es obligatoria' })
+    .min(1, 'La contrasena es obligatoria')
+    .max(LARGO_MAXIMO_PASSWORD, 'Correo o contrasena incorrectos'),
+  // Sin marcar, la sesion termina al cerrar el navegador
+  recordar: z.boolean().default(false),
 });
 
 export type RegistroInput = z.infer<typeof registroSchema>;

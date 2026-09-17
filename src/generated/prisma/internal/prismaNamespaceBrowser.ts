@@ -68,7 +68,9 @@ export const ModelName = {
   Company: 'Company',
   Form: 'Form',
   FormSubmission: 'FormSubmission',
-  FormAnswer: 'FormAnswer'
+  FormAnswer: 'FormAnswer',
+  Session: 'Session',
+  AuthEvent: 'AuthEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -106,7 +108,10 @@ export const UserScalarFieldEnum = {
   phone: 'phone',
   avatarUrl: 'avatarUrl',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  failedLoginAttempts: 'failedLoginAttempts',
+  lockedUntil: 'lockedUntil',
+  lastLoginAt: 'lastLoginAt'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -320,6 +325,35 @@ export const FormAnswerScalarFieldEnum = {
 } as const
 
 export type FormAnswerScalarFieldEnum = (typeof FormAnswerScalarFieldEnum)[keyof typeof FormAnswerScalarFieldEnum]
+
+
+export const SessionScalarFieldEnum = {
+  sessionId: 'sessionId',
+  userId: 'userId',
+  tokenHash: 'tokenHash',
+  familyId: 'familyId',
+  remember: 'remember',
+  userAgent: 'userAgent',
+  ip: 'ip',
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt'
+} as const
+
+export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
+
+
+export const AuthEventScalarFieldEnum = {
+  eventId: 'eventId',
+  userId: 'userId',
+  email: 'email',
+  type: 'type',
+  ip: 'ip',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
+} as const
+
+export type AuthEventScalarFieldEnum = (typeof AuthEventScalarFieldEnum)[keyof typeof AuthEventScalarFieldEnum]
 
 
 export const SortOrder = {

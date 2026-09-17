@@ -1,28 +1,42 @@
 import type { Request, Response, NextFunction } from 'express';
-import { AppError } from '../errors/AppError';
+import { AppError, ErrorDemasiadosIntentos } from '../errors/AppError';
 import { env } from '../config/env';
 
 export const errorHandler = (
   err: Error,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  // Express reconoce el manejador de errores por tener cuatro parametros
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _next: NextFunction
 ) => {
-  let statusCode = 500;
-  let message = 'Internal Server Error';
+  const esDesarrollo = env.NODE_ENV === 'development';
 
-  if (err instanceof AppError) {
-    statusCode = err.statusCode;
-    message = err.message;
-  } else {
-    // For unhandled errors, log them
-    console.error('ERROR 💥:', err);
-    message = err.message; // Just for dev, in production you might want to hide this
+  if (err instanceof ErrorDemasiadosIntentos) {
+    res.setHeader('Retry-After', String(err.reintentarEnSegundos));
+    res.status(429).json({
+      success: false,
+      error: err.message,
+      reintentarEnSegundos: err.reintentarEnSegundos,
+    });
+    return;
   }
 
-  res.status(statusCode).json({
+  if (err instanceof AppError) {
+    res.status(err.statusCode).json({
+      success: false,
+      error: err.message,
+      stack: esDesarrollo ? err.stack : undefined,
+    });
+    return;
+  }
+
+  // Errores no previstos: se registran completos en el servidor, pero fuera de
+  // desarrollo el cliente solo recibe un mensaje generico (no se filtran detalles internos)
+  console.error('Error no controlado:', err);
+  res.status(500).json({
     success: false,
-    error: message,
-    stack: env.NODE_ENV === 'development' ? err.stack : undefined,
+    error: esDesarrollo ? err.message : 'Ocurrio un error interno. Intentalo mas tarde',
+    stack: esDesarrollo ? err.stack : undefined,
   });
 };
