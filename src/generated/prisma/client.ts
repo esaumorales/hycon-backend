@@ -105,6 +105,11 @@ export type CourseProgress = Prisma.CourseProgressModel
  */
 export type Certificate = Prisma.CertificateModel
 /**
+ * Model Post
+ * 
+ */
+export type Post = Prisma.PostModel
+/**
  * Model Company
  * 
  */

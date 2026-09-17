@@ -61,6 +61,7 @@ export interface CursoPublico {
   name: string;
   description: string | null;
   videoUrl: string | null;
+  youtubeId: string | null;
   thumbnailUrl: string | null;
   durationMinutes: number | null;
   price: number;

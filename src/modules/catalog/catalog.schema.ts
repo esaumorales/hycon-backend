@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { esEnlaceYoutube } from '../../core/utils/youtube';
 import { CODIGOS_AGENCIA, POR_PAGINA_DEFECTO, POR_PAGINA_MAXIMO } from './catalog.constants';
 
 // Reglas compartidas. Los precios llegan como texto desde el formulario,
@@ -30,6 +31,18 @@ const urlOpcional = z.preprocess(
     .trim()
     .max(500, 'La URL es demasiado larga')
     .url('Debe ser una URL valida')
+    .optional()
+);
+
+// El video se reproduce dentro de la web con el reproductor de YouTube,
+// asi que solo se aceptan links de YouTube
+const urlYoutubeOpcional = z.preprocess(
+  vacioComoIndefinido,
+  z
+    .string()
+    .trim()
+    .max(500, 'La URL es demasiado larga')
+    .refine(esEnlaceYoutube, 'Debe ser un link de YouTube valido')
     .optional()
 );
 
@@ -89,7 +102,7 @@ export const cursoSchema = z
   .object({
     name: nombre,
     description: textoOpcional(2000),
-    videoUrl: urlOpcional,
+    videoUrl: urlYoutubeOpcional,
     thumbnailUrl: urlOpcional,
     durationMinutes: z.preprocess(
       vacioComoIndefinido,

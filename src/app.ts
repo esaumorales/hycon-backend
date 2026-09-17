@@ -20,6 +20,7 @@ import { paymentRoutes } from './modules/payments/payments.routes';
 import { lmsRoutes } from './modules/lms/lms.routes';
 import { ergoRoutes } from './modules/ergo/ergo.routes';
 import { uploadRoutes } from './modules/uploads/uploads.routes';
+import { postsRoutes } from './modules/posts/posts.routes';
 import { RUTA_PUBLICA_UPLOADS } from './modules/uploads/uploads.service';
 
 const app: Application = express();
@@ -93,6 +94,7 @@ app.use(
 app.use(`${API_PREFIX}/auth`, authRoutes);
 app.use(`${API_PREFIX}/uploads`, uploadRoutes);
 app.use(`${API_PREFIX}/catalog`, catalogRoutes);
+app.use(`${API_PREFIX}/posts`, postsRoutes);
 app.use(`${API_PREFIX}/cart`, cartRoutes);
 app.use(`${API_PREFIX}/orders`, orderRoutes);
 app.use(`${API_PREFIX}/payments`, paymentRoutes);

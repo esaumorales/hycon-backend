@@ -300,6 +300,25 @@ describe('catalogService de cursos', () => {
     expect(elementos[0].durationMinutes).toBe(90);
   });
 
+  it('expone el id de YouTube listo para incrustar', async () => {
+    const servicio = crearServicioCatalogo(
+      crearDeps({
+        listarCursos: vi.fn().mockResolvedValue({
+          filas: [
+            { ...cursoEnBase, videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=5s' },
+            { ...cursoEnBase, courseId: 2, videoUrl: 'https://vimeo.com/123' },
+            { ...cursoEnBase, courseId: 3, videoUrl: null },
+          ],
+          total: 3,
+        }),
+      })
+    );
+
+    const { elementos } = await servicio.listarCursos(primeraPagina);
+
+    expect(elementos.map((curso) => curso.youtubeId)).toEqual(['dQw4w9WgXcQ', null, null]);
+  });
+
   it('pagina los cursos igual que los productos', async () => {
     const deps = crearDeps();
     const servicio = crearServicioCatalogo(deps);

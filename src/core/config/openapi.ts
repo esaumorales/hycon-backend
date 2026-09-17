@@ -170,7 +170,14 @@ const schemas = {
       courseId: { type: 'integer', example: 1 },
       name: { type: 'string', example: 'Pausas activas en oficina' },
       description: { type: 'string', nullable: true },
-      videoUrl: { type: 'string', nullable: true, example: 'https://youtu.be/abc' },
+      videoUrl: { type: 'string', nullable: true, example: 'https://youtu.be/dQw4w9WgXcQ' },
+      youtubeId: {
+        type: 'string',
+        nullable: true,
+        description:
+          'Id del video extraido de videoUrl, para incrustarlo con https://www.youtube-nocookie.com/embed/{youtubeId}. Null si no hay video.',
+        example: 'dQw4w9WgXcQ',
+      },
       thumbnailUrl: { type: 'string', nullable: true },
       durationMinutes: { type: 'integer', nullable: true, example: 90 },
       price: { type: 'number', example: 120 },
@@ -186,7 +193,13 @@ const schemas = {
     properties: {
       name: { type: 'string', minLength: 2, maxLength: 200, example: 'Pausas activas en oficina' },
       description: { type: 'string', maxLength: 2000 },
-      videoUrl: { type: 'string', format: 'uri', example: 'https://youtu.be/abc' },
+      videoUrl: {
+        type: 'string',
+        format: 'uri',
+        description:
+          'Solo links de YouTube: watch?v=, youtu.be/, shorts/, embed/ o live/. El video se reproduce dentro de la web.',
+        example: 'https://youtu.be/dQw4w9WgXcQ',
+      },
       thumbnailUrl: {
         type: 'string',
         format: 'uri',
@@ -196,6 +209,54 @@ const schemas = {
       price: { type: 'number', exclusiveMinimum: 0, example: 120 },
       discountPrice: { type: 'number', exclusiveMinimum: 0, example: 99 },
       status: { type: 'string', enum: ['active', 'inactive'], default: 'active' },
+    },
+  },
+  Publicacion: {
+    type: 'object',
+    properties: {
+      postId: { type: 'integer', example: 1 },
+      title: { type: 'string', example: 'Pausas activas en la oficina' },
+      slug: {
+        type: 'string',
+        description: 'Generado desde el titulo; unico. Solo cambia si cambia el titulo.',
+        example: 'pausas-activas-en-la-oficina',
+      },
+      excerpt: { type: 'string', nullable: true, example: 'Cinco ejercicios de dos minutos.' },
+      content: {
+        type: 'string',
+        description: 'Cuerpo del articulo en HTML ya limpio, listo para mostrar.',
+        example: '<h2>Por que importa</h2><p>Texto con <strong>negrita</strong>.</p><ul><li><p>Punto</p></li></ul>',
+      },
+      coverUrl: { type: 'string', nullable: true },
+      status: { type: 'string', enum: ['active', 'inactive'], description: 'active: publicado; inactive: borrador' },
+      views: { type: 'integer', description: 'Lecturas, para "Lo mas leido"', example: 120 },
+      readingMinutes: { type: 'integer', description: 'Calculado a 200 palabras por minuto', example: 4 },
+      authorName: { type: 'string', example: 'Esau Morales' },
+      publishedAt: { type: 'string', format: 'date-time' },
+      createdAt: { type: 'string', format: 'date-time' },
+    },
+  },
+  PublicacionEntrada: {
+    type: 'object',
+    description: 'Crear y editar usan el mismo cuerpo completo.',
+    required: ['title', 'content'],
+    properties: {
+      title: { type: 'string', minLength: 3, maxLength: 200, example: 'Pausas activas en la oficina' },
+      excerpt: { type: 'string', maxLength: 300, description: 'Resumen para las tarjetas del listado' },
+      content: {
+        type: 'string',
+        maxLength: 50000,
+        description:
+          'HTML del editor. Etiquetas permitidas: p, br, strong, b, em, i, u, s, h2, h3, ul, ol, li, blockquote, a (href http/https/mailto), hr. Todo lo demas se elimina al guardar (scripts, estilos, atributos on*). Un h1 se convierte en h2. Tambien acepta texto plano: cada bloque separado por una linea en blanco se guarda como parrafo. Minimo 20 caracteres de texto visible.',
+      },
+      coverUrl: { type: 'string', format: 'uri', description: 'URL externa o devuelta por POST /uploads/imagenes' },
+      status: { type: 'string', enum: ['active', 'inactive'], default: 'active' },
+      publishedAt: {
+        type: 'string',
+        format: 'date',
+        description: 'YYYY-MM-DD. Al crear sin fecha se usa hoy; al editar sin fecha se conserva la anterior.',
+        example: '2026-03-01',
+      },
     },
   },
   ImagenSubida: {
@@ -318,7 +379,8 @@ export const openApiSpec = {
   tags: [
     { name: 'Auth', description: 'Registro, inicio de sesion y usuario actual' },
     { name: 'Catalogo', description: 'Productos, cursos y agencias de envio' },
-    { name: 'Archivos', description: 'Subida de imagenes para el catalogo' },
+    { name: 'Publicaciones', description: 'Articulos del blog' },
+    { name: 'Archivos', description: 'Subida de imagenes para el catalogo y las publicaciones' },
   ],
   components: {
     securitySchemes: {
@@ -423,6 +485,78 @@ export const openApiSpec = {
       claveLista: 'cursos',
       conflicto: 'Si ya tiene matriculas, pedidos o certificados se responde 409.',
     }),
+    '/posts': {
+      get: {
+        tags: ['Publicaciones'],
+        summary: 'Lista publicaciones paginadas',
+        description: `Publico. Ordenadas por fecha de publicacion, de la mas reciente a la mas antigua. ${POR_PAGINA_DEFECTO} por pagina por defecto.`,
+        parameters: PARAMETROS_LISTADO,
+        responses: {
+          '200': sobre(
+            {
+              type: 'object',
+              properties: {
+                publicaciones: { type: 'array', items: ref('Publicacion') },
+                paginacion: ref('Paginacion'),
+              },
+            },
+            'Pagina de publicaciones'
+          ),
+        },
+      },
+      post: {
+        tags: ['Publicaciones'],
+        summary: 'Crea una publicacion (solo ADMIN)',
+        description: 'El autor se toma del token. El slug se genera desde el titulo y se numera si ya existe.',
+        security: [{ bearerAuth: [] }],
+        requestBody: cuerpoJson('PublicacionEntrada'),
+        responses: {
+          '201': sobre({ type: 'object', properties: { publicacion: ref('Publicacion') } }, 'Publicacion creada'),
+          ...ERRORES_ADMIN,
+          '422': error('Datos invalidos: el mensaje indica el campo'),
+        },
+      },
+    },
+    '/posts/{id}': {
+      get: {
+        tags: ['Publicaciones'],
+        summary: 'Obtiene una publicacion',
+        parameters: [parametroId('articulo')],
+        responses: {
+          '200': sobre({ type: 'object', properties: { publicacion: ref('Publicacion') } }, 'Publicacion encontrada'),
+          '400': error('El id no es un entero positivo'),
+          '404': error('No existe la publicacion'),
+        },
+      },
+      put: {
+        tags: ['Publicaciones'],
+        summary: 'Edita una publicacion (solo ADMIN)',
+        description: 'Si se reemplaza la portada, la anterior subida al servidor se borra del disco.',
+        security: [{ bearerAuth: [] }],
+        parameters: [parametroId('articulo')],
+        requestBody: cuerpoJson('PublicacionEntrada'),
+        responses: {
+          '200': sobre({ type: 'object', properties: { publicacion: ref('Publicacion') } }, 'Publicacion actualizada'),
+          '400': error('El id no es un entero positivo'),
+          ...ERRORES_ADMIN,
+          '404': error('No existe la publicacion'),
+          '422': error('Datos invalidos: el mensaje indica el campo'),
+        },
+      },
+      delete: {
+        tags: ['Publicaciones'],
+        summary: 'Elimina una publicacion (solo ADMIN)',
+        description: 'Borrado definitivo, incluida su portada subida al servidor.',
+        security: [{ bearerAuth: [] }],
+        parameters: [parametroId('articulo')],
+        responses: {
+          '204': { description: 'Eliminada. Sin cuerpo' },
+          '400': error('El id no es un entero positivo'),
+          ...ERRORES_ADMIN,
+          '404': error('No existe la publicacion'),
+        },
+      },
+    },
     '/uploads/imagenes': {
       post: {
         tags: ['Archivos'],

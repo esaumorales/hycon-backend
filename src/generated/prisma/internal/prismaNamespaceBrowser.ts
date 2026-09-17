@@ -64,6 +64,7 @@ export const ModelName = {
   Enrollment: 'Enrollment',
   CourseProgress: 'CourseProgress',
   Certificate: 'Certificate',
+  Post: 'Post',
   Company: 'Company',
   Form: 'Form',
   FormSubmission: 'FormSubmission',
@@ -258,6 +259,24 @@ export const CertificateScalarFieldEnum = {
 } as const
 
 export type CertificateScalarFieldEnum = (typeof CertificateScalarFieldEnum)[keyof typeof CertificateScalarFieldEnum]
+
+
+export const PostScalarFieldEnum = {
+  postId: 'postId',
+  authorId: 'authorId',
+  title: 'title',
+  slug: 'slug',
+  excerpt: 'excerpt',
+  content: 'content',
+  coverUrl: 'coverUrl',
+  status: 'status',
+  views: 'views',
+  publishedAt: 'publishedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PostScalarFieldEnum = (typeof PostScalarFieldEnum)[keyof typeof PostScalarFieldEnum]
 
 
 export const CompanyScalarFieldEnum = {

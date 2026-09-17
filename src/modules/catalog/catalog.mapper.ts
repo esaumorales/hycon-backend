@@ -1,3 +1,4 @@
+import { extraerIdYoutube } from '../../core/utils/youtube';
 import { resolverAgencias } from './catalog.constants';
 import type {
   CursoBase,
@@ -38,6 +39,8 @@ export const aCursoPublico = (curso: CursoBase): CursoPublico => ({
   name: curso.name,
   description: curso.description,
   videoUrl: curso.videoUrl,
+  // Listo para incrustar; null si no hay video o el link no es de YouTube
+  youtubeId: extraerIdYoutube(curso.videoUrl),
   thumbnailUrl: curso.thumbnailUrl,
   durationMinutes: curso.durationMinutes,
   price: aNumero(curso.price) as number,

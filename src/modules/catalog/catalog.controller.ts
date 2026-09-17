@@ -1,35 +1,12 @@
-import type { Request, Response, NextFunction, RequestHandler } from 'express';
-import { AppError } from '../../core/errors/AppError';
+import type { Request } from 'express';
+import { leerId, manejar, obtenerUsuarioId as obtenerOwnerId } from '../../core/utils/controlador';
 import { catalogService } from './catalog.service';
 import { AGENCIAS_ENVIO } from './catalog.constants';
-import { idSchema, listadoQuerySchema } from './catalog.schema';
+import { listadoQuerySchema } from './catalog.schema';
 import type { CursoInput, ProductoInput } from './catalog.schema';
-
-// El propietario del registro es siempre el usuario autenticado, nunca el body
-const obtenerOwnerId = (req: Request): number => {
-  if (!req.usuario) {
-    throw new AppError('No autenticado. Inicia sesion para continuar', 401);
-  }
-  return req.usuario.userId;
-};
 
 // Los parametros invalidos de la URL no rompen la peticion: caen a su valor por defecto
 const leerListado = (req: Request) => listadoQuerySchema.parse(req.query);
-
-const leerId = (req: Request): number => {
-  const resultado = idSchema.safeParse(req.params.id);
-  if (!resultado.success) {
-    throw new AppError('El identificador debe ser un numero entero positivo', 400);
-  }
-  return resultado.data;
-};
-
-// Envoltorio para no repetir try/catch en cada controlador
-const manejar =
-  (accion: (req: Request, res: Response) => Promise<void>): RequestHandler =>
-  (req: Request, res: Response, next: NextFunction) => {
-    accion(req, res).catch(next);
-  };
 
 export const listarAgencias = manejar(async (_req, res) => {
   res.status(200).json({ success: true, data: { agencias: AGENCIAS_ENVIO } });

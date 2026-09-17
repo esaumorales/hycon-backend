@@ -249,6 +249,8 @@ describe('documentacion', () => {
         '/catalog/courses',
         '/catalog/courses/{id}',
         '/uploads/imagenes',
+        '/posts',
+        '/posts/{id}',
       ])
     );
     const paths = openApiSpec.paths as Record<string, object>;

@@ -122,11 +122,18 @@ describe('cursoSchema', () => {
     expect(cursoSchema.safeParse({ ...cursoBase, durationMinutes: '-10' }).success).toBe(false);
   });
 
-  it('valida las URLs de video y miniatura', () => {
-    expect(cursoSchema.safeParse({ ...cursoBase, videoUrl: 'youtube' }).success).toBe(false);
-    expect(cursoSchema.safeParse({ ...cursoBase, videoUrl: 'https://youtu.be/abc' }).success).toBe(
-      true
-    );
+  it('solo acepta links de YouTube como video', () => {
+    const conVideo = (videoUrl: string) => cursoSchema.safeParse({ ...cursoBase, videoUrl }).success;
+
+    expect(conVideo('youtube')).toBe(false);
+    expect(conVideo('https://vimeo.com/123456')).toBe(false);
+    expect(conVideo('https://youtu.be/abc')).toBe(false);
+    expect(conVideo('https://youtu.be/dQw4w9WgXcQ')).toBe(true);
+    expect(conVideo('https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=30s')).toBe(true);
+  });
+
+  it('valida la URL de la miniatura', () => {
+    expect(cursoSchema.safeParse({ ...cursoBase, thumbnailUrl: 'foto' }).success).toBe(false);
   });
 
   it('exige que el descuento sea menor que el precio', () => {

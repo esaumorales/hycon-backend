@@ -263,6 +263,7 @@ export type UserWhereInput = {
   role?: Prisma.XOR<Prisma.RoleScalarRelationFilter, Prisma.RoleWhereInput>
   courses?: Prisma.CourseListRelationFilter
   products?: Prisma.ProductListRelationFilter
+  posts?: Prisma.PostListRelationFilter
   carts?: Prisma.CartListRelationFilter
   orders?: Prisma.OrderListRelationFilter
   enrollments?: Prisma.EnrollmentListRelationFilter
@@ -285,6 +286,7 @@ export type UserOrderByWithRelationInput = {
   role?: Prisma.RoleOrderByWithRelationInput
   courses?: Prisma.CourseOrderByRelationAggregateInput
   products?: Prisma.ProductOrderByRelationAggregateInput
+  posts?: Prisma.PostOrderByRelationAggregateInput
   carts?: Prisma.CartOrderByRelationAggregateInput
   orders?: Prisma.OrderOrderByRelationAggregateInput
   enrollments?: Prisma.EnrollmentOrderByRelationAggregateInput
@@ -310,6 +312,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   role?: Prisma.XOR<Prisma.RoleScalarRelationFilter, Prisma.RoleWhereInput>
   courses?: Prisma.CourseListRelationFilter
   products?: Prisma.ProductListRelationFilter
+  posts?: Prisma.PostListRelationFilter
   carts?: Prisma.CartListRelationFilter
   orders?: Prisma.OrderListRelationFilter
   enrollments?: Prisma.EnrollmentListRelationFilter
@@ -364,6 +367,7 @@ export type UserCreateInput = {
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
   courses?: Prisma.CourseCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderCreateNestedManyWithoutUserInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutUserInput
@@ -385,6 +389,7 @@ export type UserUncheckedCreateInput = {
   updatedAt?: Date | string
   courses?: Prisma.CourseUncheckedCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutUserInput
@@ -405,6 +410,7 @@ export type UserUpdateInput = {
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
   courses?: Prisma.CourseUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutUserNestedInput
@@ -426,6 +432,7 @@ export type UserUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   courses?: Prisma.CourseUncheckedUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutUserNestedInput
@@ -665,6 +672,20 @@ export type UserUpdateOneRequiredWithoutCertificatesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCertificatesInput, Prisma.UserUpdateWithoutCertificatesInput>, Prisma.UserUncheckedUpdateWithoutCertificatesInput>
 }
 
+export type UserCreateNestedOneWithoutPostsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPostsInput, Prisma.UserUncheckedCreateWithoutPostsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPostsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPostsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPostsInput, Prisma.UserUncheckedCreateWithoutPostsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPostsInput
+  upsert?: Prisma.UserUpsertWithoutPostsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPostsInput, Prisma.UserUpdateWithoutPostsInput>, Prisma.UserUncheckedUpdateWithoutPostsInput>
+}
+
 export type UserCreateNestedOneWithoutCompaniesInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutCompaniesInput, Prisma.UserUncheckedCreateWithoutCompaniesInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutCompaniesInput
@@ -704,6 +725,7 @@ export type UserCreateWithoutRoleInput = {
   updatedAt?: Date | string
   courses?: Prisma.CourseCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderCreateNestedManyWithoutUserInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutUserInput
@@ -724,6 +746,7 @@ export type UserUncheckedCreateWithoutRoleInput = {
   updatedAt?: Date | string
   courses?: Prisma.CourseUncheckedCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutUserInput
@@ -785,6 +808,7 @@ export type UserCreateWithoutCoursesInput = {
   updatedAt?: Date | string
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderCreateNestedManyWithoutUserInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutUserInput
@@ -805,6 +829,7 @@ export type UserUncheckedCreateWithoutCoursesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutUserInput
@@ -840,6 +865,7 @@ export type UserUpdateWithoutCoursesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutUserNestedInput
@@ -860,6 +886,7 @@ export type UserUncheckedUpdateWithoutCoursesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutUserNestedInput
@@ -879,6 +906,7 @@ export type UserCreateWithoutProductsInput = {
   updatedAt?: Date | string
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
   courses?: Prisma.CourseCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderCreateNestedManyWithoutUserInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutUserInput
@@ -899,6 +927,7 @@ export type UserUncheckedCreateWithoutProductsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   courses?: Prisma.CourseUncheckedCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutUserInput
@@ -934,6 +963,7 @@ export type UserUpdateWithoutProductsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
   courses?: Prisma.CourseUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutUserNestedInput
@@ -954,6 +984,7 @@ export type UserUncheckedUpdateWithoutProductsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   courses?: Prisma.CourseUncheckedUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutUserNestedInput
@@ -974,6 +1005,7 @@ export type UserCreateWithoutCartsInput = {
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
   courses?: Prisma.CourseCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
   orders?: Prisma.OrderCreateNestedManyWithoutUserInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutUserInput
   certificates?: Prisma.CertificateCreateNestedManyWithoutUserInput
@@ -994,6 +1026,7 @@ export type UserUncheckedCreateWithoutCartsInput = {
   updatedAt?: Date | string
   courses?: Prisma.CourseUncheckedCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutUserInput
   certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutUserInput
@@ -1029,6 +1062,7 @@ export type UserUpdateWithoutCartsInput = {
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
   courses?: Prisma.CourseUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
   orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutUserNestedInput
   certificates?: Prisma.CertificateUpdateManyWithoutUserNestedInput
@@ -1049,6 +1083,7 @@ export type UserUncheckedUpdateWithoutCartsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   courses?: Prisma.CourseUncheckedUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutUserNestedInput
   certificates?: Prisma.CertificateUncheckedUpdateManyWithoutUserNestedInput
@@ -1068,6 +1103,7 @@ export type UserCreateWithoutOrdersInput = {
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
   courses?: Prisma.CourseCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutUserInput
   certificates?: Prisma.CertificateCreateNestedManyWithoutUserInput
@@ -1088,6 +1124,7 @@ export type UserUncheckedCreateWithoutOrdersInput = {
   updatedAt?: Date | string
   courses?: Prisma.CourseUncheckedCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutUserInput
   certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutUserInput
@@ -1123,6 +1160,7 @@ export type UserUpdateWithoutOrdersInput = {
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
   courses?: Prisma.CourseUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutUserNestedInput
   certificates?: Prisma.CertificateUpdateManyWithoutUserNestedInput
@@ -1143,6 +1181,7 @@ export type UserUncheckedUpdateWithoutOrdersInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   courses?: Prisma.CourseUncheckedUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutUserNestedInput
   certificates?: Prisma.CertificateUncheckedUpdateManyWithoutUserNestedInput
@@ -1162,6 +1201,7 @@ export type UserCreateWithoutEnrollmentsInput = {
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
   courses?: Prisma.CourseCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderCreateNestedManyWithoutUserInput
   certificates?: Prisma.CertificateCreateNestedManyWithoutUserInput
@@ -1182,6 +1222,7 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   updatedAt?: Date | string
   courses?: Prisma.CourseUncheckedCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
   certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutUserInput
@@ -1217,6 +1258,7 @@ export type UserUpdateWithoutEnrollmentsInput = {
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
   courses?: Prisma.CourseUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
   certificates?: Prisma.CertificateUpdateManyWithoutUserNestedInput
@@ -1237,6 +1279,7 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   courses?: Prisma.CourseUncheckedUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
   certificates?: Prisma.CertificateUncheckedUpdateManyWithoutUserNestedInput
@@ -1256,6 +1299,7 @@ export type UserCreateWithoutCertificatesInput = {
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
   courses?: Prisma.CourseCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderCreateNestedManyWithoutUserInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutUserInput
@@ -1276,6 +1320,7 @@ export type UserUncheckedCreateWithoutCertificatesInput = {
   updatedAt?: Date | string
   courses?: Prisma.CourseUncheckedCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutUserInput
@@ -1311,6 +1356,7 @@ export type UserUpdateWithoutCertificatesInput = {
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
   courses?: Prisma.CourseUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutUserNestedInput
@@ -1331,9 +1377,108 @@ export type UserUncheckedUpdateWithoutCertificatesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   courses?: Prisma.CourseUncheckedUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutUserNestedInput
+  companies?: Prisma.CompanyUncheckedUpdateManyWithoutUserNestedInput
+  formSubmissions?: Prisma.FormSubmissionUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutPostsInput = {
+  name: string
+  lastname: string
+  email: string
+  passwordHash: string
+  phone?: string | null
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role: Prisma.RoleCreateNestedOneWithoutUsersInput
+  courses?: Prisma.CourseCreateNestedManyWithoutOwnerInput
+  products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
+  carts?: Prisma.CartCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderCreateNestedManyWithoutUserInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutUserInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutUserInput
+  companies?: Prisma.CompanyCreateNestedManyWithoutUserInput
+  formSubmissions?: Prisma.FormSubmissionCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutPostsInput = {
+  userId?: number
+  roleId: number
+  name: string
+  lastname: string
+  email: string
+  passwordHash: string
+  phone?: string | null
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  courses?: Prisma.CourseUncheckedCreateNestedManyWithoutOwnerInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
+  carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutUserInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutUserInput
+  companies?: Prisma.CompanyUncheckedCreateNestedManyWithoutUserInput
+  formSubmissions?: Prisma.FormSubmissionUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutPostsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPostsInput, Prisma.UserUncheckedCreateWithoutPostsInput>
+}
+
+export type UserUpsertWithoutPostsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPostsInput, Prisma.UserUncheckedUpdateWithoutPostsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPostsInput, Prisma.UserUncheckedCreateWithoutPostsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPostsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPostsInput, Prisma.UserUncheckedUpdateWithoutPostsInput>
+}
+
+export type UserUpdateWithoutPostsInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  lastname?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
+  courses?: Prisma.CourseUpdateManyWithoutOwnerNestedInput
+  products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
+  carts?: Prisma.CartUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutUserNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutUserNestedInput
+  companies?: Prisma.CompanyUpdateManyWithoutUserNestedInput
+  formSubmissions?: Prisma.FormSubmissionUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPostsInput = {
+  userId?: Prisma.IntFieldUpdateOperationsInput | number
+  roleId?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  lastname?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  courses?: Prisma.CourseUncheckedUpdateManyWithoutOwnerNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
+  carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutUserNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutUserNestedInput
   companies?: Prisma.CompanyUncheckedUpdateManyWithoutUserNestedInput
   formSubmissions?: Prisma.FormSubmissionUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -1350,6 +1495,7 @@ export type UserCreateWithoutCompaniesInput = {
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
   courses?: Prisma.CourseCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderCreateNestedManyWithoutUserInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutUserInput
@@ -1370,6 +1516,7 @@ export type UserUncheckedCreateWithoutCompaniesInput = {
   updatedAt?: Date | string
   courses?: Prisma.CourseUncheckedCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutUserInput
@@ -1405,6 +1552,7 @@ export type UserUpdateWithoutCompaniesInput = {
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
   courses?: Prisma.CourseUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutUserNestedInput
@@ -1425,6 +1573,7 @@ export type UserUncheckedUpdateWithoutCompaniesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   courses?: Prisma.CourseUncheckedUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutUserNestedInput
@@ -1444,6 +1593,7 @@ export type UserCreateWithoutFormSubmissionsInput = {
   role: Prisma.RoleCreateNestedOneWithoutUsersInput
   courses?: Prisma.CourseCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostCreateNestedManyWithoutAuthorInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderCreateNestedManyWithoutUserInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutUserInput
@@ -1464,6 +1614,7 @@ export type UserUncheckedCreateWithoutFormSubmissionsInput = {
   updatedAt?: Date | string
   courses?: Prisma.CourseUncheckedCreateNestedManyWithoutOwnerInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthorInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutUserInput
@@ -1499,6 +1650,7 @@ export type UserUpdateWithoutFormSubmissionsInput = {
   role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
   courses?: Prisma.CourseUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutUserNestedInput
@@ -1519,6 +1671,7 @@ export type UserUncheckedUpdateWithoutFormSubmissionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   courses?: Prisma.CourseUncheckedUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutUserNestedInput
@@ -1549,6 +1702,7 @@ export type UserUpdateWithoutRoleInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   courses?: Prisma.CourseUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUpdateManyWithoutAuthorNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutUserNestedInput
@@ -1569,6 +1723,7 @@ export type UserUncheckedUpdateWithoutRoleInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   courses?: Prisma.CourseUncheckedUpdateManyWithoutOwnerNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
+  posts?: Prisma.PostUncheckedUpdateManyWithoutAuthorNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutUserNestedInput
@@ -1597,6 +1752,7 @@ export type UserUncheckedUpdateManyWithoutRoleInput = {
 export type UserCountOutputType = {
   courses: number
   products: number
+  posts: number
   carts: number
   orders: number
   enrollments: number
@@ -1608,6 +1764,7 @@ export type UserCountOutputType = {
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   courses?: boolean | UserCountOutputTypeCountCoursesArgs
   products?: boolean | UserCountOutputTypeCountProductsArgs
+  posts?: boolean | UserCountOutputTypeCountPostsArgs
   carts?: boolean | UserCountOutputTypeCountCartsArgs
   orders?: boolean | UserCountOutputTypeCountOrdersArgs
   enrollments?: boolean | UserCountOutputTypeCountEnrollmentsArgs
@@ -1638,6 +1795,13 @@ export type UserCountOutputTypeCountCoursesArgs<ExtArgs extends runtime.Types.Ex
  */
 export type UserCountOutputTypeCountProductsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ProductWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPostsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PostWhereInput
 }
 
 /**
@@ -1697,6 +1861,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
   courses?: boolean | Prisma.User$coursesArgs<ExtArgs>
   products?: boolean | Prisma.User$productsArgs<ExtArgs>
+  posts?: boolean | Prisma.User$postsArgs<ExtArgs>
   carts?: boolean | Prisma.User$cartsArgs<ExtArgs>
   orders?: boolean | Prisma.User$ordersArgs<ExtArgs>
   enrollments?: boolean | Prisma.User$enrollmentsArgs<ExtArgs>
@@ -1752,6 +1917,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   role?: boolean | Prisma.RoleDefaultArgs<ExtArgs>
   courses?: boolean | Prisma.User$coursesArgs<ExtArgs>
   products?: boolean | Prisma.User$productsArgs<ExtArgs>
+  posts?: boolean | Prisma.User$postsArgs<ExtArgs>
   carts?: boolean | Prisma.User$cartsArgs<ExtArgs>
   orders?: boolean | Prisma.User$ordersArgs<ExtArgs>
   enrollments?: boolean | Prisma.User$enrollmentsArgs<ExtArgs>
@@ -1773,6 +1939,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     role: Prisma.$RolePayload<ExtArgs>
     courses: Prisma.$CoursePayload<ExtArgs>[]
     products: Prisma.$ProductPayload<ExtArgs>[]
+    posts: Prisma.$PostPayload<ExtArgs>[]
     carts: Prisma.$CartPayload<ExtArgs>[]
     orders: Prisma.$OrderPayload<ExtArgs>[]
     enrollments: Prisma.$EnrollmentPayload<ExtArgs>[]
@@ -2188,6 +2355,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   role<T extends Prisma.RoleDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RoleDefaultArgs<ExtArgs>>): Prisma.Prisma__RoleClient<runtime.Types.Result.GetResult<Prisma.$RolePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   courses<T extends Prisma.User$coursesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$coursesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   products<T extends Prisma.User$productsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$productsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  posts<T extends Prisma.User$postsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$postsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   carts<T extends Prisma.User$cartsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$cartsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CartPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orders<T extends Prisma.User$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   enrollments<T extends Prisma.User$enrollmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$enrollmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EnrollmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2679,6 +2847,30 @@ export type User$productsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.ProductScalarFieldEnum | Prisma.ProductScalarFieldEnum[]
+}
+
+/**
+ * User.posts
+ */
+export type User$postsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Post
+   */
+  select?: Prisma.PostSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Post
+   */
+  omit?: Prisma.PostOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PostInclude<ExtArgs> | null
+  where?: Prisma.PostWhereInput
+  orderBy?: Prisma.PostOrderByWithRelationInput | Prisma.PostOrderByWithRelationInput[]
+  cursor?: Prisma.PostWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PostScalarFieldEnum | Prisma.PostScalarFieldEnum[]
 }
 
 /**
