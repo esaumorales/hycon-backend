@@ -19,6 +19,8 @@ import { orderRoutes } from './modules/orders/orders.routes';
 import { paymentRoutes } from './modules/payments/payments.routes';
 import { lmsRoutes } from './modules/lms/lms.routes';
 import { ergoRoutes } from './modules/ergo/ergo.routes';
+import { uploadRoutes } from './modules/uploads/uploads.routes';
+import { RUTA_PUBLICA_UPLOADS } from './modules/uploads/uploads.service';
 
 const app: Application = express();
 
@@ -76,7 +78,20 @@ app.get('/health', (_req, res) => {
   res.status(200).json({ success: true, estado: 'ok', entorno: env.NODE_ENV });
 });
 
+// Imagenes subidas desde el panel. Helmet marca por defecto los recursos como
+// same-origin, y el frontend vive en otro puerto: sin esta cabecera el navegador
+// descargaria la imagen pero se negaria a pintarla.
+app.use(
+  RUTA_PUBLICA_UPLOADS,
+  (_req, res, next) => {
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    next();
+  },
+  express.static(env.UPLOADS_DIR, { index: false, maxAge: '7d' })
+);
+
 app.use(`${API_PREFIX}/auth`, authRoutes);
+app.use(`${API_PREFIX}/uploads`, uploadRoutes);
 app.use(`${API_PREFIX}/catalog`, catalogRoutes);
 app.use(`${API_PREFIX}/cart`, cartRoutes);
 app.use(`${API_PREFIX}/orders`, orderRoutes);

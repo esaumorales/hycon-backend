@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { CODIGOS_AGENCIA, POR_PAGINA_DEFECTO, POR_PAGINA_MAXIMO } from './catalog.constants';
 
 // Reglas compartidas. Los precios llegan como texto desde el formulario,
 // por eso se usa coerce antes de validar el rango.
@@ -38,6 +39,12 @@ const textoOpcional = (maximo: number) =>
     z.string().trim().max(maximo, `No puede superar los ${maximo} caracteres`).optional()
   );
 
+// Se aceptan solo agencias conocidas y se eliminan los repetidos
+const agenciasEnvio = z
+  .array(z.enum(CODIGOS_AGENCIA, { message: 'Agencia de envio no reconocida' }))
+  .default([])
+  .transform((codigos) => [...new Set(codigos)]);
+
 // El descuento solo tiene sentido si es menor que el precio de lista
 const descuentoCoherente = <T extends { price: number; discountPrice?: number }>(datos: T) =>
   datos.discountPrice === undefined || datos.discountPrice < datos.price;
@@ -47,39 +54,40 @@ const MENSAJE_DESCUENTO = {
   path: ['discountPrice'],
 };
 
-export const crearProductoSchema = z
+const nombre = z
+  .string({ message: 'El nombre es obligatorio' })
+  .trim()
+  .min(2, 'El nombre debe tener al menos 2 caracteres')
+  .max(200, 'El nombre es demasiado largo');
+
+// Crear y editar comparten esquema: el formulario siempre envia el registro completo
+export const productoSchema = z
   .object({
-    name: z
-      .string()
-      .trim()
-      .min(2, 'El nombre debe tener al menos 2 caracteres')
-      .max(200, 'El nombre es demasiado largo'),
+    name: nombre,
     description: textoOpcional(2000),
     brand: textoOpcional(100),
     model: textoOpcional(100),
+    color: textoOpcional(50),
     price: precio,
     discountPrice: precioOpcional,
     stock: z.preprocess(
       vacioComoIndefinido,
       z.coerce
-        .number({ message: 'El stock debe ser un numero' })
-        .int('El stock debe ser un numero entero')
-        .min(0, 'El stock no puede ser negativo')
+        .number({ message: 'La cantidad debe ser un numero' })
+        .int('La cantidad debe ser un numero entero')
+        .min(0, 'La cantidad no puede ser negativa')
         .default(0)
     ),
+    shippingAgencies: agenciasEnvio,
     status: estado,
     // Si viene, se guarda como imagen principal del producto
     imageUrl: urlOpcional,
   })
   .refine(descuentoCoherente, MENSAJE_DESCUENTO);
 
-export const crearCursoSchema = z
+export const cursoSchema = z
   .object({
-    name: z
-      .string()
-      .trim()
-      .min(2, 'El nombre debe tener al menos 2 caracteres')
-      .max(200, 'El nombre es demasiado largo'),
+    name: nombre,
     description: textoOpcional(2000),
     videoUrl: urlOpcional,
     thumbnailUrl: urlOpcional,
@@ -98,13 +106,18 @@ export const crearCursoSchema = z
   })
   .refine(descuentoCoherente, MENSAJE_DESCUENTO);
 
-export type CrearProductoInput = z.infer<typeof crearProductoSchema>;
-export type CrearCursoInput = z.infer<typeof crearCursoSchema>;
+export type ProductoInput = z.infer<typeof productoSchema>;
+export type CursoInput = z.infer<typeof cursoSchema>;
 
-// Filtro de visibilidad de los listados. Por defecto solo se publican los activos:
-// el catalogo publico no debe mostrar lo que esta dado de baja.
+// Filtros del listado. Cada parametro invalido cae a su valor por defecto por separado,
+// asi un ?pagina=abc no invalida tambien el estado.
+// Por defecto solo se publican los activos: el catalogo publico no muestra lo dado de baja.
 export const listadoQuerySchema = z.object({
-  estado: z.enum(['active', 'inactive', 'todos']).default('active'),
+  estado: z.enum(['active', 'inactive', 'todos']).catch('active'),
+  pagina: z.coerce.number().int().min(1).catch(1),
+  porPagina: z.coerce.number().int().min(1).max(POR_PAGINA_MAXIMO).catch(POR_PAGINA_DEFECTO),
 });
 
 export type ListadoQuery = z.infer<typeof listadoQuerySchema>;
+
+export const idSchema = z.coerce.number().int().positive();

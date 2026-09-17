@@ -13,3 +13,6 @@ skills-lock.json
 
 # Salida de compilacion
 dist
+
+# Imagenes subidas desde el panel
+uploads/

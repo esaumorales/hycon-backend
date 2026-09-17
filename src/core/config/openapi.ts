@@ -1,4 +1,72 @@
 import { env } from './env';
+import { AGENCIAS_ENVIO, CODIGOS_AGENCIA, POR_PAGINA_DEFECTO, POR_PAGINA_MAXIMO } from '../../modules/catalog/catalog.constants';
+
+// ---------------------------------------------------------------------------
+// Esquemas reutilizables
+// ---------------------------------------------------------------------------
+
+const ref = (nombre: string) => ({ $ref: `#/components/schemas/${nombre}` });
+
+// Todas las respuestas correctas llegan envueltas en { success, data }
+const sobre = (data: object, descripcion: string) => ({
+  description: descripcion,
+  content: {
+    'application/json': {
+      schema: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: true },
+          data,
+        },
+      },
+    },
+  },
+});
+
+const error = (descripcion: string) => ({
+  description: descripcion,
+  content: { 'application/json': { schema: ref('Error') } },
+});
+
+const ERRORES_ADMIN = {
+  '401': error('Falta el token o no es valido'),
+  '403': error('La cuenta no tiene rol ADMIN'),
+};
+
+const parametroId = (entidad: string) => ({
+  name: 'id',
+  in: 'path',
+  required: true,
+  description: `Identificador del ${entidad}`,
+  schema: { type: 'integer', minimum: 1, example: 1 },
+});
+
+const PARAMETROS_LISTADO = [
+  {
+    name: 'estado',
+    in: 'query',
+    description:
+      'Filtra por estado. El catalogo publico usa `active` (por defecto); el panel pide `todos`. Un valor invalido se ignora.',
+    schema: { type: 'string', enum: ['active', 'inactive', 'todos'], default: 'active' },
+  },
+  {
+    name: 'pagina',
+    in: 'query',
+    description: 'Numero de pagina, empezando en 1. Un valor invalido vuelve a 1.',
+    schema: { type: 'integer', minimum: 1, default: 1 },
+  },
+  {
+    name: 'porPagina',
+    in: 'query',
+    description: `Filas por pagina, entre 1 y ${POR_PAGINA_MAXIMO}.`,
+    schema: { type: 'integer', minimum: 1, maximum: POR_PAGINA_MAXIMO, default: POR_PAGINA_DEFECTO },
+  },
+];
+
+const cuerpoJson = (esquema: string) => ({
+  required: true,
+  content: { 'application/json': { schema: ref(esquema) } },
+});
 
 const usuarioSchema = {
   type: 'object',
@@ -6,7 +74,7 @@ const usuarioSchema = {
     userId: { type: 'integer', example: 1 },
     name: { type: 'string', example: 'Esau' },
     lastname: { type: 'string', example: 'Morales' },
-    email: { type: 'string', example: 'admin@hycon.com' },
+    email: { type: 'string', example: 'info@hycon.lat' },
     phone: { type: 'string', nullable: true },
     avatarUrl: { type: 'string', nullable: true },
     roleId: { type: 'integer', example: 1 },
@@ -14,46 +82,249 @@ const usuarioSchema = {
   },
 };
 
-const sesionSchema = {
-  type: 'object',
-  properties: {
-    token: { type: 'string' },
-    usuario: usuarioSchema,
+const schemas = {
+  Error: {
+    type: 'object',
+    properties: {
+      success: { type: 'boolean', example: false },
+      error: { type: 'string', example: 'price: El precio debe ser mayor que cero' },
+    },
   },
-};
-
-const respuestaError = {
-  description: 'Error',
-  content: {
-    'application/json': {
-      schema: {
-        type: 'object',
-        properties: {
-          success: { type: 'boolean', example: false },
-          error: { type: 'string' },
-        },
+  Usuario: usuarioSchema,
+  Sesion: {
+    type: 'object',
+    properties: { token: { type: 'string' }, usuario: ref('Usuario') },
+  },
+  Paginacion: {
+    type: 'object',
+    properties: {
+      pagina: { type: 'integer', example: 1 },
+      porPagina: { type: 'integer', example: POR_PAGINA_DEFECTO },
+      total: { type: 'integer', example: 14 },
+      totalPaginas: { type: 'integer', example: 3 },
+    },
+  },
+  AgenciaEnvio: {
+    type: 'object',
+    properties: {
+      code: { type: 'string', enum: CODIGOS_AGENCIA, example: 'shalom' },
+      name: { type: 'string', example: 'Shalom' },
+    },
+  },
+  Producto: {
+    type: 'object',
+    properties: {
+      productId: { type: 'integer', example: 1 },
+      name: { type: 'string', example: 'Silla ergonomica Pro' },
+      description: { type: 'string', nullable: true },
+      brand: { type: 'string', nullable: true, example: 'Hycon' },
+      model: { type: 'string', nullable: true, example: 'SE-200' },
+      color: { type: 'string', nullable: true, example: 'Negro' },
+      price: { type: 'number', example: 459.9 },
+      discountPrice: { type: 'number', nullable: true, example: 399.9 },
+      stock: { type: 'integer', description: 'Cantidad disponible', example: 12 },
+      shippingAgencies: { type: 'array', items: ref('AgenciaEnvio') },
+      status: { type: 'string', enum: ['active', 'inactive'] },
+      imageUrl: { type: 'string', nullable: true, example: `${env.PUBLIC_URL}/uploads/imagenes/9f1c.webp` },
+      createdAt: { type: 'string', format: 'date-time' },
+    },
+  },
+  ProductoEntrada: {
+    type: 'object',
+    description:
+      'Crear y editar usan el mismo cuerpo. Al editar se envia el registro completo: un campo opcional vacio o ausente deja la columna en NULL.',
+    required: ['name', 'price'],
+    properties: {
+      name: { type: 'string', minLength: 2, maxLength: 200, example: 'Silla ergonomica Pro' },
+      brand: { type: 'string', maxLength: 100, example: 'Hycon' },
+      model: { type: 'string', maxLength: 100, example: 'SE-200' },
+      color: { type: 'string', maxLength: 50, example: 'Negro' },
+      price: { type: 'number', exclusiveMinimum: 0, example: 459.9 },
+      discountPrice: {
+        type: 'number',
+        exclusiveMinimum: 0,
+        description: 'Debe ser menor que price',
+        example: 399.9,
+      },
+      stock: { type: 'integer', minimum: 0, default: 0, description: 'Cantidad disponible', example: 12 },
+      shippingAgencies: {
+        type: 'array',
+        description: `Codigos de agencia. Validos: ${AGENCIAS_ENVIO.map((a) => `\`${a.code}\` (${a.name})`).join(', ')}. Los repetidos se eliminan.`,
+        items: { type: 'string', enum: CODIGOS_AGENCIA },
+        default: [],
+        example: ['shalom', 'olva'],
+      },
+      description: { type: 'string', maxLength: 2000 },
+      status: { type: 'string', enum: ['active', 'inactive'], default: 'active' },
+      imageUrl: {
+        type: 'string',
+        format: 'uri',
+        description:
+          'Imagen principal. Puede ser una URL externa o la devuelta por POST /uploads/imagenes. Al reemplazarla, la anterior subida al servidor se borra del disco.',
       },
     },
   },
+  Curso: {
+    type: 'object',
+    properties: {
+      courseId: { type: 'integer', example: 1 },
+      name: { type: 'string', example: 'Pausas activas en oficina' },
+      description: { type: 'string', nullable: true },
+      videoUrl: { type: 'string', nullable: true, example: 'https://youtu.be/abc' },
+      thumbnailUrl: { type: 'string', nullable: true },
+      durationMinutes: { type: 'integer', nullable: true, example: 90 },
+      price: { type: 'number', example: 120 },
+      discountPrice: { type: 'number', nullable: true, example: 99 },
+      status: { type: 'string', enum: ['active', 'inactive'] },
+      createdAt: { type: 'string', format: 'date-time' },
+    },
+  },
+  CursoEntrada: {
+    type: 'object',
+    description: 'Crear y editar usan el mismo cuerpo completo.',
+    required: ['name', 'price'],
+    properties: {
+      name: { type: 'string', minLength: 2, maxLength: 200, example: 'Pausas activas en oficina' },
+      description: { type: 'string', maxLength: 2000 },
+      videoUrl: { type: 'string', format: 'uri', example: 'https://youtu.be/abc' },
+      thumbnailUrl: {
+        type: 'string',
+        format: 'uri',
+        description: 'URL externa o devuelta por POST /uploads/imagenes',
+      },
+      durationMinutes: { type: 'integer', minimum: 1, example: 90 },
+      price: { type: 'number', exclusiveMinimum: 0, example: 120 },
+      discountPrice: { type: 'number', exclusiveMinimum: 0, example: 99 },
+      status: { type: 'string', enum: ['active', 'inactive'], default: 'active' },
+    },
+  },
+  ImagenSubida: {
+    type: 'object',
+    properties: {
+      url: { type: 'string', example: `${env.PUBLIC_URL}/uploads/imagenes/2b7e1c0a-5d7f-4b8e-9d0a-3f1e2c4b5a6d.webp` },
+      tipo: { type: 'string', enum: ['jpg', 'png', 'webp', 'gif'] },
+      bytes: { type: 'integer', example: 184233 },
+    },
+  },
 };
+
+// ---------------------------------------------------------------------------
+// Rutas
+// ---------------------------------------------------------------------------
+
+// Genera las cinco operaciones CRUD de una entidad del catalogo
+const rutasCrud = (opciones: {
+  ruta: string;
+  entidad: string;
+  plural: string;
+  esquema: string;
+  claveUno: string;
+  claveLista: string;
+  conflicto: string;
+}) => ({
+  [`/catalog/${opciones.ruta}`]: {
+    get: {
+      tags: ['Catalogo'],
+      summary: `Lista ${opciones.plural} paginados`,
+      description: `Publico. Ordenado del mas reciente al mas antiguo. Devuelve ${POR_PAGINA_DEFECTO} por pagina salvo que se indique porPagina.`,
+      parameters: PARAMETROS_LISTADO,
+      responses: {
+        '200': sobre(
+          {
+            type: 'object',
+            properties: {
+              [opciones.claveLista]: { type: 'array', items: ref(opciones.esquema) },
+              paginacion: ref('Paginacion'),
+            },
+          },
+          `Pagina de ${opciones.plural}`
+        ),
+      },
+    },
+    post: {
+      tags: ['Catalogo'],
+      summary: `Crea un ${opciones.entidad} (solo ADMIN)`,
+      description: 'El propietario se toma del token, nunca del cuerpo.',
+      security: [{ bearerAuth: [] }],
+      requestBody: cuerpoJson(`${opciones.esquema}Entrada`),
+      responses: {
+        '201': sobre(
+          { type: 'object', properties: { [opciones.claveUno]: ref(opciones.esquema) } },
+          `${opciones.entidad} creado`
+        ),
+        ...ERRORES_ADMIN,
+        '422': error('Datos invalidos: el mensaje indica el campo'),
+      },
+    },
+  },
+  [`/catalog/${opciones.ruta}/{id}`]: {
+    get: {
+      tags: ['Catalogo'],
+      summary: `Obtiene un ${opciones.entidad}`,
+      parameters: [parametroId(opciones.entidad)],
+      responses: {
+        '200': sobre(
+          { type: 'object', properties: { [opciones.claveUno]: ref(opciones.esquema) } },
+          `${opciones.entidad} encontrado`
+        ),
+        '400': error('El id no es un entero positivo'),
+        '404': error(`No existe el ${opciones.entidad}`),
+      },
+    },
+    put: {
+      tags: ['Catalogo'],
+      summary: `Edita un ${opciones.entidad} (solo ADMIN)`,
+      description: 'Reemplaza el registro completo con el cuerpo enviado.',
+      security: [{ bearerAuth: [] }],
+      parameters: [parametroId(opciones.entidad)],
+      requestBody: cuerpoJson(`${opciones.esquema}Entrada`),
+      responses: {
+        '200': sobre(
+          { type: 'object', properties: { [opciones.claveUno]: ref(opciones.esquema) } },
+          `${opciones.entidad} actualizado`
+        ),
+        '400': error('El id no es un entero positivo'),
+        ...ERRORES_ADMIN,
+        '404': error(`No existe el ${opciones.entidad}`),
+        '422': error('Datos invalidos: el mensaje indica el campo'),
+      },
+    },
+    delete: {
+      tags: ['Catalogo'],
+      summary: `Elimina un ${opciones.entidad} (solo ADMIN)`,
+      description: `Borrado definitivo, incluidas sus imagenes subidas al servidor. ${opciones.conflicto}`,
+      security: [{ bearerAuth: [] }],
+      parameters: [parametroId(opciones.entidad)],
+      responses: {
+        '204': { description: 'Eliminado. Sin cuerpo' },
+        '400': error('El id no es un entero positivo'),
+        ...ERRORES_ADMIN,
+        '404': error(`No existe el ${opciones.entidad}`),
+        '409': error('Tiene registros asociados; desactivalo en lugar de eliminarlo'),
+      },
+    },
+  },
+});
 
 export const openApiSpec = {
   openapi: '3.1.0',
   info: {
     title: 'Hycon API',
-    version: '1.0.0',
-    description: 'Documentacion interactiva de la API para el backend de Hycon.',
+    version: '1.1.0',
+    description:
+      'Documentacion interactiva del backend de Hycon.\n\nLas respuestas correctas llegan como `{ success: true, data }` y los errores como `{ success: false, error }`. Para las rutas de ADMIN inicia sesion en **POST /auth/login** y pega el token en el boton de autenticacion.',
   },
-  servers: [
-    {
-      url: `http://localhost:${env.PORT}/api/v1`,
-      description: 'Servidor Local de Desarrollo',
-    },
+  servers: [{ url: `${env.PUBLIC_URL}/api/v1`, description: 'Servidor configurado en PUBLIC_URL' }],
+  tags: [
+    { name: 'Auth', description: 'Registro, inicio de sesion y usuario actual' },
+    { name: 'Catalogo', description: 'Productos, cursos y agencias de envio' },
+    { name: 'Archivos', description: 'Subida de imagenes para el catalogo' },
   ],
   components: {
     securitySchemes: {
       bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
     },
+    schemas,
   },
   paths: {
     '/auth/register': {
@@ -79,12 +350,9 @@ export const openApiSpec = {
           },
         },
         responses: {
-          '201': {
-            description: 'Cuenta creada y sesion iniciada',
-            content: { 'application/json': { schema: sesionSchema } },
-          },
-          '409': respuestaError,
-          '422': respuestaError,
+          '201': sobre(ref('Sesion'), 'Cuenta creada y sesion iniciada'),
+          '409': error('El correo ya esta registrado'),
+          '422': error('Datos invalidos'),
         },
       },
     },
@@ -100,98 +368,16 @@ export const openApiSpec = {
                 type: 'object',
                 required: ['email', 'password'],
                 properties: {
-                  email: { type: 'string', example: 'admin@hycon.com' },
-                  password: { type: 'string', example: 'Hycon2026' },
+                  email: { type: 'string', example: 'info@hycon.lat' },
+                  password: { type: 'string', example: '123456' },
                 },
               },
             },
           },
         },
         responses: {
-          '200': {
-            description: 'Sesion iniciada',
-            content: { 'application/json': { schema: sesionSchema } },
-          },
-          '401': respuestaError,
-        },
-      },
-    },
-    '/catalog/products': {
-      get: {
-        tags: ['Catalogo'],
-        summary: 'Lista los productos publicados',
-        responses: { '200': { description: 'Listado de productos' } },
-      },
-      post: {
-        tags: ['Catalogo'],
-        summary: 'Crea un producto (solo ADMIN)',
-        security: [{ bearerAuth: [] }],
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                required: ['name', 'price'],
-                properties: {
-                  name: { type: 'string', example: 'Caja de carton 40x40' },
-                  description: { type: 'string' },
-                  brand: { type: 'string', example: 'Hycon' },
-                  model: { type: 'string', example: 'C-40' },
-                  price: { type: 'number', example: 25.9 },
-                  discountPrice: { type: 'number', example: 19.9 },
-                  stock: { type: 'integer', example: 12 },
-                  status: { type: 'string', enum: ['active', 'inactive'] },
-                  imageUrl: { type: 'string', example: 'https://cdn.hycon.lat/caja.webp' },
-                },
-              },
-            },
-          },
-        },
-        responses: {
-          '201': { description: 'Producto creado' },
-          '401': respuestaError,
-          '403': respuestaError,
-          '422': respuestaError,
-        },
-      },
-    },
-    '/catalog/courses': {
-      get: {
-        tags: ['Catalogo'],
-        summary: 'Lista los cursos publicados',
-        responses: { '200': { description: 'Listado de cursos' } },
-      },
-      post: {
-        tags: ['Catalogo'],
-        summary: 'Crea un curso (solo ADMIN)',
-        security: [{ bearerAuth: [] }],
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                required: ['name', 'price'],
-                properties: {
-                  name: { type: 'string', example: 'Logistica de ultima milla' },
-                  description: { type: 'string' },
-                  videoUrl: { type: 'string', example: 'https://youtu.be/abc' },
-                  thumbnailUrl: { type: 'string' },
-                  durationMinutes: { type: 'integer', example: 90 },
-                  price: { type: 'number', example: 120 },
-                  discountPrice: { type: 'number', example: 99 },
-                  status: { type: 'string', enum: ['active', 'inactive'] },
-                },
-              },
-            },
-          },
-        },
-        responses: {
-          '201': { description: 'Curso creado' },
-          '401': respuestaError,
-          '403': respuestaError,
-          '422': respuestaError,
+          '200': sobre(ref('Sesion'), 'Sesion iniciada'),
+          '401': error('Credenciales incorrectas'),
         },
       },
     },
@@ -201,11 +387,67 @@ export const openApiSpec = {
         summary: 'Devuelve el usuario de la sesion activa',
         security: [{ bearerAuth: [] }],
         responses: {
-          '200': {
-            description: 'Usuario autenticado',
-            content: { 'application/json': { schema: usuarioSchema } },
+          '200': sobre({ type: 'object', properties: { usuario: ref('Usuario') } }, 'Usuario autenticado'),
+          '401': error('Falta el token o no es valido'),
+        },
+      },
+    },
+    '/catalog/shipping-agencies': {
+      get: {
+        tags: ['Catalogo'],
+        summary: 'Lista las agencias de envio disponibles',
+        description: 'Publico. Son los unicos codigos que acepta shippingAgencies al crear o editar un producto.',
+        responses: {
+          '200': sobre(
+            { type: 'object', properties: { agencias: { type: 'array', items: ref('AgenciaEnvio') } } },
+            'Agencias de envio'
+          ),
+        },
+      },
+    },
+    ...rutasCrud({
+      ruta: 'products',
+      entidad: 'producto',
+      plural: 'productos',
+      esquema: 'Producto',
+      claveUno: 'producto',
+      claveLista: 'productos',
+      conflicto: 'Si ya aparece en pedidos o carritos la base lo impide y se responde 409.',
+    }),
+    ...rutasCrud({
+      ruta: 'courses',
+      entidad: 'curso',
+      plural: 'cursos',
+      esquema: 'Curso',
+      claveUno: 'curso',
+      claveLista: 'cursos',
+      conflicto: 'Si ya tiene matriculas, pedidos o certificados se responde 409.',
+    }),
+    '/uploads/imagenes': {
+      post: {
+        tags: ['Archivos'],
+        summary: 'Sube una imagen (solo ADMIN)',
+        description:
+          'Acepta JPG, PNG, WEBP o GIF de hasta 5 MB. El formato se comprueba por la firma del archivo, no por la extension. Devuelve la URL publica para usarla como imageUrl o thumbnailUrl.',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                required: ['imagen'],
+                properties: { imagen: { type: 'string', format: 'binary' } },
+              },
+            },
           },
-          '401': respuestaError,
+        },
+        responses: {
+          '201': sobre({ type: 'object', properties: { imagen: ref('ImagenSubida') } }, 'Imagen guardada'),
+          '400': error('No se adjunto el archivo en el campo imagen'),
+          ...ERRORES_ADMIN,
+          '413': error('La imagen supera 5 MB'),
+          '415': error('El archivo no es una imagen permitida'),
         },
       },
     },

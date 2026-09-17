@@ -79,9 +79,12 @@ model Product {
   description   String?  @db.Text
   brand         String?  @db.VarChar(100)
   model         String?  @db.VarChar(100)
+  color         String?  @db.VarChar(50)
   price         Decimal  @db.Decimal(10, 2)
   discountPrice Decimal? @map("discount_price") @db.Decimal(10, 2)
   stock         Int      @default(0)
+  // Codigos de las agencias con las que se despacha: shalom, olva, marvisur...
+  shippingAgencies String[] @default([]) @map("shipping_agencies") @db.VarChar(30)
   status        String   @default("active") @db.VarChar(20)
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")

@@ -1,7 +1,9 @@
+import { resolverAgencias } from './catalog.constants';
 import type {
   CursoBase,
   CursoPublico,
   DecimalCompatible,
+  Paginacion,
   ProductoBase,
   ProductoPublico,
 } from './catalog.types';
@@ -20,9 +22,11 @@ export const aProductoPublico = (producto: ProductoBase): ProductoPublico => {
     description: producto.description,
     brand: producto.brand,
     model: producto.model,
+    color: producto.color,
     price: aNumero(producto.price) as number,
     discountPrice: aNumero(producto.discountPrice),
     stock: producto.stock,
+    shippingAgencies: resolverAgencias(producto.shippingAgencies ?? []),
     status: producto.status,
     imageUrl: principal ? principal.imageUrl : null,
     createdAt: producto.createdAt.toISOString(),
@@ -40,4 +44,12 @@ export const aCursoPublico = (curso: CursoBase): CursoPublico => ({
   discountPrice: aNumero(curso.discountPrice),
   status: curso.status,
   createdAt: curso.createdAt.toISOString(),
+});
+
+export const aPaginacion = (pagina: number, porPagina: number, total: number): Paginacion => ({
+  pagina,
+  porPagina,
+  total,
+  // Aunque no haya filas se informa una pagina, para que el paginador no muestre "de 0"
+  totalPaginas: Math.max(1, Math.ceil(total / porPagina)),
 });

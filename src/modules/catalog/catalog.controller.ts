@@ -1,8 +1,9 @@
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction, RequestHandler } from 'express';
 import { AppError } from '../../core/errors/AppError';
 import { catalogService } from './catalog.service';
-import { listadoQuerySchema } from './catalog.schema';
-import type { CrearCursoInput, CrearProductoInput } from './catalog.schema';
+import { AGENCIAS_ENVIO } from './catalog.constants';
+import { idSchema, listadoQuerySchema } from './catalog.schema';
+import type { CursoInput, ProductoInput } from './catalog.schema';
 
 // El propietario del registro es siempre el usuario autenticado, nunca el body
 const obtenerOwnerId = (req: Request): number => {
@@ -12,47 +13,77 @@ const obtenerOwnerId = (req: Request): number => {
   return req.usuario.userId;
 };
 
-// Un estado invalido en la URL no rompe la peticion: se ignora y se usa el valor por defecto
-const leerEstado = (req: Request) => listadoQuerySchema.catch({ estado: 'active' }).parse(req.query).estado;
+// Los parametros invalidos de la URL no rompen la peticion: caen a su valor por defecto
+const leerListado = (req: Request) => listadoQuerySchema.parse(req.query);
 
-export const listarProductos = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const productos = await catalogService.listarProductos(leerEstado(req));
-    res.status(200).json({ success: true, data: { productos } });
-  } catch (error) {
-    next(error);
+const leerId = (req: Request): number => {
+  const resultado = idSchema.safeParse(req.params.id);
+  if (!resultado.success) {
+    throw new AppError('El identificador debe ser un numero entero positivo', 400);
   }
+  return resultado.data;
 };
 
-export const crearProducto = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const producto = await catalogService.crearProducto(
-      req.body as CrearProductoInput,
-      obtenerOwnerId(req)
-    );
-    res.status(201).json({ success: true, data: { producto } });
-  } catch (error) {
-    next(error);
-  }
-};
+// Envoltorio para no repetir try/catch en cada controlador
+const manejar =
+  (accion: (req: Request, res: Response) => Promise<void>): RequestHandler =>
+  (req: Request, res: Response, next: NextFunction) => {
+    accion(req, res).catch(next);
+  };
 
-export const listarCursos = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const cursos = await catalogService.listarCursos(leerEstado(req));
-    res.status(200).json({ success: true, data: { cursos } });
-  } catch (error) {
-    next(error);
-  }
-};
+export const listarAgencias = manejar(async (_req, res) => {
+  res.status(200).json({ success: true, data: { agencias: AGENCIAS_ENVIO } });
+});
 
-export const crearCurso = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const curso = await catalogService.crearCurso(
-      req.body as CrearCursoInput,
-      obtenerOwnerId(req)
-    );
-    res.status(201).json({ success: true, data: { curso } });
-  } catch (error) {
-    next(error);
-  }
-};
+export const listarProductos = manejar(async (req, res) => {
+  const { elementos, paginacion } = await catalogService.listarProductos(leerListado(req));
+  res.status(200).json({ success: true, data: { productos: elementos, paginacion } });
+});
+
+export const obtenerProducto = manejar(async (req, res) => {
+  const producto = await catalogService.obtenerProducto(leerId(req));
+  res.status(200).json({ success: true, data: { producto } });
+});
+
+export const crearProducto = manejar(async (req, res) => {
+  const producto = await catalogService.crearProducto(
+    req.body as ProductoInput,
+    obtenerOwnerId(req)
+  );
+  res.status(201).json({ success: true, data: { producto } });
+});
+
+export const actualizarProducto = manejar(async (req, res) => {
+  const producto = await catalogService.actualizarProducto(leerId(req), req.body as ProductoInput);
+  res.status(200).json({ success: true, data: { producto } });
+});
+
+export const eliminarProducto = manejar(async (req, res) => {
+  await catalogService.eliminarProducto(leerId(req));
+  res.status(204).end();
+});
+
+export const listarCursos = manejar(async (req, res) => {
+  const { elementos, paginacion } = await catalogService.listarCursos(leerListado(req));
+  res.status(200).json({ success: true, data: { cursos: elementos, paginacion } });
+});
+
+export const obtenerCurso = manejar(async (req, res) => {
+  const curso = await catalogService.obtenerCurso(leerId(req));
+  res.status(200).json({ success: true, data: { curso } });
+});
+
+export const crearCurso = manejar(async (req, res) => {
+  const curso = await catalogService.crearCurso(req.body as CursoInput, obtenerOwnerId(req));
+  res.status(201).json({ success: true, data: { curso } });
+});
+
+export const actualizarCurso = manejar(async (req, res) => {
+  const curso = await catalogService.actualizarCurso(leerId(req), req.body as CursoInput);
+  res.status(200).json({ success: true, data: { curso } });
+});
+
+export const eliminarCurso = manejar(async (req, res) => {
+  await catalogService.eliminarCurso(leerId(req));
+  res.status(204).end();
+});
