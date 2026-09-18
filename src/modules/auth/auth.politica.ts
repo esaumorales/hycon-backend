@@ -67,8 +67,8 @@ export const evaluarPassword = (password: string, datos: DatosPersonales = {}): 
     return 'Esta contrasena es muy comun o facil de adivinar. Elige otra';
   }
 
-  const compacta = limpia.replace(/[\s._\-]/g, '');
-  if (fragmentosPersonales(datos).some((fragmento) => compacta.includes(fragmento.replace(/[\s._\-]/g, '')))) {
+  const compacta = limpia.replace(/[\s._-]/g, '');
+  if (fragmentosPersonales(datos).some((fragmento) => compacta.includes(fragmento.replace(/[\s._-]/g, '')))) {
     return 'La contrasena no debe contener tu nombre ni tu correo';
   }
 
