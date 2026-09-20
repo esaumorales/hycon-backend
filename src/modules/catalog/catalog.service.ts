@@ -1,8 +1,8 @@
 import { prisma } from '../../core/database/prisma';
 import { AppError } from '../../core/errors/AppError';
-import { aCursoPublico, aProductoPublico } from './catalog.mapper';
+import { aCursoPublico, aProductoDetallePublico, aProductoPublico } from './catalog.mapper';
 import type { CrearCursoInput, CrearProductoInput, ListadoQuery } from './catalog.schema';
-import type { CursoBase, CursoPublico, ProductoBase, ProductoPublico } from './catalog.types';
+import type { CursoBase, CursoPublico, ProductoBase, ProductoDetallePublico, ProductoPublico } from './catalog.types';
 
 // Tope de seguridad: el panel no pagina, pero tampoco se traen filas sin limite
 export const LIMITE_LISTADO = 200;
@@ -15,8 +15,10 @@ const filtroEstado = (estado: EstadoListado) =>
 
 export interface DependenciasCatalogo {
   listarProductos(limite: number, estado: EstadoListado): Promise<ProductoBase[]>;
+  obtenerProducto(productId: number): Promise<ProductoBase | null>;
   crearProducto(datos: CrearProductoInput & { ownerId: number }): Promise<ProductoBase>;
   listarCursos(limite: number, estado: EstadoListado): Promise<CursoBase[]>;
+  obtenerCurso(courseId: number): Promise<CursoBase | null>;
   crearCurso(datos: CrearCursoInput & { ownerId: number }): Promise<CursoBase>;
 }
 
@@ -58,6 +60,12 @@ export const dependenciasReales: DependenciasCatalogo = {
       take: limite,
     }) as unknown as Promise<ProductoBase[]>,
 
+  obtenerProducto: (productId) =>
+    prisma.product.findFirst({
+      where: { productId, status: 'active' },
+      select: seleccionProducto,
+    }) as unknown as Promise<ProductoBase | null>,
+
   crearProducto: ({ imageUrl, ...datos }) =>
     prisma.product.create({
       data: {
@@ -78,6 +86,12 @@ export const dependenciasReales: DependenciasCatalogo = {
       take: limite,
     }) as unknown as Promise<CursoBase[]>,
 
+  obtenerCurso: (courseId) =>
+    prisma.course.findFirst({
+      where: { courseId, status: 'active' },
+      select: seleccionCurso,
+    }) as unknown as Promise<CursoBase | null>,
+
   crearCurso: (datos) =>
     prisma.course.create({
       data: datos,
@@ -91,6 +105,12 @@ export const crearServicioCatalogo = (deps: DependenciasCatalogo) => ({
     return productos.map(aProductoPublico);
   },
 
+  async obtenerProducto(productId: number): Promise<ProductoDetallePublico> {
+    const producto = await deps.obtenerProducto(productId);
+    if (!producto) throw new AppError('Producto no encontrado', 404);
+    return aProductoDetallePublico(producto);
+  },
+
   async crearProducto(datos: CrearProductoInput, ownerId: number): Promise<ProductoPublico> {
     if (!ownerId) {
       throw new AppError('No se pudo identificar al usuario que crea el producto', 401);
@@ -102,6 +122,12 @@ export const crearServicioCatalogo = (deps: DependenciasCatalogo) => ({
   async listarCursos(estado: EstadoListado = 'active'): Promise<CursoPublico[]> {
     const cursos = await deps.listarCursos(LIMITE_LISTADO, estado);
     return cursos.map(aCursoPublico);
+  },
+
+  async obtenerCurso(courseId: number): Promise<CursoPublico> {
+    const curso = await deps.obtenerCurso(courseId);
+    if (!curso) throw new AppError('Curso no encontrado', 404);
+    return aCursoPublico(curso);
   },
 
   async crearCurso(datos: CrearCursoInput, ownerId: number): Promise<CursoPublico> {

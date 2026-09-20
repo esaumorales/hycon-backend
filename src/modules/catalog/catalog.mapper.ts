@@ -3,6 +3,7 @@ import type {
   CursoPublico,
   DecimalCompatible,
   ProductoBase,
+  ProductoDetallePublico,
   ProductoPublico,
 } from './catalog.types';
 
@@ -26,6 +27,16 @@ export const aProductoPublico = (producto: ProductoBase): ProductoPublico => {
     status: producto.status,
     imageUrl: principal ? principal.imageUrl : null,
     createdAt: producto.createdAt.toISOString(),
+  };
+};
+
+export const aProductoDetallePublico = (producto: ProductoBase): ProductoDetallePublico => {
+  const publico = aProductoPublico(producto);
+  return {
+    ...publico,
+    imageUrls: publico.imageUrl
+      ? [publico.imageUrl, ...producto.images.filter((imagen) => imagen.imageUrl !== publico.imageUrl).map((imagen) => imagen.imageUrl)]
+      : [],
   };
 };
 

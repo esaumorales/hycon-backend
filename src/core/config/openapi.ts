@@ -156,6 +156,25 @@ export const openApiSpec = {
         },
       },
     },
+    '/catalog/products/{productId}': {
+      get: {
+        tags: ['Catalogo'],
+        summary: 'Obtiene el detalle de un producto publicado',
+        parameters: [
+          {
+            name: 'productId',
+            in: 'path',
+            required: true,
+            schema: { type: 'integer', minimum: 1 },
+          },
+        ],
+        responses: {
+          '200': { description: 'Detalle del producto, incluidas sus imagenes' },
+          '400': respuestaError,
+          '404': respuestaError,
+        },
+      },
+    },
     '/catalog/courses': {
       get: {
         tags: ['Catalogo'],
@@ -192,6 +211,23 @@ export const openApiSpec = {
           '401': respuestaError,
           '403': respuestaError,
           '422': respuestaError,
+        },
+      },
+    },
+    '/catalog/courses/{courseId}': {
+      get: {
+        tags: ['Catalogo'],
+        summary: 'Obtiene el detalle de un curso publicado',
+        parameters: [{
+          name: 'courseId',
+          in: 'path',
+          required: true,
+          schema: { type: 'integer', minimum: 1 },
+        }],
+        responses: {
+          '200': { description: 'Datos, portada y avance del curso' },
+          '400': respuestaError,
+          '404': respuestaError,
         },
       },
     },

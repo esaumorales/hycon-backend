@@ -24,6 +24,19 @@ export const listarProductos = async (req: Request, res: Response, next: NextFun
   }
 };
 
+export const obtenerProducto = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const productId = Number(req.params.productId);
+    if (!Number.isSafeInteger(productId) || productId < 1) {
+      throw new AppError('Identificador de producto invalido', 400);
+    }
+    const producto = await catalogService.obtenerProducto(productId);
+    res.status(200).json({ success: true, data: { producto } });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const crearProducto = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const producto = await catalogService.crearProducto(
@@ -40,6 +53,19 @@ export const listarCursos = async (req: Request, res: Response, next: NextFuncti
   try {
     const cursos = await catalogService.listarCursos(leerEstado(req));
     res.status(200).json({ success: true, data: { cursos } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const obtenerCurso = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const courseId = Number(req.params.courseId);
+    if (!Number.isSafeInteger(courseId) || courseId < 1) {
+      throw new AppError('Identificador de curso invalido', 400);
+    }
+    const curso = await catalogService.obtenerCurso(courseId);
+    res.status(200).json({ success: true, data: { curso } });
   } catch (error) {
     next(error);
   }

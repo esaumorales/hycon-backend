@@ -9,6 +9,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "seed": "tsx prisma/seed.ts",
+    "seed:catalog": "tsx prisma/seed-catalog-demo.ts",
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate"
   },

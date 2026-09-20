@@ -37,10 +37,33 @@ const cursoEnBase: CursoBase = {
 
 const crearDeps = (sobrescribir: Partial<DependenciasCatalogo> = {}): DependenciasCatalogo => ({
   listarProductos: vi.fn().mockResolvedValue([productoEnBase]),
+  obtenerProducto: vi.fn().mockResolvedValue(productoEnBase),
   crearProducto: vi.fn().mockResolvedValue(productoEnBase),
   listarCursos: vi.fn().mockResolvedValue([cursoEnBase]),
+  obtenerCurso: vi.fn().mockResolvedValue(cursoEnBase),
   crearCurso: vi.fn().mockResolvedValue(cursoEnBase),
   ...sobrescribir,
+});
+
+describe('catalogService.obtenerProducto', () => {
+  it('devuelve los datos y las imagenes del producto', async () => {
+    const servicio = crearServicioCatalogo(crearDeps());
+
+    const producto = await servicio.obtenerProducto(1);
+
+    expect(producto.name).toBe('Caja de carton');
+    expect(producto.imageUrls).toHaveLength(2);
+    expect(producto.imageUrl).toBe('https://cdn.hycon.lat/principal.webp');
+    expect(producto.imageUrls[0]).toBe(producto.imageUrl);
+  });
+
+  it('responde 404 si el producto no esta publicado o no existe', async () => {
+    const servicio = crearServicioCatalogo(
+      crearDeps({ obtenerProducto: vi.fn().mockResolvedValue(null) })
+    );
+
+    await expect(servicio.obtenerProducto(9)).rejects.toMatchObject({ statusCode: 404 });
+  });
 });
 
 describe('catalogService.listarProductos', () => {
@@ -162,6 +185,20 @@ describe('catalogService.crearProducto', () => {
 });
 
 describe('catalogService de cursos', () => {
+  it('obtiene un curso por ID y devuelve solo sus datos publicos', async () => {
+    const deps = crearDeps();
+    const curso = await crearServicioCatalogo(deps).obtenerCurso(1);
+
+    expect(deps.obtenerCurso).toHaveBeenCalledWith(1);
+    expect(curso).toMatchObject({ courseId: 1, price: 120, durationMinutes: 90 });
+    expect(curso).not.toHaveProperty('ownerId');
+  });
+
+  it('responde 404 cuando el curso no existe o no esta publicado', async () => {
+    const deps = crearDeps({ obtenerCurso: vi.fn().mockResolvedValue(null) });
+    await expect(crearServicioCatalogo(deps).obtenerCurso(99)).rejects.toMatchObject({ statusCode: 404 });
+  });
+
   it('convierte los precios y conserva la duracion', async () => {
     const servicio = crearServicioCatalogo(crearDeps());
 

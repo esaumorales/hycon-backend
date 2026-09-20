@@ -47,6 +47,10 @@ export interface ProductoPublico {
   createdAt: string;
 }
 
+export interface ProductoDetallePublico extends ProductoPublico {
+  imageUrls: string[];
+}
+
 export interface CursoPublico {
   courseId: number;
   name: string;
