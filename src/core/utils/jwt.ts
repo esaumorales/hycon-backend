@@ -1,5 +1,5 @@
+import { randomUUID } from 'crypto';
 import jwt from 'jsonwebtoken';
-import type { SignOptions } from 'jsonwebtoken';
 import { env } from '../config/env';
 import { AppError } from '../errors/AppError';
 
@@ -11,14 +11,30 @@ export interface TokenPayload {
   rol: string;
 }
 
-export const firmarToken = (payload: TokenPayload): string => {
-  const opciones = { expiresIn: env.JWT_EXPIRES_IN } as SignOptions;
-  return jwt.sign(payload, env.JWT_SECRET, opciones);
-};
+// Emisor y destinatario fijos: un token firmado para otro sistema con el mismo secreto no sirve aqui
+const EMISOR = 'hycon-api';
+const AUDIENCIA = 'hycon-app';
+const ALGORITMO = 'HS256';
+
+export const firmarToken = (payload: TokenPayload): string =>
+  jwt.sign({ userId: payload.userId, email: payload.email, rol: payload.rol }, env.JWT_SECRET, {
+    algorithm: ALGORITMO,
+    expiresIn: env.ACCESS_TOKEN_MINUTOS * 60,
+    issuer: EMISOR,
+    audience: AUDIENCIA,
+    // Identificador unico: dos tokens emitidos en el mismo segundo nunca son iguales
+    jwtid: randomUUID(),
+  });
 
 export const verificarToken = (token: string): TokenPayload => {
   try {
-    return jwt.verify(token, env.JWT_SECRET) as TokenPayload;
+    // El algoritmo se fija: evita ataques que cambian el "alg" de la cabecera
+    const datos = jwt.verify(token, env.JWT_SECRET, {
+      algorithms: [ALGORITMO],
+      issuer: EMISOR,
+      audience: AUDIENCIA,
+    }) as jwt.JwtPayload & TokenPayload;
+    return { userId: datos.userId, email: datos.email, rol: datos.rol };
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
       throw new AppError('La sesion expiro, vuelve a iniciar sesion', 401);

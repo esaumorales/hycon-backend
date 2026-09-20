@@ -83,6 +83,11 @@ export type CourseProgress = Prisma.CourseProgressModel
  */
 export type Certificate = Prisma.CertificateModel
 /**
+ * Model Post
+ * 
+ */
+export type Post = Prisma.PostModel
+/**
  * Model Company
  * 
  */
@@ -102,3 +107,13 @@ export type FormSubmission = Prisma.FormSubmissionModel
  * 
  */
 export type FormAnswer = Prisma.FormAnswerModel
+/**
+ * Model Session
+ * 
+ */
+export type Session = Prisma.SessionModel
+/**
+ * Model AuthEvent
+ * 
+ */
+export type AuthEvent = Prisma.AuthEventModel

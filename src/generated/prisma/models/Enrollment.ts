@@ -562,10 +562,6 @@ export type EnrollmentUncheckedUpdateManyWithoutOrderNestedInput = {
   deleteMany?: Prisma.EnrollmentScalarWhereInput | Prisma.EnrollmentScalarWhereInput[]
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type EnrollmentCreateNestedOneWithoutProgressInput = {
   create?: Prisma.XOR<Prisma.EnrollmentCreateWithoutProgressInput, Prisma.EnrollmentUncheckedCreateWithoutProgressInput>
   connectOrCreate?: Prisma.EnrollmentCreateOrConnectWithoutProgressInput

@@ -1,11 +1,13 @@
 import express, { Application } from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { env } from './core/config/env';
 
 // Import Middlewares
 import { errorHandler } from './core/middlewares/error.middleware';
+import { AppError } from './core/errors/AppError';
 
 // Import OpenAPI Spec and Scalar
 import { apiReference } from '@scalar/express-api-reference';
@@ -19,8 +21,17 @@ import { orderRoutes } from './modules/orders/orders.routes';
 import { paymentRoutes } from './modules/payments/payments.routes';
 import { lmsRoutes } from './modules/lms/lms.routes';
 import { ergoRoutes } from './modules/ergo/ergo.routes';
+import { uploadRoutes } from './modules/uploads/uploads.routes';
+import { postsRoutes } from './modules/posts/posts.routes';
+import { RUTA_PUBLICA_UPLOADS } from './modules/uploads/uploads.service';
 
 const app: Application = express();
+
+// Detras de un proxy (Nginx, balanceador) la IP real llega en X-Forwarded-For.
+// Solo se confia en el numero de saltos configurado, para que nadie la falsifique.
+app.set('trust proxy', env.TRUST_PROXY);
+// No anunciar que el servidor es Express
+app.disable('x-powered-by');
 
 // Security Middlewares
 app.use(
@@ -45,7 +56,7 @@ app.use(
       if (!origen || env.CORS_ORIGINS.includes(origen)) {
         return callback(null, true);
       }
-      return callback(new Error(`Origen no permitido por CORS: ${origen}`));
+      return callback(new AppError('Origen no permitido', 403));
     },
     credentials: true,
   })
@@ -55,7 +66,9 @@ app.use(
 app.use(morgan('dev'));
 
 // Body Parser Middleware
-app.use(express.json());
+// Limite de tamano: un cuerpo gigante no debe poder agotar la memoria
+app.use(express.json({ limit: '1mb' }));
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 // API Routes Registration
@@ -76,8 +89,22 @@ app.get('/health', (_req, res) => {
   res.status(200).json({ success: true, estado: 'ok', entorno: env.NODE_ENV });
 });
 
+// Imagenes subidas desde el panel. Helmet marca por defecto los recursos como
+// same-origin, y el frontend vive en otro puerto: sin esta cabecera el navegador
+// descargaria la imagen pero se negaria a pintarla.
+app.use(
+  RUTA_PUBLICA_UPLOADS,
+  (_req, res, next) => {
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    next();
+  },
+  express.static(env.UPLOADS_DIR, { index: false, maxAge: '7d' })
+);
+
 app.use(`${API_PREFIX}/auth`, authRoutes);
+app.use(`${API_PREFIX}/uploads`, uploadRoutes);
 app.use(`${API_PREFIX}/catalog`, catalogRoutes);
+app.use(`${API_PREFIX}/posts`, postsRoutes);
 app.use(`${API_PREFIX}/cart`, cartRoutes);
 app.use(`${API_PREFIX}/orders`, orderRoutes);
 app.use(`${API_PREFIX}/payments`, paymentRoutes);
