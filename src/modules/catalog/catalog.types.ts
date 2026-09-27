@@ -5,6 +5,7 @@ export interface DecimalCompatible {
 
 export interface ProductoBase {
   productId: number;
+  uuid: string;
   ownerId: number;
   name: string;
   description: string | null;
@@ -22,6 +23,7 @@ export interface ProductoBase {
 
 export interface CursoBase {
   courseId: number;
+  uuid: string;
   ownerId: number;
   name: string;
   description: string | null;
@@ -39,9 +41,10 @@ export interface AgenciaEnvio {
   name: string;
 }
 
-// Forma que se expone por la API: precios ya convertidos a number
+// Forma que se expone por la API: precios ya convertidos a number y el uuid
+// como unico identificador (el correlativo no sale de la base)
 export interface ProductoPublico {
-  productId: number;
+  uuid: string;
   name: string;
   description: string | null;
   brand: string | null;
@@ -57,7 +60,7 @@ export interface ProductoPublico {
 }
 
 export interface CursoPublico {
-  courseId: number;
+  uuid: string;
   name: string;
   description: string | null;
   videoUrl: string | null;

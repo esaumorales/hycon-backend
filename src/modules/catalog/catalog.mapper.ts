@@ -18,7 +18,7 @@ export const aProductoPublico = (producto: ProductoBase): ProductoPublico => {
     producto.images.find((imagen) => imagen.isThumbnail) ?? producto.images[0] ?? null;
 
   return {
-    productId: producto.productId,
+    uuid: producto.uuid,
     name: producto.name,
     description: producto.description,
     brand: producto.brand,
@@ -35,7 +35,7 @@ export const aProductoPublico = (producto: ProductoBase): ProductoPublico => {
 };
 
 export const aCursoPublico = (curso: CursoBase): CursoPublico => ({
-  courseId: curso.courseId,
+  uuid: curso.uuid,
   name: curso.name,
   description: curso.description,
   videoUrl: curso.videoUrl,

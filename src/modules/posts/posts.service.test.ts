@@ -1,10 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
 import { crearServicioPublicaciones, type DependenciasPublicaciones } from './posts.service';
+const UUID = '3f1d9d6a-2c47-4f0a-9d4b-6f0c3b8a1e22';
+const UUID_AJENO = '00000000-0000-4000-8000-000000000999';
+
 import type { PublicacionBase } from './posts.types';
 import type { PublicacionInput } from './posts.schema';
 
 const guardada: PublicacionBase = {
   postId: 7,
+  uuid: UUID,
   authorId: 1,
   title: 'Pausas activas en la oficina',
   slug: 'pausas-activas-en-la-oficina',
@@ -27,6 +31,8 @@ const datos: PublicacionInput = {
 const crearDeps = (sobrescribir: Partial<DependenciasPublicaciones> = {}): DependenciasPublicaciones => ({
   listar: vi.fn().mockResolvedValue({ filas: [guardada], total: 13 }),
   obtener: vi.fn().mockResolvedValue(guardada),
+  obtenerPorSlug: vi.fn().mockResolvedValue(guardada),
+  sumarLectura: vi.fn().mockResolvedValue(undefined),
   slugsParecidos: vi.fn().mockResolvedValue([]),
   crear: vi.fn().mockResolvedValue(guardada),
   actualizar: vi.fn().mockResolvedValue({ tipo: 'actualizado', registro: guardada, imagenesAnteriores: [] }),
@@ -36,13 +42,22 @@ const crearDeps = (sobrescribir: Partial<DependenciasPublicaciones> = {}): Depen
 });
 
 describe('postsService.listar', () => {
+  it('pasa al listado el orden pedido', async () => {
+    const deps = crearDeps();
+    const servicio = crearServicioPublicaciones(deps);
+
+    await servicio.listar({ estado: 'active', pagina: 1, porPagina: 3, orden: 'leidos' });
+
+    expect(deps.listar).toHaveBeenCalledWith({ estado: 'active', orden: 'leidos', saltar: 0, tomar: 3 });
+  });
+
   it('pagina y expone tiempo de lectura, lecturas y autor', async () => {
     const deps = crearDeps();
     const servicio = crearServicioPublicaciones(deps);
 
-    const { elementos, paginacion } = await servicio.listar({ estado: 'todos', pagina: 2, porPagina: 6 });
+    const { elementos, paginacion } = await servicio.listar({ estado: 'todos', pagina: 2, porPagina: 6, orden: 'recientes' });
 
-    expect(deps.listar).toHaveBeenCalledWith({ estado: 'todos', saltar: 6, tomar: 6 });
+    expect(deps.listar).toHaveBeenCalledWith({ estado: 'todos', orden: 'recientes', saltar: 6, tomar: 6 });
     expect(paginacion).toEqual({ pagina: 2, porPagina: 6, total: 13, totalPaginas: 3 });
     expect(elementos[0]).toMatchObject({
       readingMinutes: 3,
@@ -51,6 +66,50 @@ describe('postsService.listar', () => {
       publishedAt: '2026-03-01T12:00:00.000Z',
     });
     expect(elementos[0]).not.toHaveProperty('authorId');
+  });
+});
+
+describe('postsService.obtener', () => {
+  it('por slug devuelve el articulo y suma una lectura', async () => {
+    const deps = crearDeps();
+    const servicio = crearServicioPublicaciones(deps);
+
+    const publicacion = await servicio.obtener({ slug: 'pausas-activas-en-la-oficina' }, { registrarLectura: true });
+
+    expect(deps.obtenerPorSlug).toHaveBeenCalledWith('pausas-activas-en-la-oficina');
+    expect(deps.sumarLectura).toHaveBeenCalledWith(7);
+    // El contador que se devuelve ya incluye esta lectura
+    expect(publicacion.views).toBe(121);
+  });
+
+  it('por uuid no suma lecturas: es la vista del panel', async () => {
+    const deps = crearDeps();
+    const servicio = crearServicioPublicaciones(deps);
+
+    await servicio.obtener({ uuid: UUID });
+
+    expect(deps.obtener).toHaveBeenCalledWith(UUID);
+    expect(deps.sumarLectura).not.toHaveBeenCalled();
+  });
+
+  it('un borrador no suma lecturas aunque se pida', async () => {
+    const deps = crearDeps({
+      obtenerPorSlug: vi.fn().mockResolvedValue({ ...guardada, status: 'inactive' }),
+    });
+    const servicio = crearServicioPublicaciones(deps);
+
+    await servicio.obtener({ slug: 'borrador' }, { registrarLectura: true });
+
+    expect(deps.sumarLectura).not.toHaveBeenCalled();
+  });
+
+  it('si falla el contador el articulo se lee igual', async () => {
+    const deps = crearDeps({ sumarLectura: vi.fn().mockRejectedValue(new Error('base caida')) });
+    const servicio = crearServicioPublicaciones(deps);
+
+    await expect(
+      servicio.obtener({ slug: 'slug' }, { registrarLectura: true })
+    ).resolves.toMatchObject({ uuid: UUID });
   });
 });
 
@@ -111,11 +170,11 @@ describe('postsService.actualizar', () => {
     const deps = crearDeps();
     const servicio = crearServicioPublicaciones(deps);
 
-    await servicio.actualizar(7, datos);
+    await servicio.actualizar(UUID, datos);
 
     expect(deps.slugsParecidos).not.toHaveBeenCalled();
     expect(deps.actualizar).toHaveBeenCalledWith(
-      7,
+      UUID,
       expect.objectContaining({ slug: 'pausas-activas-en-la-oficina' })
     );
   });
@@ -124,10 +183,10 @@ describe('postsService.actualizar', () => {
     const deps = crearDeps();
     const servicio = crearServicioPublicaciones(deps);
 
-    await servicio.actualizar(7, { ...datos, title: 'Nuevo título' });
+    await servicio.actualizar(UUID, { ...datos, title: 'Nuevo título' });
 
-    expect(deps.slugsParecidos).toHaveBeenCalledWith('nuevo-titulo', 7);
-    expect(deps.actualizar).toHaveBeenCalledWith(7, expect.objectContaining({ slug: 'nuevo-titulo' }));
+    expect(deps.slugsParecidos).toHaveBeenCalledWith('nuevo-titulo', UUID);
+    expect(deps.actualizar).toHaveBeenCalledWith(UUID, expect.objectContaining({ slug: 'nuevo-titulo' }));
   });
 
   it('borra la portada reemplazada pero no la que se conserva', async () => {
@@ -141,16 +200,16 @@ describe('postsService.actualizar', () => {
     });
     const servicio = crearServicioPublicaciones(deps);
 
-    await servicio.actualizar(7, { ...datos, coverUrl: vieja });
+    await servicio.actualizar(UUID, { ...datos, coverUrl: vieja });
     expect(deps.eliminarImagen).not.toHaveBeenCalled();
 
-    await servicio.actualizar(7, { ...datos, coverUrl: 'http://localhost:4000/uploads/imagenes/nueva.png' });
+    await servicio.actualizar(UUID, { ...datos, coverUrl: 'http://localhost:4000/uploads/imagenes/nueva.png' });
     expect(deps.eliminarImagen).toHaveBeenCalledWith(vieja);
   });
 
   it('responde 404 si no existe', async () => {
     const servicio = crearServicioPublicaciones(crearDeps({ obtener: vi.fn().mockResolvedValue(null) }));
-    await expect(servicio.actualizar(99, datos)).rejects.toMatchObject({ statusCode: 404 });
+    await expect(servicio.actualizar(UUID_AJENO, datos)).rejects.toMatchObject({ statusCode: 404 });
   });
 });
 
@@ -161,7 +220,7 @@ describe('postsService.eliminar y obtener', () => {
     });
     const servicio = crearServicioPublicaciones(deps);
 
-    await servicio.eliminar(7);
+    await servicio.eliminar(UUID);
 
     expect(deps.eliminarImagen).toHaveBeenCalledWith(guardada.coverUrl);
   });
@@ -174,7 +233,7 @@ describe('postsService.eliminar y obtener', () => {
       })
     );
 
-    await expect(servicio.eliminar(99)).rejects.toMatchObject({ statusCode: 404 });
-    await expect(servicio.obtener(99)).rejects.toMatchObject({ statusCode: 404 });
+    await expect(servicio.eliminar(UUID_AJENO)).rejects.toMatchObject({ statusCode: 404 });
+    await expect(servicio.obtener({ uuid: UUID_AJENO })).rejects.toMatchObject({ statusCode: 404 });
   });
 });

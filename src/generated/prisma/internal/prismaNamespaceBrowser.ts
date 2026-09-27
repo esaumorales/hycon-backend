@@ -119,6 +119,7 @@ export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof User
 
 export const CourseScalarFieldEnum = {
   courseId: 'courseId',
+  uuid: 'uuid',
   ownerId: 'ownerId',
   name: 'name',
   description: 'description',
@@ -137,6 +138,7 @@ export type CourseScalarFieldEnum = (typeof CourseScalarFieldEnum)[keyof typeof 
 
 export const ProductScalarFieldEnum = {
   productId: 'productId',
+  uuid: 'uuid',
   ownerId: 'ownerId',
   name: 'name',
   description: 'description',
@@ -268,6 +270,7 @@ export type CertificateScalarFieldEnum = (typeof CertificateScalarFieldEnum)[key
 
 export const PostScalarFieldEnum = {
   postId: 'postId',
+  uuid: 'uuid',
   authorId: 'authorId',
   title: 'title',
   slug: 'slug',

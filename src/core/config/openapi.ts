@@ -33,12 +33,13 @@ const ERRORES_ADMIN = {
   '403': error('La cuenta no tiene rol ADMIN'),
 };
 
-const parametroId = (entidad: string) => ({
-  name: 'id',
+// El catalogo se direcciona por uuid: el correlativo no sale de la base
+const parametroUuid = (entidad: string) => ({
+  name: 'uuid',
   in: 'path',
   required: true,
-  description: `Identificador del ${entidad}`,
-  schema: { type: 'integer', minimum: 1, example: 1 },
+  description: `Identificador publico del ${entidad}`,
+  schema: { type: 'string', format: 'uuid', example: '7b73989c-0719-4c06-bd1e-8c7ae193a432' },
 });
 
 const PARAMETROS_LISTADO = [
@@ -131,7 +132,12 @@ const schemas = {
   Producto: {
     type: 'object',
     properties: {
-      productId: { type: 'integer', example: 1 },
+      uuid: {
+        type: 'string',
+        format: 'uuid',
+        description: 'Identificador publico del producto: es el que se usa en las URLs',
+        example: '7b73989c-0719-4c06-bd1e-8c7ae193a432',
+      },
       name: { type: 'string', example: 'Silla ergonomica Pro' },
       description: { type: 'string', nullable: true },
       brand: { type: 'string', nullable: true, example: 'Hycon' },
@@ -184,7 +190,12 @@ const schemas = {
   Curso: {
     type: 'object',
     properties: {
-      courseId: { type: 'integer', example: 1 },
+      uuid: {
+        type: 'string',
+        format: 'uuid',
+        description: 'Identificador publico del curso: es el que se usa en las URLs',
+        example: 'b7b299d8-ee8f-4bea-a618-0a5f8261136f',
+      },
       name: { type: 'string', example: 'Pausas activas en oficina' },
       description: { type: 'string', nullable: true },
       videoUrl: { type: 'string', nullable: true, example: 'https://youtu.be/dQw4w9WgXcQ' },
@@ -231,7 +242,12 @@ const schemas = {
   Publicacion: {
     type: 'object',
     properties: {
-      postId: { type: 'integer', example: 1 },
+      uuid: {
+        type: 'string',
+        format: 'uuid',
+        description: 'Identificador publico del articulo: lo usa el panel para editar y eliminar',
+        example: '3f1d9d6a-2c47-4f0a-9d4b-6f0c3b8a1e22',
+      },
       title: { type: 'string', example: 'Pausas activas en la oficina' },
       slug: {
         type: 'string',
@@ -335,17 +351,17 @@ const rutasCrud = (opciones: {
       },
     },
   },
-  [`/catalog/${opciones.ruta}/{id}`]: {
+  [`/catalog/${opciones.ruta}/{uuid}`]: {
     get: {
       tags: ['Catalogo'],
       summary: `Obtiene un ${opciones.entidad}`,
-      parameters: [parametroId(opciones.entidad)],
+      parameters: [parametroUuid(opciones.entidad)],
       responses: {
         '200': sobre(
           { type: 'object', properties: { [opciones.claveUno]: ref(opciones.esquema) } },
           `${opciones.entidad} encontrado`
         ),
-        '400': error('El id no es un entero positivo'),
+        '400': error('El identificador no es un uuid valido'),
         '404': error(`No existe el ${opciones.entidad}`),
       },
     },
@@ -354,14 +370,14 @@ const rutasCrud = (opciones: {
       summary: `Edita un ${opciones.entidad} (solo ADMIN)`,
       description: 'Reemplaza el registro completo con el cuerpo enviado.',
       security: [{ bearerAuth: [] }],
-      parameters: [parametroId(opciones.entidad)],
+      parameters: [parametroUuid(opciones.entidad)],
       requestBody: cuerpoJson(`${opciones.esquema}Entrada`),
       responses: {
         '200': sobre(
           { type: 'object', properties: { [opciones.claveUno]: ref(opciones.esquema) } },
           `${opciones.entidad} actualizado`
         ),
-        '400': error('El id no es un entero positivo'),
+        '400': error('El identificador no es un uuid valido'),
         ...ERRORES_ADMIN,
         '404': error(`No existe el ${opciones.entidad}`),
         '422': error('Datos invalidos: el mensaje indica el campo'),
@@ -372,10 +388,10 @@ const rutasCrud = (opciones: {
       summary: `Elimina un ${opciones.entidad} (solo ADMIN)`,
       description: `Borrado definitivo, incluidas sus imagenes subidas al servidor. ${opciones.conflicto}`,
       security: [{ bearerAuth: [] }],
-      parameters: [parametroId(opciones.entidad)],
+      parameters: [parametroUuid(opciones.entidad)],
       responses: {
         '204': { description: 'Eliminado. Sin cuerpo' },
-        '400': error('El id no es un entero positivo'),
+        '400': error('El identificador no es un uuid valido'),
         ...ERRORES_ADMIN,
         '404': error(`No existe el ${opciones.entidad}`),
         '409': error('Tiene registros asociados; desactivalo en lugar de eliminarlo'),
@@ -546,8 +562,16 @@ export const openApiSpec = {
       get: {
         tags: ['Publicaciones'],
         summary: 'Lista publicaciones paginadas',
-        description: `Publico. Ordenadas por fecha de publicacion, de la mas reciente a la mas antigua. ${POR_PAGINA_DEFECTO} por pagina por defecto.`,
-        parameters: PARAMETROS_LISTADO,
+        description: `Publico. ${POR_PAGINA_DEFECTO} por pagina por defecto. Por defecto salen las mas recientes primero; con orden=leidos salen las mas leidas (seccion "Lo mas leido").`,
+        parameters: [
+          ...PARAMETROS_LISTADO,
+          {
+            name: 'orden',
+            in: 'query',
+            description: 'recientes: por fecha de publicacion. leidos: por numero de lecturas. Un valor invalido vuelve a recientes.',
+            schema: { type: 'string', enum: ['recientes', 'leidos'], default: 'recientes' },
+          },
+        ],
         responses: {
           '200': sobre(
             {
@@ -574,14 +598,23 @@ export const openApiSpec = {
         },
       },
     },
-    '/posts/{id}': {
+    '/posts/{referencia}': {
       get: {
         tags: ['Publicaciones'],
-        summary: 'Obtiene una publicacion',
-        parameters: [parametroId('articulo')],
+        summary: 'Obtiene una publicacion por uuid o por slug',
+        description:
+          'Con el uuid devuelve el articulo tal cual (lo usa el panel). Con el slug de la URL publica suma una lectura al contador views, salvo que sea un borrador.',
+        parameters: [
+          {
+            name: 'referencia',
+            in: 'path',
+            required: true,
+            description: 'uuid del articulo o su slug publico',
+            schema: { type: 'string', example: 'pausas-activas-en-la-oficina' },
+          },
+        ],
         responses: {
           '200': sobre({ type: 'object', properties: { publicacion: ref('Publicacion') } }, 'Publicacion encontrada'),
-          '400': error('El id no es un entero positivo'),
           '404': error('No existe la publicacion'),
         },
       },
@@ -590,11 +623,11 @@ export const openApiSpec = {
         summary: 'Edita una publicacion (solo ADMIN)',
         description: 'Si se reemplaza la portada, la anterior subida al servidor se borra del disco.',
         security: [{ bearerAuth: [] }],
-        parameters: [parametroId('articulo')],
+        parameters: [parametroUuid('articulo')],
         requestBody: cuerpoJson('PublicacionEntrada'),
         responses: {
           '200': sobre({ type: 'object', properties: { publicacion: ref('Publicacion') } }, 'Publicacion actualizada'),
-          '400': error('El id no es un entero positivo'),
+          '400': error('El identificador no es un uuid valido'),
           ...ERRORES_ADMIN,
           '404': error('No existe la publicacion'),
           '422': error('Datos invalidos: el mensaje indica el campo'),
@@ -605,10 +638,10 @@ export const openApiSpec = {
         summary: 'Elimina una publicacion (solo ADMIN)',
         description: 'Borrado definitivo, incluida su portada subida al servidor.',
         security: [{ bearerAuth: [] }],
-        parameters: [parametroId('articulo')],
+        parameters: [parametroUuid('articulo')],
         responses: {
           '204': { description: 'Eliminada. Sin cuerpo' },
-          '400': error('El id no es un entero positivo'),
+          '400': error('El identificador no es un uuid valido'),
           ...ERRORES_ADMIN,
           '404': error('No existe la publicacion'),
         },

@@ -25,6 +25,8 @@ const cuerpo = {
   publishedAt: '2026-03-01',
 };
 
+const UUID = '3f1d9d6a-2c47-4f0a-9d4b-6f0c3b8a1e22';
+
 describe('/api/v1/posts', () => {
   beforeEach(() => {
     vi.mocked(postsService.listar).mockResolvedValue({
@@ -38,13 +40,26 @@ describe('/api/v1/posts', () => {
 
     expect(respuesta.status).toBe(200);
     expect(respuesta.body.data).toHaveProperty('publicaciones');
-    expect(postsService.listar).toHaveBeenCalledWith({ estado: 'todos', pagina: 3, porPagina: 6 });
+    expect(postsService.listar).toHaveBeenCalledWith({
+      estado: 'todos',
+      pagina: 3,
+      porPagina: 6,
+      orden: 'recientes',
+    });
+  });
+
+  it('acepta el orden por mas leidos y descarta uno inventado', async () => {
+    await request(app).get('/api/v1/posts?orden=leidos');
+    expect(postsService.listar).toHaveBeenLastCalledWith(expect.objectContaining({ orden: 'leidos' }));
+
+    await request(app).get('/api/v1/posts?orden=loquesea');
+    expect(postsService.listar).toHaveBeenLastCalledWith(expect.objectContaining({ orden: 'recientes' }));
   });
 
   it('crear, editar y eliminar exigen sesion de ADMIN', async () => {
     const sinSesion = await request(app).post('/api/v1/posts').send(cuerpo);
-    const comoCliente = await request(app).put('/api/v1/posts/1').set('Authorization', cliente).send(cuerpo);
-    const borrarCliente = await request(app).delete('/api/v1/posts/1').set('Authorization', cliente);
+    const comoCliente = await request(app).put(`/api/v1/posts/${UUID}`).set('Authorization', cliente).send(cuerpo);
+    const borrarCliente = await request(app).delete(`/api/v1/posts/${UUID}`).set('Authorization', cliente);
 
     expect(sinSesion.status).toBe(401);
     expect(comoCliente.status).toBe(403);
@@ -74,23 +89,43 @@ describe('/api/v1/posts', () => {
     expect(respuesta.body.error).toMatch(/^content:/);
   });
 
-  it('editar y eliminar usan el id de la URL', async () => {
-    vi.mocked(postsService.actualizar).mockResolvedValue({ postId: 5 } as never);
+  it('editar y eliminar usan el uuid de la URL', async () => {
+    vi.mocked(postsService.actualizar).mockResolvedValue({ uuid: UUID } as never);
     vi.mocked(postsService.eliminar).mockResolvedValue();
 
-    const editar = await request(app).put('/api/v1/posts/5').set('Authorization', admin).send(cuerpo);
-    const eliminar = await request(app).delete('/api/v1/posts/5').set('Authorization', admin);
+    const editar = await request(app).put(`/api/v1/posts/${UUID}`).set('Authorization', admin).send(cuerpo);
+    const eliminar = await request(app).delete(`/api/v1/posts/${UUID}`).set('Authorization', admin);
 
     expect(editar.status).toBe(200);
-    expect(postsService.actualizar).toHaveBeenCalledWith(5, expect.any(Object));
+    expect(postsService.actualizar).toHaveBeenCalledWith(UUID, expect.any(Object));
     expect(eliminar.status).toBe(204);
-    expect(postsService.eliminar).toHaveBeenCalledWith(5);
+    expect(postsService.eliminar).toHaveBeenCalledWith(UUID);
   });
 
-  it('id invalido responde 400 y uno inexistente 404', async () => {
+  it('por id numerico no suma lecturas: es la vista del panel', async () => {
+    vi.mocked(postsService.obtener).mockResolvedValue({ uuid: UUID } as never);
+
+    const respuesta = await request(app).get(`/api/v1/posts/${UUID}`);
+
+    expect(respuesta.status).toBe(200);
+    expect(postsService.obtener).toHaveBeenCalledWith({ uuid: UUID });
+  });
+
+  it('por slug devuelve el articulo y suma una lectura', async () => {
+    vi.mocked(postsService.obtener).mockResolvedValue({ uuid: UUID } as never);
+
+    const respuesta = await request(app).get('/api/v1/posts/pausas-activas-en-la-oficina');
+
+    expect(respuesta.status).toBe(200);
+    expect(postsService.obtener).toHaveBeenCalledWith({ slug: 'pausas-activas-en-la-oficina' }, {
+      registrarLectura: true,
+    });
+  });
+
+  it('una publicacion inexistente responde 404', async () => {
     vi.mocked(postsService.obtener).mockRejectedValue(new AppError('Publicacion no encontrada', 404));
 
-    expect((await request(app).get('/api/v1/posts/abc')).status).toBe(400);
-    expect((await request(app).get('/api/v1/posts/99')).status).toBe(404);
+    expect((await request(app).get(`/api/v1/posts/${UUID}`)).status).toBe(404);
+    expect((await request(app).get('/api/v1/posts/no-existe')).status).toBe(404);
   });
 });

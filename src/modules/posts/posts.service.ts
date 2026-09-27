@@ -2,7 +2,7 @@ import { prisma } from '../../core/database/prisma';
 import { AppError } from '../../core/errors/AppError';
 import { almacenImagenes } from '../uploads/uploads.service';
 import { aPaginacion } from '../catalog/catalog.mapper';
-import type { ListadoQuery } from '../catalog/catalog.schema';
+import type { ListadoPublicaciones } from './posts.schema';
 import type { ConsultaListado, Listado } from '../catalog/catalog.service';
 import type { PaginaDe, ResultadoActualizar, ResultadoEliminar } from '../catalog/catalog.types';
 import type { PublicacionInput } from './posts.schema';
@@ -11,19 +11,29 @@ import { generarSlug, minutosDeLectura, slugDisponible } from './posts.utils';
 
 type DatosGuardado = Omit<PublicacionInput, 'publishedAt'> & { slug: string; publishedAt?: Date };
 
+export type OrdenPublicaciones = ListadoPublicaciones['orden'];
+
+export interface ConsultaPublicaciones extends ConsultaListado {
+  orden: OrdenPublicaciones;
+}
+
 export interface DependenciasPublicaciones {
-  listar(consulta: ConsultaListado): Promise<PaginaDe<PublicacionBase>>;
-  obtener(id: number): Promise<PublicacionBase | null>;
+  listar(consulta: ConsultaPublicaciones): Promise<PaginaDe<PublicacionBase>>;
+  obtener(uuid: string): Promise<PublicacionBase | null>;
+  // La web publica llega por la URL legible del articulo
+  obtenerPorSlug(slug: string): Promise<PublicacionBase | null>;
+  // Suma una lectura sin bloquear la respuesta del articulo
+  sumarLectura(postId: number): Promise<unknown>;
   // Slugs que empiezan por la base, sin contar el del propio articulo al editar
-  slugsParecidos(base: string, excluirId?: number): Promise<string[]>;
+  slugsParecidos(base: string, excluirUuid?: string): Promise<string[]>;
   crear(datos: DatosGuardado & { authorId: number }): Promise<PublicacionBase>;
-  actualizar(id: number, datos: DatosGuardado): Promise<ResultadoActualizar<PublicacionBase>>;
-  eliminar(id: number): Promise<ResultadoEliminar>;
+  actualizar(uuid: string, datos: DatosGuardado): Promise<ResultadoActualizar<PublicacionBase>>;
+  eliminar(uuid: string): Promise<ResultadoEliminar>;
   eliminarImagen(url: string): Promise<unknown>;
 }
 
 export const aPublicacionPublica = (publicacion: PublicacionBase): PublicacionPublica => ({
-  postId: publicacion.postId,
+  uuid: publicacion.uuid,
   title: publicacion.title,
   slug: publicacion.slug,
   excerpt: publicacion.excerpt,
@@ -39,6 +49,7 @@ export const aPublicacionPublica = (publicacion: PublicacionBase): PublicacionPu
 
 const seleccion = {
   postId: true,
+  uuid: true,
   authorId: true,
   title: true,
   slug: true,
@@ -69,13 +80,16 @@ const columnas = (datos: DatosGuardado) => ({
 });
 
 export const dependenciasReales: DependenciasPublicaciones = {
-  async listar({ estado, saltar, tomar }) {
+  async listar({ estado, saltar, tomar, orden }) {
     const where = estado === 'todos' ? undefined : { status: estado };
     const [filas, total] = await prisma.$transaction([
       prisma.post.findMany({
         where,
         select: seleccion,
-        orderBy: [{ publishedAt: 'desc' }, { postId: 'desc' }],
+        orderBy:
+          orden === 'leidos'
+            ? [{ views: 'desc' }, { publishedAt: 'desc' }]
+            : [{ publishedAt: 'desc' }, { postId: 'desc' }],
         skip: saltar,
         take: tomar,
       }),
@@ -84,13 +98,17 @@ export const dependenciasReales: DependenciasPublicaciones = {
     return { filas, total };
   },
 
-  obtener: (id) => prisma.post.findUnique({ where: { postId: id }, select: seleccion }),
+  obtener: (uuid) => prisma.post.findUnique({ where: { uuid }, select: seleccion }),
 
-  async slugsParecidos(base, excluirId) {
+  obtenerPorSlug: (slug) => prisma.post.findUnique({ where: { slug }, select: seleccion }),
+
+  sumarLectura: (postId) => prisma.post.update({ where: { postId }, data: { views: { increment: 1 } } }),
+
+  async slugsParecidos(base, excluirUuid) {
     const filas = await prisma.post.findMany({
       where: {
         slug: { startsWith: base },
-        ...(excluirId ? { NOT: { postId: excluirId } } : {}),
+        ...(excluirUuid ? { NOT: { uuid: excluirUuid } } : {}),
       },
       select: { slug: true },
     });
@@ -100,12 +118,12 @@ export const dependenciasReales: DependenciasPublicaciones = {
   crear: ({ authorId, ...datos }) =>
     prisma.post.create({ data: { ...columnas(datos), authorId }, select: seleccion }),
 
-  async actualizar(id, datos) {
-    const previo = await prisma.post.findUnique({ where: { postId: id }, select: { coverUrl: true } });
+  async actualizar(uuid, datos) {
+    const previo = await prisma.post.findUnique({ where: { uuid }, select: { coverUrl: true } });
     if (!previo) return { tipo: 'no-encontrado' };
 
     const registro = await prisma.post.update({
-      where: { postId: id },
+      where: { uuid },
       data: columnas(datos),
       select: seleccion,
     });
@@ -116,9 +134,9 @@ export const dependenciasReales: DependenciasPublicaciones = {
     };
   },
 
-  async eliminar(id) {
+  async eliminar(uuid) {
     try {
-      const borrado = await prisma.post.delete({ where: { postId: id }, select: { coverUrl: true } });
+      const borrado = await prisma.post.delete({ where: { uuid }, select: { coverUrl: true } });
       return { tipo: 'eliminado', imagenes: borrado.coverUrl ? [borrado.coverUrl] : [] };
     } catch (error) {
       if (codigoPrisma(error) === 'P2025') return { tipo: 'no-encontrado' };
@@ -130,9 +148,9 @@ export const dependenciasReales: DependenciasPublicaciones = {
 };
 
 export const crearServicioPublicaciones = (deps: DependenciasPublicaciones) => {
-  const resolverSlug = async (titulo: string, excluirId?: number) => {
+  const resolverSlug = async (titulo: string, excluirUuid?: string) => {
     const base = generarSlug(titulo);
-    return slugDisponible(base, await deps.slugsParecidos(base, excluirId));
+    return slugDisponible(base, await deps.slugsParecidos(base, excluirUuid));
   };
 
   const limpiarPortadas = async (anteriores: string[], vigente?: string) => {
@@ -142,9 +160,10 @@ export const crearServicioPublicaciones = (deps: DependenciasPublicaciones) => {
   };
 
   return {
-    async listar({ estado, pagina, porPagina }: ListadoQuery): Promise<Listado<PublicacionPublica>> {
+    async listar({ estado, pagina, porPagina, orden }: ListadoPublicaciones): Promise<Listado<PublicacionPublica>> {
       const { filas, total } = await deps.listar({
         estado,
+        orden,
         saltar: (pagina - 1) * porPagina,
         tomar: porPagina,
       });
@@ -154,9 +173,22 @@ export const crearServicioPublicaciones = (deps: DependenciasPublicaciones) => {
       };
     },
 
-    async obtener(id: number): Promise<PublicacionPublica> {
-      const publicacion = await deps.obtener(id);
+    /** Acepta el uuid del panel o el slug legible de la URL publica. */
+    async obtener(
+      referencia: { uuid: string } | { slug: string },
+      opciones: { registrarLectura?: boolean } = {}
+    ): Promise<PublicacionPublica> {
+      const publicacion =
+        'uuid' in referencia
+          ? await deps.obtener(referencia.uuid)
+          : await deps.obtenerPorSlug(referencia.slug);
       if (!publicacion) throw new AppError('Publicacion no encontrada', 404);
+
+      if (opciones.registrarLectura && publicacion.status === 'active') {
+        // Un fallo al contar no debe impedir leer el articulo
+        await deps.sumarLectura(publicacion.postId).catch(() => undefined);
+        return aPublicacionPublica({ ...publicacion, views: publicacion.views + 1 });
+      }
       return aPublicacionPublica(publicacion);
     },
 
@@ -174,15 +206,15 @@ export const crearServicioPublicaciones = (deps: DependenciasPublicaciones) => {
       return aPublicacionPublica(creada);
     },
 
-    async actualizar(id: number, datos: PublicacionInput): Promise<PublicacionPublica> {
-      const actual = await deps.obtener(id);
+    async actualizar(uuid: string, datos: PublicacionInput): Promise<PublicacionPublica> {
+      const actual = await deps.obtener(uuid);
       if (!actual) throw new AppError('Publicacion no encontrada', 404);
 
       // El slug solo cambia si cambia el titulo, para no romper enlaces ya compartidos
       const slug =
-        actual.title === datos.title ? actual.slug : await resolverSlug(datos.title, id);
+        actual.title === datos.title ? actual.slug : await resolverSlug(datos.title, uuid);
 
-      const resultado = await deps.actualizar(id, { ...datos, slug });
+      const resultado = await deps.actualizar(uuid, { ...datos, slug });
       if (resultado.tipo === 'no-encontrado') {
         throw new AppError('Publicacion no encontrada', 404);
       }
@@ -190,8 +222,8 @@ export const crearServicioPublicaciones = (deps: DependenciasPublicaciones) => {
       return aPublicacionPublica(resultado.registro);
     },
 
-    async eliminar(id: number): Promise<void> {
-      const resultado = await deps.eliminar(id);
+    async eliminar(uuid: string): Promise<void> {
+      const resultado = await deps.eliminar(uuid);
       if (resultado.tipo !== 'eliminado') {
         throw new AppError('Publicacion no encontrada', 404);
       }

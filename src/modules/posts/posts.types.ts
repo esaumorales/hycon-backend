@@ -1,5 +1,6 @@
 export interface PublicacionBase {
   postId: number;
+  uuid: string;
   authorId: number;
   title: string;
   slug: string;
@@ -13,9 +14,9 @@ export interface PublicacionBase {
   author: { name: string; lastname: string };
 }
 
-// Forma que se expone por la API
+// Forma que se expone por la API: el correlativo se queda en la base
 export interface PublicacionPublica {
-  postId: number;
+  uuid: string;
   title: string;
   slug: string;
   excerpt: string | null;
