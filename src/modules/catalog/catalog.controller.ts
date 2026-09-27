@@ -1,5 +1,5 @@
 import type { Request } from 'express';
-import { leerId, manejar, obtenerUsuarioId as obtenerOwnerId } from '../../core/utils/controlador';
+import { leerUuid, manejar, obtenerUsuarioId as obtenerOwnerId } from '../../core/utils/controlador';
 import { catalogService } from './catalog.service';
 import { AGENCIAS_ENVIO } from './catalog.constants';
 import { listadoQuerySchema } from './catalog.schema';
@@ -18,7 +18,7 @@ export const listarProductos = manejar(async (req, res) => {
 });
 
 export const obtenerProducto = manejar(async (req, res) => {
-  const producto = await catalogService.obtenerProducto(leerId(req));
+  const producto = await catalogService.obtenerProducto(leerUuid(req));
   res.status(200).json({ success: true, data: { producto } });
 });
 
@@ -31,12 +31,12 @@ export const crearProducto = manejar(async (req, res) => {
 });
 
 export const actualizarProducto = manejar(async (req, res) => {
-  const producto = await catalogService.actualizarProducto(leerId(req), req.body as ProductoInput);
+  const producto = await catalogService.actualizarProducto(leerUuid(req), req.body as ProductoInput);
   res.status(200).json({ success: true, data: { producto } });
 });
 
 export const eliminarProducto = manejar(async (req, res) => {
-  await catalogService.eliminarProducto(leerId(req));
+  await catalogService.eliminarProducto(leerUuid(req));
   res.status(204).end();
 });
 
@@ -46,7 +46,7 @@ export const listarCursos = manejar(async (req, res) => {
 });
 
 export const obtenerCurso = manejar(async (req, res) => {
-  const curso = await catalogService.obtenerCurso(leerId(req));
+  const curso = await catalogService.obtenerCurso(leerUuid(req));
   res.status(200).json({ success: true, data: { curso } });
 });
 
@@ -56,11 +56,11 @@ export const crearCurso = manejar(async (req, res) => {
 });
 
 export const actualizarCurso = manejar(async (req, res) => {
-  const curso = await catalogService.actualizarCurso(leerId(req), req.body as CursoInput);
+  const curso = await catalogService.actualizarCurso(leerUuid(req), req.body as CursoInput);
   res.status(200).json({ success: true, data: { curso } });
 });
 
 export const eliminarCurso = manejar(async (req, res) => {
-  await catalogService.eliminarCurso(leerId(req));
+  await catalogService.eliminarCurso(leerUuid(req));
   res.status(204).end();
 });

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { AppError } from '../errors/AppError';
 
 const idSchema = z.coerce.number().int().positive();
+const uuidSchema = z.string().uuid();
 
 // Envoltorio para no repetir try/catch en cada controlador
 export const manejar =
@@ -15,6 +16,15 @@ export const leerId = (req: Request): number => {
   const resultado = idSchema.safeParse(req.params.id);
   if (!resultado.success) {
     throw new AppError('El identificador debe ser un numero entero positivo', 400);
+  }
+  return resultado.data;
+};
+
+// Identificador publico de catalogo: por la URL solo viaja el uuid, nunca el correlativo
+export const leerUuid = (req: Request): string => {
+  const resultado = uuidSchema.safeParse(req.params.uuid);
+  if (!resultado.success) {
+    throw new AppError('El identificador debe ser un uuid valido', 400);
   }
   return resultado.data;
 };

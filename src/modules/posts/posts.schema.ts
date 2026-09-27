@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { listadoQuerySchema } from '../catalog/catalog.schema';
 import { sanitizarContenido, textoPlano } from './posts.contenido';
 
 const vacioComoIndefinido = (valor: unknown) =>
@@ -45,3 +46,10 @@ export const publicacionSchema = z.object({
 });
 
 export type PublicacionInput = z.infer<typeof publicacionSchema>;
+
+// El blog necesita dos ordenes: lo ultimo publicado y lo mas leido
+export const listadoPublicacionesSchema = listadoQuerySchema.extend({
+  orden: z.enum(['recientes', 'leidos']).catch('recientes'),
+});
+
+export type ListadoPublicaciones = z.infer<typeof listadoPublicacionesSchema>;

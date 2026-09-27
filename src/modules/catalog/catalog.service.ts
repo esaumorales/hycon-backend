@@ -28,16 +28,16 @@ const filtroEstado = (estado: EstadoListado) =>
 
 export interface DependenciasCatalogo {
   listarProductos(consulta: ConsultaListado): Promise<PaginaDe<ProductoBase>>;
-  obtenerProducto(id: number): Promise<ProductoBase | null>;
+  obtenerProducto(uuid: string): Promise<ProductoBase | null>;
   crearProducto(datos: ProductoInput & { ownerId: number }): Promise<ProductoBase>;
-  actualizarProducto(id: number, datos: ProductoInput): Promise<ResultadoActualizar<ProductoBase>>;
-  eliminarProducto(id: number): Promise<ResultadoEliminar>;
+  actualizarProducto(uuid: string, datos: ProductoInput): Promise<ResultadoActualizar<ProductoBase>>;
+  eliminarProducto(uuid: string): Promise<ResultadoEliminar>;
 
   listarCursos(consulta: ConsultaListado): Promise<PaginaDe<CursoBase>>;
-  obtenerCurso(id: number): Promise<CursoBase | null>;
+  obtenerCurso(uuid: string): Promise<CursoBase | null>;
   crearCurso(datos: CursoInput & { ownerId: number }): Promise<CursoBase>;
-  actualizarCurso(id: number, datos: CursoInput): Promise<ResultadoActualizar<CursoBase>>;
-  eliminarCurso(id: number): Promise<ResultadoEliminar>;
+  actualizarCurso(uuid: string, datos: CursoInput): Promise<ResultadoActualizar<CursoBase>>;
+  eliminarCurso(uuid: string): Promise<ResultadoEliminar>;
 
   // Borra del disco una imagen que ya no usa ningun registro
   eliminarImagen(url: string): Promise<unknown>;
@@ -50,6 +50,7 @@ export interface Listado<T> {
 
 const seleccionProducto = {
   productId: true,
+  uuid: true,
   ownerId: true,
   name: true,
   description: true,
@@ -67,6 +68,7 @@ const seleccionProducto = {
 
 const seleccionCurso = {
   courseId: true,
+  uuid: true,
   ownerId: true,
   name: true,
   description: true,
@@ -132,9 +134,9 @@ export const dependenciasReales: DependenciasCatalogo = {
     return { filas: filas as unknown as ProductoBase[], total };
   },
 
-  obtenerProducto: (id) =>
+  obtenerProducto: (uuid) =>
     prisma.product.findUnique({
-      where: { productId: id },
+      where: { uuid },
       select: seleccionProducto,
     }) as unknown as Promise<ProductoBase | null>,
 
@@ -144,15 +146,15 @@ export const dependenciasReales: DependenciasCatalogo = {
       select: seleccionProducto,
     }) as unknown as Promise<ProductoBase>,
 
-  async actualizarProducto(id, { imageUrl, ...datos }) {
+  async actualizarProducto(uuid, { imageUrl, ...datos }) {
     const previo = await prisma.product.findUnique({
-      where: { productId: id },
+      where: { uuid },
       select: { images: { select: { imageUrl: true } } },
     });
     if (!previo) return { tipo: 'no-encontrado' };
 
     const registro = await prisma.product.update({
-      where: { productId: id },
+      where: { uuid },
       data: {
         ...columnasProducto(datos),
         // Se reemplaza la imagen principal completa: borrar y volver a crear es mas simple
@@ -169,12 +171,17 @@ export const dependenciasReales: DependenciasCatalogo = {
     };
   },
 
-  async eliminarProducto(id) {
+  async eliminarProducto(uuid) {
+    // Las imagenes cuelgan del correlativo, asi que primero se traduce el uuid
+    const producto = await prisma.product.findUnique({ where: { uuid }, select: { productId: true } });
+    if (!producto) return { tipo: 'no-encontrado' };
+    const productId = producto.productId;
+
     try {
       const [imagenes] = await prisma.$transaction([
-        prisma.productImage.findMany({ where: { productId: id }, select: { imageUrl: true } }),
-        prisma.productImage.deleteMany({ where: { productId: id } }),
-        prisma.product.delete({ where: { productId: id } }),
+        prisma.productImage.findMany({ where: { productId }, select: { imageUrl: true } }),
+        prisma.productImage.deleteMany({ where: { productId } }),
+        prisma.product.delete({ where: { productId } }),
       ]);
       return { tipo: 'eliminado', imagenes: imagenes.map((imagen) => imagen.imageUrl) };
     } catch (error) {
@@ -199,9 +206,9 @@ export const dependenciasReales: DependenciasCatalogo = {
     return { filas: filas as unknown as CursoBase[], total };
   },
 
-  obtenerCurso: (id) =>
+  obtenerCurso: (uuid) =>
     prisma.course.findUnique({
-      where: { courseId: id },
+      where: { uuid },
       select: seleccionCurso,
     }) as unknown as Promise<CursoBase | null>,
 
@@ -211,15 +218,15 @@ export const dependenciasReales: DependenciasCatalogo = {
       select: seleccionCurso,
     }) as unknown as Promise<CursoBase>,
 
-  async actualizarCurso(id, datos) {
+  async actualizarCurso(uuid, datos) {
     const previo = await prisma.course.findUnique({
-      where: { courseId: id },
+      where: { uuid },
       select: { thumbnailUrl: true },
     });
     if (!previo) return { tipo: 'no-encontrado' };
 
     const registro = await prisma.course.update({
-      where: { courseId: id },
+      where: { uuid },
       data: columnasCurso(datos),
       select: seleccionCurso,
     });
@@ -231,10 +238,10 @@ export const dependenciasReales: DependenciasCatalogo = {
     };
   },
 
-  async eliminarCurso(id) {
+  async eliminarCurso(uuid) {
     try {
       const curso = await prisma.course.delete({
-        where: { courseId: id },
+        where: { uuid },
         select: { thumbnailUrl: true },
       });
       return { tipo: 'eliminado', imagenes: curso.thumbnailUrl ? [curso.thumbnailUrl] : [] };
@@ -278,8 +285,8 @@ export const crearServicioCatalogo = (deps: DependenciasCatalogo) => {
     listarProductos: (consulta: ListadoQuery) =>
       listar(deps.listarProductos, aProductoPublico, consulta),
 
-    async obtenerProducto(id: number): Promise<ProductoPublico> {
-      const producto = await deps.obtenerProducto(id);
+    async obtenerProducto(uuid: string): Promise<ProductoPublico> {
+      const producto = await deps.obtenerProducto(uuid);
       if (!producto) throw new AppError('Producto no encontrado', 404);
       return aProductoPublico(producto);
     },
@@ -291,8 +298,8 @@ export const crearServicioCatalogo = (deps: DependenciasCatalogo) => {
       return aProductoPublico(producto);
     },
 
-    async actualizarProducto(id: number, datos: ProductoInput): Promise<ProductoPublico> {
-      const resultado = await deps.actualizarProducto(id, datos);
+    async actualizarProducto(uuid: string, datos: ProductoInput): Promise<ProductoPublico> {
+      const resultado = await deps.actualizarProducto(uuid, datos);
       if (resultado.tipo === 'no-encontrado') {
         throw new AppError('Producto no encontrado', 404);
       }
@@ -300,8 +307,8 @@ export const crearServicioCatalogo = (deps: DependenciasCatalogo) => {
       return aProductoPublico(resultado.registro);
     },
 
-    async eliminarProducto(id: number): Promise<void> {
-      const resultado = await deps.eliminarProducto(id);
+    async eliminarProducto(uuid: string): Promise<void> {
+      const resultado = await deps.eliminarProducto(uuid);
       if (resultado.tipo === 'no-encontrado') {
         throw new AppError('Producto no encontrado', 404);
       }
@@ -316,8 +323,8 @@ export const crearServicioCatalogo = (deps: DependenciasCatalogo) => {
 
     listarCursos: (consulta: ListadoQuery) => listar(deps.listarCursos, aCursoPublico, consulta),
 
-    async obtenerCurso(id: number): Promise<CursoPublico> {
-      const curso = await deps.obtenerCurso(id);
+    async obtenerCurso(uuid: string): Promise<CursoPublico> {
+      const curso = await deps.obtenerCurso(uuid);
       if (!curso) throw new AppError('Curso no encontrado', 404);
       return aCursoPublico(curso);
     },
@@ -328,8 +335,8 @@ export const crearServicioCatalogo = (deps: DependenciasCatalogo) => {
       return aCursoPublico(curso);
     },
 
-    async actualizarCurso(id: number, datos: CursoInput): Promise<CursoPublico> {
-      const resultado = await deps.actualizarCurso(id, datos);
+    async actualizarCurso(uuid: string, datos: CursoInput): Promise<CursoPublico> {
+      const resultado = await deps.actualizarCurso(uuid, datos);
       if (resultado.tipo === 'no-encontrado') {
         throw new AppError('Curso no encontrado', 404);
       }
@@ -337,8 +344,8 @@ export const crearServicioCatalogo = (deps: DependenciasCatalogo) => {
       return aCursoPublico(resultado.registro);
     },
 
-    async eliminarCurso(id: number): Promise<void> {
-      const resultado = await deps.eliminarCurso(id);
+    async eliminarCurso(uuid: string): Promise<void> {
+      const resultado = await deps.eliminarCurso(uuid);
       if (resultado.tipo === 'no-encontrado') {
         throw new AppError('Curso no encontrado', 404);
       }

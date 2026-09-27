@@ -24,15 +24,15 @@ const soloAdmin = [protect, restrictTo('ADMIN')];
 router.get('/shipping-agencies', listarAgencias);
 
 router.get('/products', listarProductos);
-router.get('/products/:id', obtenerProducto);
+router.get('/products/:uuid', obtenerProducto);
 router.post('/products', ...soloAdmin, validate(productoSchema), crearProducto);
-router.put('/products/:id', ...soloAdmin, validate(productoSchema), actualizarProducto);
-router.delete('/products/:id', ...soloAdmin, eliminarProducto);
+router.put('/products/:uuid', ...soloAdmin, validate(productoSchema), actualizarProducto);
+router.delete('/products/:uuid', ...soloAdmin, eliminarProducto);
 
 router.get('/courses', listarCursos);
-router.get('/courses/:id', obtenerCurso);
+router.get('/courses/:uuid', obtenerCurso);
 router.post('/courses', ...soloAdmin, validate(cursoSchema), crearCurso);
-router.put('/courses/:id', ...soloAdmin, validate(cursoSchema), actualizarCurso);
-router.delete('/courses/:id', ...soloAdmin, eliminarCurso);
+router.put('/courses/:uuid', ...soloAdmin, validate(cursoSchema), actualizarCurso);
+router.delete('/courses/:uuid', ...soloAdmin, eliminarCurso);
 
 export { router as catalogRoutes };

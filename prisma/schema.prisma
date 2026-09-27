@@ -59,6 +59,8 @@ model User {
 
 model Course {
   courseId        Int      @id @default(autoincrement()) @map("course_id")
+  // Identificador publico: es el que viaja por la API y por la URL, nunca el correlativo
+  uuid            String   @unique @default(uuid(7)) @db.Uuid
   ownerId         Int      @map("owner_id")
   name            String   @db.VarChar(200)
   description     String?  @db.Text
@@ -83,6 +85,8 @@ model Course {
 
 model Product {
   productId     Int      @id @default(autoincrement()) @map("product_id")
+  // Identificador publico: es el que viaja por la API y por la URL, nunca el correlativo
+  uuid          String   @unique @default(uuid(7)) @db.Uuid
   ownerId       Int      @map("owner_id")
   name          String   @db.VarChar(200)
   description   String?  @db.Text
@@ -247,6 +251,8 @@ model Certificate {
 
 model Post {
   postId      Int      @id @default(autoincrement()) @map("post_id")
+  // Identificador publico: es el que viaja por la API, nunca el correlativo
+  uuid        String   @unique @default(uuid(7)) @db.Uuid
   authorId    Int      @map("author_id")
   title       String   @db.VarChar(200)
   // Identificador legible para la URL publica del articulo

@@ -83,9 +83,14 @@ describe('GET /api/v1/catalog', () => {
     expect(respuesta.body.data.agencias).toContainEqual({ code: 'shalom', name: 'Shalom' });
   });
 
-  it('responde 400 con un id que no es numero', async () => {
-    const respuesta = await request(app).get('/api/v1/catalog/products/abc');
-    expect(respuesta.status).toBe(400);
+  it('responde 400 si el identificador no es un uuid', async () => {
+    const texto = await request(app).get('/api/v1/catalog/products/abc');
+    // El correlativo tampoco vale: el catalogo solo se direcciona por uuid
+    const correlativo = await request(app).get('/api/v1/catalog/products/1');
+
+    expect(texto.status).toBe(400);
+    expect(correlativo.status).toBe(400);
+    expect(catalogService.obtenerProducto).not.toHaveBeenCalled();
   });
 
   it('propaga el 404 del servicio', async () => {
@@ -93,19 +98,24 @@ describe('GET /api/v1/catalog', () => {
       new AppError('Producto no encontrado', 404)
     );
 
-    const respuesta = await request(app).get('/api/v1/catalog/products/99');
+    const respuesta = await request(app).get(
+      '/api/v1/catalog/products/00000000-0000-4000-8000-000000000999'
+    );
 
     expect(respuesta.status).toBe(404);
     expect(respuesta.body.error).toBe('Producto no encontrado');
   });
 });
 
+const UUID = '7b73989c-0719-4c06-bd1e-8c7ae193a432';
+const UUID_CURSO = 'b7b299d8-ee8f-4bea-a618-0a5f8261136f';
+
 describe('escrituras del catalogo', () => {
   it.each([
-    ['put', '/api/v1/catalog/products/1'],
-    ['delete', '/api/v1/catalog/products/1'],
-    ['put', '/api/v1/catalog/courses/1'],
-    ['delete', '/api/v1/catalog/courses/1'],
+    ['put', `/api/v1/catalog/products/${UUID}`],
+    ['delete', `/api/v1/catalog/products/${UUID}`],
+    ['put', `/api/v1/catalog/courses/${UUID_CURSO}`],
+    ['delete', `/api/v1/catalog/courses/${UUID_CURSO}`],
   ] as const)('%s %s exige sesion', async (metodo, ruta) => {
     const respuesta = await request(app)[metodo](ruta).send(productoValido);
     expect(respuesta.status).toBe(401);
@@ -113,11 +123,11 @@ describe('escrituras del catalogo', () => {
 
   it('un CLIENTE no puede editar ni eliminar', async () => {
     const editar = await request(app)
-      .put('/api/v1/catalog/products/1')
+      .put(`/api/v1/catalog/products/${UUID}`)
       .set('Authorization', tokenCliente)
       .send(productoValido);
     const eliminar = await request(app)
-      .delete('/api/v1/catalog/products/1')
+      .delete(`/api/v1/catalog/products/${UUID}`)
       .set('Authorization', tokenCliente);
 
     expect(editar.status).toBe(403);
@@ -127,23 +137,23 @@ describe('escrituras del catalogo', () => {
   });
 
   it('el ADMIN edita con el cuerpo ya validado y convertido', async () => {
-    vi.mocked(catalogService.actualizarProducto).mockResolvedValue({ productId: 1 } as never);
+    vi.mocked(catalogService.actualizarProducto).mockResolvedValue({ uuid: UUID } as never);
 
     const respuesta = await request(app)
-      .put('/api/v1/catalog/products/1')
+      .put(`/api/v1/catalog/products/${UUID}`)
       .set('Authorization', tokenAdmin)
       .send(productoValido);
 
     expect(respuesta.status).toBe(200);
     expect(catalogService.actualizarProducto).toHaveBeenCalledWith(
-      1,
+      UUID,
       expect.objectContaining({ price: 25.9, stock: 0, shippingAgencies: ['olva'] })
     );
   });
 
   it('editar con datos invalidos responde 422 sin llegar al servicio', async () => {
     const respuesta = await request(app)
-      .put('/api/v1/catalog/products/1')
+      .put(`/api/v1/catalog/products/${UUID}`)
       .set('Authorization', tokenAdmin)
       .send({ ...productoValido, shippingAgencies: ['inventada'] });
 
@@ -155,11 +165,11 @@ describe('escrituras del catalogo', () => {
     vi.mocked(catalogService.eliminarCurso).mockResolvedValue();
 
     const respuesta = await request(app)
-      .delete('/api/v1/catalog/courses/3')
+      .delete(`/api/v1/catalog/courses/${UUID_CURSO}`)
       .set('Authorization', tokenAdmin);
 
     expect(respuesta.status).toBe(204);
-    expect(catalogService.eliminarCurso).toHaveBeenCalledWith(3);
+    expect(catalogService.eliminarCurso).toHaveBeenCalledWith(UUID_CURSO);
   });
 
   it('eliminar algo con pedidos devuelve el 409 del servicio', async () => {
@@ -168,7 +178,7 @@ describe('escrituras del catalogo', () => {
     );
 
     const respuesta = await request(app)
-      .delete('/api/v1/catalog/products/1')
+      .delete(`/api/v1/catalog/products/${UUID}`)
       .set('Authorization', tokenAdmin);
 
     expect(respuesta.status).toBe(409);
@@ -245,16 +255,16 @@ describe('documentacion', () => {
       expect.arrayContaining([
         '/catalog/shipping-agencies',
         '/catalog/products',
-        '/catalog/products/{id}',
+        '/catalog/products/{uuid}',
         '/catalog/courses',
-        '/catalog/courses/{id}',
+        '/catalog/courses/{uuid}',
         '/uploads/imagenes',
         '/posts',
-        '/posts/{id}',
+        '/posts/{referencia}',
       ])
     );
     const paths = openApiSpec.paths as Record<string, object>;
-    expect(Object.keys(paths['/catalog/products/{id}'])).toEqual(
+    expect(Object.keys(paths['/catalog/products/{uuid}'])).toEqual(
       expect.arrayContaining(['get', 'put', 'delete'])
     );
   });

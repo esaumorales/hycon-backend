@@ -3,8 +3,13 @@ import { crearServicioCatalogo, type DependenciasCatalogo } from './catalog.serv
 import type { CursoBase, ProductoBase } from './catalog.types';
 import type { CursoInput, ProductoInput } from './catalog.schema';
 
+const UUID_PRODUCTO = '7b73989c-0719-4c06-bd1e-8c7ae193a432';
+const UUID_CURSO = 'b7b299d8-ee8f-4bea-a618-0a5f8261136f';
+const UUID_AJENO = '00000000-0000-4000-8000-000000000999';
+
 const productoEnBase: ProductoBase = {
   productId: 1,
+  uuid: UUID_PRODUCTO,
   ownerId: 4,
   name: 'Caja de carton',
   description: null,
@@ -26,6 +31,7 @@ const productoEnBase: ProductoBase = {
 
 const cursoEnBase: CursoBase = {
   courseId: 1,
+  uuid: UUID_CURSO,
   ownerId: 4,
   name: 'Logistica basica',
   description: null,
@@ -160,14 +166,17 @@ describe('catalogService.listarProductos', () => {
 describe('catalogService.obtenerProducto', () => {
   it('devuelve el producto en su forma publica', async () => {
     const servicio = crearServicioCatalogo(crearDeps());
-    expect((await servicio.obtenerProducto(1)).productId).toBe(1);
+    const producto = await servicio.obtenerProducto(UUID_PRODUCTO);
+    expect(producto.uuid).toBe(UUID_PRODUCTO);
+    // El correlativo de la base no sale por la API
+    expect(producto).not.toHaveProperty('productId');
   });
 
   it('responde 404 si no existe', async () => {
     const servicio = crearServicioCatalogo(
       crearDeps({ obtenerProducto: vi.fn().mockResolvedValue(null) })
     );
-    await expect(servicio.obtenerProducto(99)).rejects.toMatchObject({ statusCode: 404 });
+    await expect(servicio.obtenerProducto(UUID_AJENO)).rejects.toMatchObject({ statusCode: 404 });
   });
 });
 
@@ -206,10 +215,10 @@ describe('catalogService.actualizarProducto', () => {
     const deps = crearDeps();
     const servicio = crearServicioCatalogo(deps);
 
-    const producto = await servicio.actualizarProducto(1, datosProducto);
+    const producto = await servicio.actualizarProducto(UUID_PRODUCTO, datosProducto);
 
-    expect(deps.actualizarProducto).toHaveBeenCalledWith(1, datosProducto);
-    expect(producto.productId).toBe(1);
+    expect(deps.actualizarProducto).toHaveBeenCalledWith(UUID_PRODUCTO, datosProducto);
+    expect(producto.uuid).toBe(UUID_PRODUCTO);
   });
 
   it('responde 404 si el producto no existe', async () => {
@@ -217,7 +226,7 @@ describe('catalogService.actualizarProducto', () => {
       crearDeps({ actualizarProducto: vi.fn().mockResolvedValue({ tipo: 'no-encontrado' }) })
     );
 
-    await expect(servicio.actualizarProducto(99, datosProducto)).rejects.toMatchObject({
+    await expect(servicio.actualizarProducto(UUID_AJENO, datosProducto)).rejects.toMatchObject({
       statusCode: 404,
     });
   });
@@ -232,7 +241,7 @@ describe('catalogService.actualizarProducto', () => {
     });
     const servicio = crearServicioCatalogo(deps);
 
-    await servicio.actualizarProducto(1, {
+    await servicio.actualizarProducto(UUID_PRODUCTO, {
       ...datosProducto,
       imageUrl: 'http://localhost:4000/uploads/imagenes/nueva.png',
     });
@@ -253,7 +262,7 @@ describe('catalogService.actualizarProducto', () => {
     });
     const servicio = crearServicioCatalogo(deps);
 
-    await servicio.actualizarProducto(1, { ...datosProducto, imageUrl: url });
+    await servicio.actualizarProducto(UUID_PRODUCTO, { ...datosProducto, imageUrl: url });
 
     expect(deps.eliminarImagen).not.toHaveBeenCalled();
   });
@@ -268,7 +277,7 @@ describe('catalogService.eliminarProducto', () => {
     });
     const servicio = crearServicioCatalogo(deps);
 
-    await servicio.eliminarProducto(1);
+    await servicio.eliminarProducto(UUID_PRODUCTO);
 
     expect(deps.eliminarImagen).toHaveBeenCalledWith('http://x/uploads/imagenes/a.png');
   });
@@ -277,14 +286,14 @@ describe('catalogService.eliminarProducto', () => {
     const servicio = crearServicioCatalogo(
       crearDeps({ eliminarProducto: vi.fn().mockResolvedValue({ tipo: 'no-encontrado' }) })
     );
-    await expect(servicio.eliminarProducto(99)).rejects.toMatchObject({ statusCode: 404 });
+    await expect(servicio.eliminarProducto(UUID_AJENO)).rejects.toMatchObject({ statusCode: 404 });
   });
 
   it('responde 409 si el producto ya tiene pedidos y no toca las imagenes', async () => {
     const deps = crearDeps({ eliminarProducto: vi.fn().mockResolvedValue({ tipo: 'en-uso' }) });
     const servicio = crearServicioCatalogo(deps);
 
-    await expect(servicio.eliminarProducto(1)).rejects.toMatchObject({ statusCode: 409 });
+    await expect(servicio.eliminarProducto(UUID_PRODUCTO)).rejects.toMatchObject({ statusCode: 409 });
     expect(deps.eliminarImagen).not.toHaveBeenCalled();
   });
 });
@@ -306,8 +315,8 @@ describe('catalogService de cursos', () => {
         listarCursos: vi.fn().mockResolvedValue({
           filas: [
             { ...cursoEnBase, videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=5s' },
-            { ...cursoEnBase, courseId: 2, videoUrl: 'https://vimeo.com/123' },
-            { ...cursoEnBase, courseId: 3, videoUrl: null },
+            { ...cursoEnBase, courseId: 2, uuid: UUID_AJENO, videoUrl: 'https://vimeo.com/123' },
+            { ...cursoEnBase, courseId: 3, uuid: '00000000-0000-4000-8000-000000000003', videoUrl: null },
           ],
           total: 3,
         }),
@@ -352,7 +361,7 @@ describe('catalogService de cursos', () => {
     });
     const servicio = crearServicioCatalogo(deps);
 
-    await servicio.actualizarCurso(1, datosCurso);
+    await servicio.actualizarCurso(UUID_CURSO, datosCurso);
 
     expect(deps.eliminarImagen).toHaveBeenCalledWith(
       'http://localhost:4000/uploads/imagenes/vieja.png'
@@ -368,17 +377,17 @@ describe('catalogService de cursos', () => {
       })
     );
 
-    await expect(servicio.actualizarCurso(9, datosCurso)).rejects.toMatchObject({
+    await expect(servicio.actualizarCurso(UUID_AJENO, datosCurso)).rejects.toMatchObject({
       statusCode: 404,
     });
-    await expect(servicio.eliminarCurso(9)).rejects.toMatchObject({ statusCode: 404 });
-    await expect(servicio.obtenerCurso(9)).rejects.toMatchObject({ statusCode: 404 });
+    await expect(servicio.eliminarCurso(UUID_AJENO)).rejects.toMatchObject({ statusCode: 404 });
+    await expect(servicio.obtenerCurso(UUID_AJENO)).rejects.toMatchObject({ statusCode: 404 });
   });
 
   it('responde 409 si el curso tiene matriculas', async () => {
     const servicio = crearServicioCatalogo(
       crearDeps({ eliminarCurso: vi.fn().mockResolvedValue({ tipo: 'en-uso' }) })
     );
-    await expect(servicio.eliminarCurso(1)).rejects.toMatchObject({ statusCode: 409 });
+    await expect(servicio.eliminarCurso(UUID_CURSO)).rejects.toMatchObject({ statusCode: 409 });
   });
 });
