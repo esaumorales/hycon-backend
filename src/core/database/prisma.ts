@@ -10,11 +10,30 @@ declare global {
 
 const connectionString = env.DATABASE_URL;
 
-const pool = new Pool({ connectionString });
+// Conexiones del pool. Postgres admite 100 por defecto y aqui solo corre esta API:
+// 10 sobran y evitan que una rafaga de peticiones deje sin conexion a la siguiente.
+const pool = new Pool({
+  connectionString,
+  max: 10,
+  // Una conexion parada se devuelve al sistema en lugar de quedarse ocupada
+  idleTimeoutMillis: 30_000,
+  // Si la base no responde en este tiempo, mejor fallar claro que esperar indefinidamente
+  connectionTimeoutMillis: 10_000,
+});
+
 const adapter = new PrismaPg(pool);
 
 export const prisma =
-  global.prisma || new PrismaClient({ adapter });
+  global.prisma ||
+  new PrismaClient({
+    adapter,
+    transactionOptions: {
+      // Espera por una conexion libre antes de rendirse (el error P2028 salia a los 2 s)
+      maxWait: 10_000,
+      // Techo de duracion de la transaccion en si
+      timeout: 15_000,
+    },
+  });
 
 if (env.NODE_ENV !== 'production') {
   global.prisma = prisma;

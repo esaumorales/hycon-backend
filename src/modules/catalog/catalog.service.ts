@@ -1,4 +1,5 @@
 import { prisma } from '../../core/database/prisma';
+import { listarConTotal } from '../../core/database/consultas';
 import { AppError } from '../../core/errors/AppError';
 import { almacenImagenes } from '../uploads/uploads.service';
 import { aCursoPublico, aPaginacion, aProductoPublico } from './catalog.mapper';
@@ -119,18 +120,19 @@ const columnasCurso = (datos: CursoInput) => ({
 export const dependenciasReales: DependenciasCatalogo = {
   async listarProductos({ estado, saltar, tomar }) {
     const where = filtroEstado(estado);
-    const [filas, total] = await prisma.$transaction([
-      prisma.product.findMany({
-        where,
-        select: seleccionProducto,
-        // productId desempata los creados en el mismo instante: sin eso una fila
-        // podria aparecer en dos paginas seguidas
-        orderBy: [{ createdAt: 'desc' }, { productId: 'desc' }],
-        skip: saltar,
-        take: tomar,
-      }),
-      prisma.product.count({ where }),
-    ]);
+    const { filas, total } = await listarConTotal(
+      () =>
+        prisma.product.findMany({
+          where,
+          select: seleccionProducto,
+          // productId desempata los creados en el mismo instante: sin eso una fila
+          // podria aparecer en dos paginas seguidas
+          orderBy: [{ createdAt: 'desc' }, { productId: 'desc' }],
+          skip: saltar,
+          take: tomar,
+        }),
+      () => prisma.product.count({ where })
+    );
     return { filas: filas as unknown as ProductoBase[], total };
   },
 
@@ -193,16 +195,17 @@ export const dependenciasReales: DependenciasCatalogo = {
 
   async listarCursos({ estado, saltar, tomar }) {
     const where = filtroEstado(estado);
-    const [filas, total] = await prisma.$transaction([
-      prisma.course.findMany({
-        where,
-        select: seleccionCurso,
-        orderBy: [{ createdAt: 'desc' }, { courseId: 'desc' }],
-        skip: saltar,
-        take: tomar,
-      }),
-      prisma.course.count({ where }),
-    ]);
+    const { filas, total } = await listarConTotal(
+      () =>
+        prisma.course.findMany({
+          where,
+          select: seleccionCurso,
+          orderBy: [{ createdAt: 'desc' }, { courseId: 'desc' }],
+          skip: saltar,
+          take: tomar,
+        }),
+      () => prisma.course.count({ where })
+    );
     return { filas: filas as unknown as CursoBase[], total };
   },
 

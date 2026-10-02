@@ -1,4 +1,5 @@
 import { prisma } from '../../core/database/prisma';
+import { listarConTotal } from '../../core/database/consultas';
 import { AppError } from '../../core/errors/AppError';
 import { almacenImagenes } from '../uploads/uploads.service';
 import { aPaginacion } from '../catalog/catalog.mapper';
@@ -82,20 +83,20 @@ const columnas = (datos: DatosGuardado) => ({
 export const dependenciasReales: DependenciasPublicaciones = {
   async listar({ estado, saltar, tomar, orden }) {
     const where = estado === 'todos' ? undefined : { status: estado };
-    const [filas, total] = await prisma.$transaction([
-      prisma.post.findMany({
-        where,
-        select: seleccion,
-        orderBy:
-          orden === 'leidos'
-            ? [{ views: 'desc' }, { publishedAt: 'desc' }]
-            : [{ publishedAt: 'desc' }, { postId: 'desc' }],
-        skip: saltar,
-        take: tomar,
-      }),
-      prisma.post.count({ where }),
-    ]);
-    return { filas, total };
+    return listarConTotal(
+      () =>
+        prisma.post.findMany({
+          where,
+          select: seleccion,
+          orderBy:
+            orden === 'leidos'
+              ? [{ views: 'desc' }, { publishedAt: 'desc' }]
+              : [{ publishedAt: 'desc' }, { postId: 'desc' }],
+          skip: saltar,
+          take: tomar,
+        }),
+      () => prisma.post.count({ where })
+    );
   },
 
   obtener: (uuid) => prisma.post.findUnique({ where: { uuid }, select: seleccion }),

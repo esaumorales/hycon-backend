@@ -93,6 +93,19 @@ describe('GET /api/v1/catalog', () => {
     expect(catalogService.obtenerProducto).not.toHaveBeenCalled();
   });
 
+  it('un fallo de la base responde 503 con Retry-After, no un 500 mudo', async () => {
+    // P2028: la transaccion no consiguio conexion; antes salia como error interno
+    vi.mocked(catalogService.listarProductos).mockRejectedValue(
+      Object.assign(new Error('Transaction API error'), { code: 'P2028' })
+    );
+
+    const respuesta = await request(app).get('/api/v1/catalog/products');
+
+    expect(respuesta.status).toBe(503);
+    expect(respuesta.headers['retry-after']).toBe('5');
+    expect(respuesta.body.error).toMatch(/saturado/i);
+  });
+
   it('propaga el 404 del servicio', async () => {
     vi.mocked(catalogService.obtenerProducto).mockRejectedValue(
       new AppError('Producto no encontrado', 404)
