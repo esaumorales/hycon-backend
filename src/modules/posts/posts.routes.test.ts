@@ -129,3 +129,17 @@ describe('/api/v1/posts', () => {
     expect((await request(app).get('/api/v1/posts/no-existe')).status).toBe(404);
   });
 });
+
+
+describe('Filtros HTTP de publicaciones', () => {
+  it('propaga fechas, búsqueda y orden', async () => {
+    vi.mocked(postsService.listar).mockResolvedValue({ elementos: [], paginacion: { pagina: 1, porPagina: 6, total: 0, totalPaginas: 1 } });
+    const r = await request(app).get('/api/v1/posts?buscar=almacen&desde=2026-09-01&hasta=2026-10-03&orden=titulo');
+    expect(r.status).toBe(200);
+    expect(postsService.listar).toHaveBeenLastCalledWith(expect.objectContaining({ buscar: 'almacen', desde: '2026-09-01', hasta: '2026-10-03', orden: 'titulo' }));
+  });
+  it('rechaza fechas inexistentes y rangos invertidos con 400', async () => {
+    expect((await request(app).get('/api/v1/posts?desde=2026-02-30')).status).toBe(400);
+    expect((await request(app).get('/api/v1/posts?desde=2026-10-03&hasta=2026-09-01')).status).toBe(400);
+  });
+});

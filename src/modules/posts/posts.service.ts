@@ -1,10 +1,11 @@
+import { consultaPublicaciones } from './posts.filtros';
 import { prisma } from '../../core/database/prisma';
 import { listarConTotal } from '../../core/database/consultas';
 import { AppError } from '../../core/errors/AppError';
 import { almacenImagenes } from '../uploads/uploads.service';
 import { aPaginacion } from '../catalog/catalog.mapper';
 import type { ListadoPublicaciones } from './posts.schema';
-import type { ConsultaListado, Listado } from '../catalog/catalog.service';
+import type { Listado } from '../catalog/catalog.service';
 import type { PaginaDe, ResultadoActualizar, ResultadoEliminar } from '../catalog/catalog.types';
 import type { PublicacionInput } from './posts.schema';
 import type { PublicacionBase, PublicacionPublica } from './posts.types';
@@ -14,8 +15,9 @@ type DatosGuardado = Omit<PublicacionInput, 'publishedAt'> & { slug: string; pub
 
 export type OrdenPublicaciones = ListadoPublicaciones['orden'];
 
-export interface ConsultaPublicaciones extends ConsultaListado {
-  orden: OrdenPublicaciones;
+export interface ConsultaPublicaciones extends Omit<ListadoPublicaciones, 'pagina' | 'porPagina'> {
+  saltar: number;
+  tomar: number;
 }
 
 export interface DependenciasPublicaciones {
@@ -81,17 +83,14 @@ const columnas = (datos: DatosGuardado) => ({
 });
 
 export const dependenciasReales: DependenciasPublicaciones = {
-  async listar({ estado, saltar, tomar, orden }) {
-    const where = estado === 'todos' ? undefined : { status: estado };
+  async listar({ saltar, tomar, ...filtros }) {
+    const { where, orderBy } = consultaPublicaciones(filtros);
     return listarConTotal(
       () =>
         prisma.post.findMany({
           where,
           select: seleccion,
-          orderBy:
-            orden === 'leidos'
-              ? [{ views: 'desc' }, { publishedAt: 'desc' }]
-              : [{ publishedAt: 'desc' }, { postId: 'desc' }],
+          orderBy,
           skip: saltar,
           take: tomar,
         }),
@@ -161,10 +160,9 @@ export const crearServicioPublicaciones = (deps: DependenciasPublicaciones) => {
   };
 
   return {
-    async listar({ estado, pagina, porPagina, orden }: ListadoPublicaciones): Promise<Listado<PublicacionPublica>> {
+    async listar({ pagina, porPagina, ...filtros }: ListadoPublicaciones): Promise<Listado<PublicacionPublica>> {
       const { filas, total } = await deps.listar({
-        estado,
-        orden,
+        ...filtros,
         saltar: (pagina - 1) * porPagina,
         tomar: porPagina,
       });

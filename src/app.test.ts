@@ -282,3 +282,23 @@ describe('documentacion', () => {
     );
   });
 });
+
+
+describe('Filtros HTTP del catálogo', () => {
+  it('propaga búsqueda, rango de precio, stock y orden a productos', async () => {
+    const r = await request(app).get('/api/v1/catalog/products?buscar=Caja&precioMin=0&precioMax=100&stock=disponible&orden=precio-asc');
+    expect(r.status).toBe(200);
+    expect(catalogService.listarProductos).toHaveBeenLastCalledWith(expect.objectContaining({ buscar: 'Caja', precioMin: 0, precioMax: 100, stock: 'disponible', orden: 'precio-asc' }));
+  });
+  it('propaga duración y búsqueda al listado de cursos', async () => {
+    const r = await request(app).get('/api/v1/catalog/courses?estado=inactive&buscar=Logistica&duracionMax=120');
+    expect(r.status).toBe(200);
+    expect(catalogService.listarCursos).toHaveBeenLastCalledWith(expect.objectContaining({ estado: 'inactive', buscar: 'Logistica', duracionMax: 120 }));
+  });
+  it('rechaza rangos invertidos con 400 en vez de un error interno', async () => {
+    vi.mocked(catalogService.listarProductos).mockClear();
+    const r = await request(app).get('/api/v1/catalog/products?precioMin=100&precioMax=10');
+    expect(r.status).toBe(400);
+    expect(catalogService.listarProductos).not.toHaveBeenCalled();
+  });
+});

@@ -1,3 +1,4 @@
+import { consultaProductos, consultaCursos } from './catalog.filtros';
 import { prisma } from '../../core/database/prisma';
 import { listarConTotal } from '../../core/database/consultas';
 import { AppError } from '../../core/errors/AppError';
@@ -17,15 +18,11 @@ import type {
 
 export type EstadoListado = ListadoQuery['estado'];
 
-export interface ConsultaListado {
-  estado: EstadoListado;
+export interface ConsultaListado extends Omit<ListadoQuery, 'pagina' | 'porPagina'> {
   saltar: number;
   tomar: number;
 }
 
-// 'todos' no filtra; cualquier otro valor filtra por esa columna status
-const filtroEstado = (estado: EstadoListado) =>
-  estado === 'todos' ? undefined : { status: estado };
 
 export interface DependenciasCatalogo {
   listarProductos(consulta: ConsultaListado): Promise<PaginaDe<ProductoBase>>;
@@ -118,8 +115,8 @@ const columnasCurso = (datos: CursoInput) => ({
 });
 
 export const dependenciasReales: DependenciasCatalogo = {
-  async listarProductos({ estado, saltar, tomar }) {
-    const where = filtroEstado(estado);
+  async listarProductos({ saltar, tomar, ...filtros }) {
+    const { where, orderBy } = consultaProductos(filtros);
     const { filas, total } = await listarConTotal(
       () =>
         prisma.product.findMany({
@@ -127,7 +124,7 @@ export const dependenciasReales: DependenciasCatalogo = {
           select: seleccionProducto,
           // productId desempata los creados en el mismo instante: sin eso una fila
           // podria aparecer en dos paginas seguidas
-          orderBy: [{ createdAt: 'desc' }, { productId: 'desc' }],
+          orderBy,
           skip: saltar,
           take: tomar,
         }),
@@ -193,14 +190,14 @@ export const dependenciasReales: DependenciasCatalogo = {
     }
   },
 
-  async listarCursos({ estado, saltar, tomar }) {
-    const where = filtroEstado(estado);
+  async listarCursos({ saltar, tomar, ...filtros }) {
+    const { where, orderBy } = consultaCursos(filtros);
     const { filas, total } = await listarConTotal(
       () =>
         prisma.course.findMany({
           where,
           select: seleccionCurso,
-          orderBy: [{ createdAt: 'desc' }, { courseId: 'desc' }],
+          orderBy,
           skip: saltar,
           take: tomar,
         }),
@@ -274,10 +271,10 @@ export const crearServicioCatalogo = (deps: DependenciasCatalogo) => {
   const listar = async <B, P>(
     consultar: (consulta: ConsultaListado) => Promise<PaginaDe<B>>,
     mapear: (fila: B) => P,
-    { estado, pagina, porPagina }: ListadoQuery
+    { pagina, porPagina, ...filtros }: ListadoQuery
   ): Promise<Listado<P>> => {
     const { filas, total } = await consultar({
-      estado,
+      ...filtros,
       saltar: (pagina - 1) * porPagina,
       tomar: porPagina,
     });

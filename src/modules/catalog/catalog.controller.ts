@@ -1,3 +1,4 @@
+import { AppError } from '../../core/errors/AppError';
 import type { Request } from 'express';
 import { leerUuid, manejar, obtenerUsuarioId as obtenerOwnerId } from '../../core/utils/controlador';
 import { catalogService } from './catalog.service';
@@ -6,7 +7,11 @@ import { listadoQuerySchema } from './catalog.schema';
 import type { CursoInput, ProductoInput } from './catalog.schema';
 
 // Los parametros invalidos de la URL no rompen la peticion: caen a su valor por defecto
-const leerListado = (req: Request) => listadoQuerySchema.parse(req.query);
+const leerListado = (req: Request) => {
+  const resultado = listadoQuerySchema.safeParse(req.query);
+  if (!resultado.success) throw new AppError(resultado.error.issues[0].message, 400);
+  return resultado.data;
+};
 
 export const listarAgencias = manejar(async (_req, res) => {
   res.status(200).json({ success: true, data: { agencias: AGENCIAS_ENVIO } });

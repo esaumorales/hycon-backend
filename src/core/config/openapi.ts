@@ -43,6 +43,7 @@ const parametroUuid = (entidad: string) => ({
 });
 
 const PARAMETROS_LISTADO = [
+  { name: 'buscar', in: 'query', description: 'Búsqueda parcial sin distinguir mayúsculas; hasta 120 caracteres.', schema: { type: 'string', maxLength: 120 } },
   {
     name: 'estado',
     in: 'query',
@@ -321,7 +322,14 @@ const rutasCrud = (opciones: {
       tags: ['Catalogo'],
       summary: `Lista ${opciones.plural} paginados`,
       description: `Publico. Ordenado del mas reciente al mas antiguo. Devuelve ${POR_PAGINA_DEFECTO} por pagina salvo que se indique porPagina.`,
-      parameters: PARAMETROS_LISTADO,
+      parameters: [
+        ...PARAMETROS_LISTADO,
+        { name: 'orden', in: 'query', schema: { type: 'string', enum: ['recientes', 'antiguos', 'nombre', 'precio-asc', 'precio-desc'], default: 'recientes' } },
+        ...['precioMin', 'precioMax'].map((name) => ({ name, in: 'query', description: 'Precio de lista en soles; mínimo y máximo inclusivos.', schema: { type: 'number', minimum: 0, maximum: 999999.99 } })),
+        ...(opciones.ruta === 'products'
+          ? [{ name: 'stock', in: 'query', schema: { type: 'string', enum: ['disponible', 'agotado'] } }]
+          : [{ name: 'duracionMax', in: 'query', description: 'Duración máxima del curso en minutos.', schema: { type: 'integer', minimum: 0, maximum: 100000 } }]),
+      ],
       responses: {
         '200': sobre(
           {
@@ -568,9 +576,10 @@ export const openApiSpec = {
           {
             name: 'orden',
             in: 'query',
-            description: 'recientes: por fecha de publicacion. leidos: por numero de lecturas. Un valor invalido vuelve a recientes.',
-            schema: { type: 'string', enum: ['recientes', 'leidos'], default: 'recientes' },
+            description: 'Orden por fecha, número de lecturas o título. Un valor inválido vuelve a recientes.',
+            schema: { type: 'string', enum: ['recientes', 'leidos', 'antiguos', 'titulo'], default: 'recientes' },
           },
+          ...['desde', 'hasta'].map((name) => ({ name, in: 'query', description: 'Fecha inclusiva en el calendario de Perú (UTC-5). Los rangos inválidos devuelven 400.', schema: { type: 'string', format: 'date' } })),
         ],
         responses: {
           '200': sobre(

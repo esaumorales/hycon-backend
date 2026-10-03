@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { buscarSchema, numeroFiltro } from '../../core/utils/filtros-listado';
 import { esEnlaceYoutube } from '../../core/utils/youtube';
 import { CODIGOS_AGENCIA, POR_PAGINA_DEFECTO, POR_PAGINA_MAXIMO } from './catalog.constants';
 
@@ -125,11 +126,21 @@ export type CursoInput = z.infer<typeof cursoSchema>;
 // Filtros del listado. Cada parametro invalido cae a su valor por defecto por separado,
 // asi un ?pagina=abc no invalida tambien el estado.
 // Por defecto solo se publican los activos: el catalogo publico no muestra lo dado de baja.
-export const listadoQuerySchema = z.object({
+export const listadoBaseSchema = z.object({
+  buscar: buscarSchema,
   estado: z.enum(['active', 'inactive', 'todos']).catch('active'),
   pagina: z.coerce.number().int().min(1).catch(1),
   porPagina: z.coerce.number().int().min(1).max(POR_PAGINA_MAXIMO).catch(POR_PAGINA_DEFECTO),
 });
+
+export const listadoQuerySchema = listadoBaseSchema.extend({
+  orden: z.enum(['recientes', 'antiguos', 'nombre', 'precio-asc', 'precio-desc']).optional(),
+  precioMin: numeroFiltro(999999.99),
+  precioMax: numeroFiltro(999999.99),
+  stock: z.enum(['disponible', 'agotado']).optional(),
+  duracionMax: numeroFiltro(100000, true),
+}).refine((v) => v.precioMin === undefined || v.precioMax === undefined || v.precioMin <= v.precioMax,
+  { message: 'El precio mínimo no puede superar el máximo', path: ['precioMax'] });
 
 export type ListadoQuery = z.infer<typeof listadoQuerySchema>;
 

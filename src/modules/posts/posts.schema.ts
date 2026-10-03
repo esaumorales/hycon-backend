@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { listadoQuerySchema } from '../catalog/catalog.schema';
+import { fechaFiltro } from '../../core/utils/filtros-listado';
+import { listadoBaseSchema } from '../catalog/catalog.schema';
 import { sanitizarContenido, textoPlano } from './posts.contenido';
 
 const vacioComoIndefinido = (valor: unknown) =>
@@ -48,8 +49,11 @@ export const publicacionSchema = z.object({
 export type PublicacionInput = z.infer<typeof publicacionSchema>;
 
 // El blog necesita dos ordenes: lo ultimo publicado y lo mas leido
-export const listadoPublicacionesSchema = listadoQuerySchema.extend({
-  orden: z.enum(['recientes', 'leidos']).catch('recientes'),
-});
+export const listadoPublicacionesSchema = listadoBaseSchema.extend({
+  orden: z.enum(['recientes', 'leidos', 'antiguos', 'titulo']).catch('recientes'),
+  desde: fechaFiltro,
+  hasta: fechaFiltro,
+}).refine((v) => !v.desde || !v.hasta || v.desde <= v.hasta,
+  { message: 'La fecha inicial no puede superar la final', path: ['hasta'] });
 
 export type ListadoPublicaciones = z.infer<typeof listadoPublicacionesSchema>;

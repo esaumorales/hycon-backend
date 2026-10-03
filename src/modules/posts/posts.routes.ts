@@ -2,11 +2,14 @@ import { Router } from 'express';
 import { protect, restrictTo } from '../../core/middlewares/auth.middleware';
 import { validate } from '../../core/middlewares/validate.middleware';
 import { leerUuid, manejar, obtenerUsuarioId } from '../../core/utils/controlador';
+import { AppError } from '../../core/errors/AppError';
 import { listadoPublicacionesSchema, publicacionSchema, type PublicacionInput } from './posts.schema';
 import { postsService } from './posts.service';
 
 const listar = manejar(async (req, res) => {
-  const { elementos, paginacion } = await postsService.listar(listadoPublicacionesSchema.parse(req.query));
+  const consulta = listadoPublicacionesSchema.safeParse(req.query);
+  if (!consulta.success) throw new AppError(consulta.error.issues[0].message, 400);
+  const { elementos, paginacion } = await postsService.listar(consulta.data);
   res.status(200).json({ success: true, data: { publicaciones: elementos, paginacion } });
 });
 
