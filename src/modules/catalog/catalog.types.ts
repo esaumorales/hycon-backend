@@ -24,6 +24,7 @@ export interface ProductoBase {
 export interface CursoBase {
   courseId: number;
   uuid: string;
+  previewSeconds: number;
   ownerId: number;
   name: string;
   description: string | null;
@@ -65,6 +66,8 @@ export interface ProductoDetallePublico extends ProductoPublico {
 
 export interface CursoPublico {
   uuid: string;
+  // Segundos de la leccion de muestra que ve quien no ha comprado
+  previewSegundos: number;
   name: string;
   description: string | null;
   videoUrl: string | null;

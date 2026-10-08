@@ -54,6 +54,7 @@ export const ModelName = {
   Role: 'Role',
   User: 'User',
   Course: 'Course',
+  Lesson: 'Lesson',
   Product: 'Product',
   ProductImage: 'ProductImage',
   Cart: 'Cart',
@@ -126,6 +127,7 @@ export const CourseScalarFieldEnum = {
   videoUrl: 'videoUrl',
   thumbnailUrl: 'thumbnailUrl',
   durationMinutes: 'durationMinutes',
+  previewSeconds: 'previewSeconds',
   price: 'price',
   discountPrice: 'discountPrice',
   status: 'status',
@@ -134,6 +136,23 @@ export const CourseScalarFieldEnum = {
 } as const
 
 export type CourseScalarFieldEnum = (typeof CourseScalarFieldEnum)[keyof typeof CourseScalarFieldEnum]
+
+
+export const LessonScalarFieldEnum = {
+  lessonId: 'lessonId',
+  uuid: 'uuid',
+  courseId: 'courseId',
+  title: 'title',
+  description: 'description',
+  videoUrl: 'videoUrl',
+  durationMinutes: 'durationMinutes',
+  position: 'position',
+  isPreview: 'isPreview',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LessonScalarFieldEnum = (typeof LessonScalarFieldEnum)[keyof typeof LessonScalarFieldEnum]
 
 
 export const ProductScalarFieldEnum = {
@@ -192,6 +211,7 @@ export type CartItemScalarFieldEnum = (typeof CartItemScalarFieldEnum)[keyof typ
 
 export const OrderScalarFieldEnum = {
   orderId: 'orderId',
+  uuid: 'uuid',
   userId: 'userId',
   subtotal: 'subtotal',
   discount: 'discount',

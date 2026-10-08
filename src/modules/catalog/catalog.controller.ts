@@ -4,7 +4,9 @@ import { leerUuid, manejar, obtenerUsuarioId as obtenerOwnerId } from '../../cor
 import { catalogService } from './catalog.service';
 import { AGENCIAS_ENVIO } from './catalog.constants';
 import { listadoQuerySchema } from './catalog.schema';
+import { leccionesService } from './lecciones.service';
 import type { CursoInput, ProductoInput } from './catalog.schema';
+import type { LeccionInput, OrdenLeccionesInput } from './lecciones.schema';
 
 // Los parametros invalidos de la URL no rompen la peticion: caen a su valor por defecto
 const leerListado = (req: Request) => {
@@ -68,4 +70,40 @@ export const actualizarCurso = manejar(async (req, res) => {
 export const eliminarCurso = manejar(async (req, res) => {
   await catalogService.eliminarCurso(leerUuid(req));
   res.status(204).end();
+});
+
+export const listarLecciones = manejar(async (req, res) => {
+  // Si viene con sesion se le muestran los videos que ya compro
+  const temario = await leccionesService.listarPublicas(leerUuid(req), req.usuario?.userId);
+  res.status(200).json({ success: true, data: { temario } });
+});
+
+export const listarLeccionesAdmin = manejar(async (req, res) => {
+  const temario = await leccionesService.listarParaAdmin(leerUuid(req));
+  res.status(200).json({ success: true, data: { temario } });
+});
+
+export const crearLeccion = manejar(async (req, res) => {
+  const leccion = await leccionesService.crear(leerUuid(req), req.body as LeccionInput);
+  res.status(201).json({ success: true, data: { leccion } });
+});
+
+export const actualizarLeccion = manejar(async (req, res) => {
+  const leccion = await leccionesService.actualizar(
+    leerUuid(req),
+    String(req.params.leccionUuid ?? ''),
+    req.body as LeccionInput
+  );
+  res.status(200).json({ success: true, data: { leccion } });
+});
+
+export const eliminarLeccion = manejar(async (req, res) => {
+  await leccionesService.eliminar(leerUuid(req), String(req.params.leccionUuid ?? ''));
+  res.status(204).end();
+});
+
+export const reordenarLecciones = manejar(async (req, res) => {
+  const { orden } = req.body as OrdenLeccionesInput;
+  const temario = await leccionesService.reordenar(leerUuid(req), orden);
+  res.status(200).json({ success: true, data: { temario } });
 });

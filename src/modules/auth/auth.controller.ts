@@ -3,7 +3,8 @@ import { AppError } from '../../core/errors/AppError';
 import { manejar } from '../../core/utils/controlador';
 import { authService } from './auth.service';
 import { borrarCookieSesion, escribirCookieSesion, NOMBRE_COOKIE_SESION } from './auth.cookies';
-import type { LoginInput, RegistroInput } from './auth.schema';
+import { exigirArchivo } from '../uploads/uploads.middleware';
+import type { CambioPasswordInput, LoginInput, PerfilInput, RegistroInput } from './auth.schema';
 import type { ContextoPeticion, SesionIniciada } from './auth.types';
 
 const contextoDe = (req: Request): ContextoPeticion => ({
@@ -48,10 +49,51 @@ export const cerrarSesion = manejar(async (req, res) => {
   res.status(204).end();
 });
 
-export const perfil = manejar(async (req, res) => {
+const idDelUsuario = (req: Request): number => {
   if (!req.usuario) {
     throw new AppError('No autenticado. Inicia sesion para continuar', 401);
   }
-  const usuario = await authService.obtenerPerfil(req.usuario.userId);
+  return req.usuario.userId;
+};
+
+const responderUsuario = (res: Response, usuario: unknown) => {
+  res.setHeader('Cache-Control', 'no-store');
   res.status(200).json({ success: true, data: { usuario } });
+};
+
+export const perfil = manejar(async (req, res) => {
+  responderUsuario(res, await authService.obtenerPerfil(idDelUsuario(req)));
+});
+
+export const actualizarPerfil = manejar(async (req, res) => {
+  const usuario = await authService.actualizarPerfil(
+    idDelUsuario(req),
+    req.body as PerfilInput,
+    contextoDe(req)
+  );
+  responderUsuario(res, usuario);
+});
+
+export const cambiarPassword = manejar(async (req, res) => {
+  await authService.cambiarPassword(
+    idDelUsuario(req),
+    req.body as CambioPasswordInput,
+    // La sesion desde la que se cambia sigue abierta; las demas se cierran
+    { tokenSesionActual: leerCookieSesion(req) },
+    contextoDe(req)
+  );
+  res.status(204).end();
+});
+
+export const actualizarAvatar = manejar(async (req, res) => {
+  const usuario = await authService.actualizarAvatar(
+    idDelUsuario(req),
+    exigirArchivo(req),
+    contextoDe(req)
+  );
+  responderUsuario(res, usuario);
+});
+
+export const quitarAvatar = manejar(async (req, res) => {
+  responderUsuario(res, await authService.quitarAvatar(idDelUsuario(req), contextoDe(req)));
 });

@@ -114,6 +114,16 @@ export const cursoSchema = z
         .max(100000, 'La duracion supera el maximo permitido')
         .optional()
     ),
+    // Cuanto se deja ver de la leccion de muestra a quien no ha comprado
+    previewSegundos: z.preprocess(
+      vacioComoIndefinido,
+      z.coerce
+        .number({ message: 'La muestra debe ser un numero de segundos' })
+        .int('La muestra debe ser un numero entero de segundos')
+        .min(5, 'La muestra debe durar al menos 5 segundos')
+        .max(600, 'La muestra no puede pasar de 10 minutos')
+        .default(60)
+    ),
     price: precio,
     discountPrice: precioOpcional,
     status: estado,

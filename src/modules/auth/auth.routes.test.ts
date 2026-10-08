@@ -8,11 +8,16 @@ vi.mock('./auth.service', () => ({
     renovarSesion: vi.fn(),
     cerrarSesion: vi.fn(),
     obtenerPerfil: vi.fn(),
+    actualizarPerfil: vi.fn(),
+    cambiarPassword: vi.fn(),
+    actualizarAvatar: vi.fn(),
+    quitarAvatar: vi.fn(),
   },
 }));
 
 import { app } from '../../app';
 import { AppError, ErrorDemasiadosIntentos } from '../../core/errors/AppError';
+import { firmarToken } from '../../core/utils/jwt';
 import { authService } from './auth.service';
 
 const usuario = {
@@ -190,5 +195,119 @@ describe('cabeceras de seguridad', () => {
     expect(respuesta.body.error).not.toContain('10.0.0.5');
     expect(respuesta.body.stack).toBeUndefined();
     silenciar.mockRestore();
+  });
+});
+
+
+describe('perfil del usuario', () => {
+  const cliente = `Bearer ${firmarToken({ userId: 7, email: 'ana@hycon.com', rol: 'CLIENTE' })}`;
+  const datos = { name: 'Ana', lastname: 'Quispe Rojas', phone: '902665565' };
+
+  beforeEach(() => {
+    vi.mocked(authService.actualizarPerfil).mockResolvedValue({ ...usuario, ...datos });
+    vi.mocked(authService.cambiarPassword).mockResolvedValue(undefined);
+    vi.mocked(authService.actualizarAvatar).mockResolvedValue({
+      ...usuario,
+      avatarUrl: 'http://localhost:4000/uploads/imagenes/foto.webp',
+    });
+    vi.mocked(authService.quitarAvatar).mockResolvedValue({ ...usuario, avatarUrl: null });
+  });
+
+  it('todas las rutas del perfil exigen sesion', async () => {
+    const editar = await request(app).put('/api/v1/auth/me').send(datos);
+    const password = await request(app)
+      .put('/api/v1/auth/me/password')
+      .send({ actual: 'a', nueva: 'brisa-tablero-19-norte' });
+    const avatar = await request(app).post('/api/v1/auth/me/avatar');
+    const quitar = await request(app).delete('/api/v1/auth/me/avatar');
+
+    expect([editar.status, password.status, avatar.status, quitar.status]).toEqual([401, 401, 401, 401]);
+    expect(authService.actualizarPerfil).not.toHaveBeenCalled();
+    expect(authService.cambiarPassword).not.toHaveBeenCalled();
+  });
+
+  it('guarda los datos con el usuario del token, no con el que venga en el cuerpo', async () => {
+    const respuesta = await request(app)
+      .put('/api/v1/auth/me')
+      .set('Authorization', cliente)
+      .send({ ...datos, userId: 1 });
+
+    expect(respuesta.status).toBe(200);
+    expect(respuesta.body.data.usuario.lastname).toBe('Quispe Rojas');
+    expect(respuesta.headers['cache-control']).toBe('no-store');
+    expect(authService.actualizarPerfil).toHaveBeenCalledWith(7, expect.objectContaining(datos), expect.any(Object));
+  });
+
+  it('rechaza un perfil con datos invalidos sin llegar al servicio', async () => {
+    const corto = await request(app)
+      .put('/api/v1/auth/me')
+      .set('Authorization', cliente)
+      .send({ name: 'A', lastname: 'Quispe' });
+    const telefonoRaro = await request(app)
+      .put('/api/v1/auth/me')
+      .set('Authorization', cliente)
+      .send({ ...datos, phone: 'llamame <script>' });
+
+    expect(corto.status).toBe(422);
+    expect(telefonoRaro.status).toBe(422);
+    expect(authService.actualizarPerfil).not.toHaveBeenCalled();
+  });
+
+  it('cambia la contrasena y responde 204 sin cuerpo', async () => {
+    const respuesta = await request(app)
+      .put('/api/v1/auth/me/password')
+      .set('Authorization', cliente)
+      .set('Cookie', 'hycon_sesion=token-largo-secreto')
+      .send({ actual: 'la-de-antes', nueva: 'brisa-tablero-19-norte' });
+
+    expect(respuesta.status).toBe(204);
+    expect(authService.cambiarPassword).toHaveBeenCalledWith(
+      7,
+      { actual: 'la-de-antes', nueva: 'brisa-tablero-19-norte' },
+      { tokenSesionActual: 'token-largo-secreto' },
+      expect.any(Object)
+    );
+  });
+
+  it('una contrasena nueva que no cumple la politica no llega al servicio', async () => {
+    const debil = await request(app)
+      .put('/api/v1/auth/me/password')
+      .set('Authorization', cliente)
+      .send({ actual: 'la-de-antes', nueva: '123456' });
+    const repetida = await request(app)
+      .put('/api/v1/auth/me/password')
+      .set('Authorization', cliente)
+      .send({ actual: 'brisa-tablero-19-norte', nueva: 'brisa-tablero-19-norte' });
+
+    expect(debil.status).toBe(422);
+    expect(repetida.status).toBe(422);
+    expect(repetida.body.error).toMatch(/distinta de la actual/i);
+    expect(authService.cambiarPassword).not.toHaveBeenCalled();
+  });
+
+  it('sube la foto y devuelve el usuario con su URL', async () => {
+    const respuesta = await request(app)
+      .post('/api/v1/auth/me/avatar')
+      .set('Authorization', cliente)
+      .attach('imagen', Buffer.from([0xff, 0xd8, 0xff, 0xe0]), 'foto.jpg');
+
+    expect(respuesta.status).toBe(200);
+    expect(respuesta.body.data.usuario.avatarUrl).toMatch(/foto\.webp$/);
+    expect(authService.actualizarAvatar).toHaveBeenCalledWith(7, expect.any(Buffer), expect.any(Object));
+  });
+
+  it('sin archivo adjunto responde 400', async () => {
+    const respuesta = await request(app).post('/api/v1/auth/me/avatar').set('Authorization', cliente);
+
+    expect(respuesta.status).toBe(400);
+    expect(authService.actualizarAvatar).not.toHaveBeenCalled();
+  });
+
+  it('quita la foto del perfil', async () => {
+    const respuesta = await request(app).delete('/api/v1/auth/me/avatar').set('Authorization', cliente);
+
+    expect(respuesta.status).toBe(200);
+    expect(respuesta.body.data.usuario.avatarUrl).toBeNull();
+    expect(authService.quitarAvatar).toHaveBeenCalledWith(7, expect.any(Object));
   });
 });

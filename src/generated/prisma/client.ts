@@ -55,6 +55,11 @@ export type User = Prisma.UserModel
  */
 export type Course = Prisma.CourseModel
 /**
+ * Model Lesson
+ * 
+ */
+export type Lesson = Prisma.LessonModel
+/**
  * Model Product
  * 
  */

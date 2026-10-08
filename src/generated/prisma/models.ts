@@ -11,6 +11,7 @@
 export type * from './models/Role'
 export type * from './models/User'
 export type * from './models/Course'
+export type * from './models/Lesson'
 export type * from './models/Product'
 export type * from './models/ProductImage'
 export type * from './models/Cart'

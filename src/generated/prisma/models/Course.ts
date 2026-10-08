@@ -30,6 +30,7 @@ export type CourseAvgAggregateOutputType = {
   courseId: number | null
   ownerId: number | null
   durationMinutes: number | null
+  previewSeconds: number | null
   price: runtime.Decimal | null
   discountPrice: runtime.Decimal | null
 }
@@ -38,6 +39,7 @@ export type CourseSumAggregateOutputType = {
   courseId: number | null
   ownerId: number | null
   durationMinutes: number | null
+  previewSeconds: number | null
   price: runtime.Decimal | null
   discountPrice: runtime.Decimal | null
 }
@@ -51,6 +53,7 @@ export type CourseMinAggregateOutputType = {
   videoUrl: string | null
   thumbnailUrl: string | null
   durationMinutes: number | null
+  previewSeconds: number | null
   price: runtime.Decimal | null
   discountPrice: runtime.Decimal | null
   status: string | null
@@ -67,6 +70,7 @@ export type CourseMaxAggregateOutputType = {
   videoUrl: string | null
   thumbnailUrl: string | null
   durationMinutes: number | null
+  previewSeconds: number | null
   price: runtime.Decimal | null
   discountPrice: runtime.Decimal | null
   status: string | null
@@ -83,6 +87,7 @@ export type CourseCountAggregateOutputType = {
   videoUrl: number
   thumbnailUrl: number
   durationMinutes: number
+  previewSeconds: number
   price: number
   discountPrice: number
   status: number
@@ -96,6 +101,7 @@ export type CourseAvgAggregateInputType = {
   courseId?: true
   ownerId?: true
   durationMinutes?: true
+  previewSeconds?: true
   price?: true
   discountPrice?: true
 }
@@ -104,6 +110,7 @@ export type CourseSumAggregateInputType = {
   courseId?: true
   ownerId?: true
   durationMinutes?: true
+  previewSeconds?: true
   price?: true
   discountPrice?: true
 }
@@ -117,6 +124,7 @@ export type CourseMinAggregateInputType = {
   videoUrl?: true
   thumbnailUrl?: true
   durationMinutes?: true
+  previewSeconds?: true
   price?: true
   discountPrice?: true
   status?: true
@@ -133,6 +141,7 @@ export type CourseMaxAggregateInputType = {
   videoUrl?: true
   thumbnailUrl?: true
   durationMinutes?: true
+  previewSeconds?: true
   price?: true
   discountPrice?: true
   status?: true
@@ -149,6 +158,7 @@ export type CourseCountAggregateInputType = {
   videoUrl?: true
   thumbnailUrl?: true
   durationMinutes?: true
+  previewSeconds?: true
   price?: true
   discountPrice?: true
   status?: true
@@ -252,6 +262,7 @@ export type CourseGroupByOutputType = {
   videoUrl: string | null
   thumbnailUrl: string | null
   durationMinutes: number | null
+  previewSeconds: number
   price: runtime.Decimal
   discountPrice: runtime.Decimal | null
   status: string
@@ -291,6 +302,7 @@ export type CourseWhereInput = {
   videoUrl?: Prisma.StringNullableFilter<"Course"> | string | null
   thumbnailUrl?: Prisma.StringNullableFilter<"Course"> | string | null
   durationMinutes?: Prisma.IntNullableFilter<"Course"> | number | null
+  previewSeconds?: Prisma.IntFilter<"Course"> | number
   price?: Prisma.DecimalFilter<"Course"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: Prisma.DecimalNullableFilter<"Course"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFilter<"Course"> | string
@@ -301,6 +313,7 @@ export type CourseWhereInput = {
   orderItems?: Prisma.OrderItemListRelationFilter
   enrollments?: Prisma.EnrollmentListRelationFilter
   certificates?: Prisma.CertificateListRelationFilter
+  lessons?: Prisma.LessonListRelationFilter
 }
 
 export type CourseOrderByWithRelationInput = {
@@ -312,6 +325,7 @@ export type CourseOrderByWithRelationInput = {
   videoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   thumbnailUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   durationMinutes?: Prisma.SortOrderInput | Prisma.SortOrder
+  previewSeconds?: Prisma.SortOrder
   price?: Prisma.SortOrder
   discountPrice?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -322,6 +336,7 @@ export type CourseOrderByWithRelationInput = {
   orderItems?: Prisma.OrderItemOrderByRelationAggregateInput
   enrollments?: Prisma.EnrollmentOrderByRelationAggregateInput
   certificates?: Prisma.CertificateOrderByRelationAggregateInput
+  lessons?: Prisma.LessonOrderByRelationAggregateInput
 }
 
 export type CourseWhereUniqueInput = Prisma.AtLeast<{
@@ -336,6 +351,7 @@ export type CourseWhereUniqueInput = Prisma.AtLeast<{
   videoUrl?: Prisma.StringNullableFilter<"Course"> | string | null
   thumbnailUrl?: Prisma.StringNullableFilter<"Course"> | string | null
   durationMinutes?: Prisma.IntNullableFilter<"Course"> | number | null
+  previewSeconds?: Prisma.IntFilter<"Course"> | number
   price?: Prisma.DecimalFilter<"Course"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: Prisma.DecimalNullableFilter<"Course"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFilter<"Course"> | string
@@ -346,6 +362,7 @@ export type CourseWhereUniqueInput = Prisma.AtLeast<{
   orderItems?: Prisma.OrderItemListRelationFilter
   enrollments?: Prisma.EnrollmentListRelationFilter
   certificates?: Prisma.CertificateListRelationFilter
+  lessons?: Prisma.LessonListRelationFilter
 }, "courseId" | "uuid">
 
 export type CourseOrderByWithAggregationInput = {
@@ -357,6 +374,7 @@ export type CourseOrderByWithAggregationInput = {
   videoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   thumbnailUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   durationMinutes?: Prisma.SortOrderInput | Prisma.SortOrder
+  previewSeconds?: Prisma.SortOrder
   price?: Prisma.SortOrder
   discountPrice?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -381,6 +399,7 @@ export type CourseScalarWhereWithAggregatesInput = {
   videoUrl?: Prisma.StringNullableWithAggregatesFilter<"Course"> | string | null
   thumbnailUrl?: Prisma.StringNullableWithAggregatesFilter<"Course"> | string | null
   durationMinutes?: Prisma.IntNullableWithAggregatesFilter<"Course"> | number | null
+  previewSeconds?: Prisma.IntWithAggregatesFilter<"Course"> | number
   price?: Prisma.DecimalWithAggregatesFilter<"Course"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: Prisma.DecimalNullableWithAggregatesFilter<"Course"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringWithAggregatesFilter<"Course"> | string
@@ -395,6 +414,7 @@ export type CourseCreateInput = {
   videoUrl?: string | null
   thumbnailUrl?: string | null
   durationMinutes?: number | null
+  previewSeconds?: number
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: string
@@ -405,6 +425,7 @@ export type CourseCreateInput = {
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutCourseInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutCourseInput
   certificates?: Prisma.CertificateCreateNestedManyWithoutCourseInput
+  lessons?: Prisma.LessonCreateNestedManyWithoutCourseInput
 }
 
 export type CourseUncheckedCreateInput = {
@@ -416,6 +437,7 @@ export type CourseUncheckedCreateInput = {
   videoUrl?: string | null
   thumbnailUrl?: string | null
   durationMinutes?: number | null
+  previewSeconds?: number
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: string
@@ -425,6 +447,7 @@ export type CourseUncheckedCreateInput = {
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutCourseInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutCourseInput
   certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutCourseInput
+  lessons?: Prisma.LessonUncheckedCreateNestedManyWithoutCourseInput
 }
 
 export type CourseUpdateInput = {
@@ -434,6 +457,7 @@ export type CourseUpdateInput = {
   videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   durationMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  previewSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -444,6 +468,7 @@ export type CourseUpdateInput = {
   orderItems?: Prisma.OrderItemUpdateManyWithoutCourseNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutCourseNestedInput
   certificates?: Prisma.CertificateUpdateManyWithoutCourseNestedInput
+  lessons?: Prisma.LessonUpdateManyWithoutCourseNestedInput
 }
 
 export type CourseUncheckedUpdateInput = {
@@ -455,6 +480,7 @@ export type CourseUncheckedUpdateInput = {
   videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   durationMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  previewSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -464,6 +490,7 @@ export type CourseUncheckedUpdateInput = {
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutCourseNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutCourseNestedInput
   certificates?: Prisma.CertificateUncheckedUpdateManyWithoutCourseNestedInput
+  lessons?: Prisma.LessonUncheckedUpdateManyWithoutCourseNestedInput
 }
 
 export type CourseCreateManyInput = {
@@ -475,6 +502,7 @@ export type CourseCreateManyInput = {
   videoUrl?: string | null
   thumbnailUrl?: string | null
   durationMinutes?: number | null
+  previewSeconds?: number
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: string
@@ -489,6 +517,7 @@ export type CourseUpdateManyMutationInput = {
   videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   durationMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  previewSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -505,6 +534,7 @@ export type CourseUncheckedUpdateManyInput = {
   videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   durationMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  previewSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -531,6 +561,7 @@ export type CourseCountOrderByAggregateInput = {
   videoUrl?: Prisma.SortOrder
   thumbnailUrl?: Prisma.SortOrder
   durationMinutes?: Prisma.SortOrder
+  previewSeconds?: Prisma.SortOrder
   price?: Prisma.SortOrder
   discountPrice?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -542,6 +573,7 @@ export type CourseAvgOrderByAggregateInput = {
   courseId?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   durationMinutes?: Prisma.SortOrder
+  previewSeconds?: Prisma.SortOrder
   price?: Prisma.SortOrder
   discountPrice?: Prisma.SortOrder
 }
@@ -555,6 +587,7 @@ export type CourseMaxOrderByAggregateInput = {
   videoUrl?: Prisma.SortOrder
   thumbnailUrl?: Prisma.SortOrder
   durationMinutes?: Prisma.SortOrder
+  previewSeconds?: Prisma.SortOrder
   price?: Prisma.SortOrder
   discountPrice?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -571,6 +604,7 @@ export type CourseMinOrderByAggregateInput = {
   videoUrl?: Prisma.SortOrder
   thumbnailUrl?: Prisma.SortOrder
   durationMinutes?: Prisma.SortOrder
+  previewSeconds?: Prisma.SortOrder
   price?: Prisma.SortOrder
   discountPrice?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -582,18 +616,19 @@ export type CourseSumOrderByAggregateInput = {
   courseId?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   durationMinutes?: Prisma.SortOrder
+  previewSeconds?: Prisma.SortOrder
   price?: Prisma.SortOrder
   discountPrice?: Prisma.SortOrder
-}
-
-export type CourseNullableScalarRelationFilter = {
-  is?: Prisma.CourseWhereInput | null
-  isNot?: Prisma.CourseWhereInput | null
 }
 
 export type CourseScalarRelationFilter = {
   is?: Prisma.CourseWhereInput
   isNot?: Prisma.CourseWhereInput
+}
+
+export type CourseNullableScalarRelationFilter = {
+  is?: Prisma.CourseWhereInput | null
+  isNot?: Prisma.CourseWhereInput | null
 }
 
 export type CourseCreateNestedManyWithoutOwnerInput = {
@@ -660,6 +695,20 @@ export type NullableDecimalFieldUpdateOperationsInput = {
   decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
   multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
   divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
+}
+
+export type CourseCreateNestedOneWithoutLessonsInput = {
+  create?: Prisma.XOR<Prisma.CourseCreateWithoutLessonsInput, Prisma.CourseUncheckedCreateWithoutLessonsInput>
+  connectOrCreate?: Prisma.CourseCreateOrConnectWithoutLessonsInput
+  connect?: Prisma.CourseWhereUniqueInput
+}
+
+export type CourseUpdateOneRequiredWithoutLessonsNestedInput = {
+  create?: Prisma.XOR<Prisma.CourseCreateWithoutLessonsInput, Prisma.CourseUncheckedCreateWithoutLessonsInput>
+  connectOrCreate?: Prisma.CourseCreateOrConnectWithoutLessonsInput
+  upsert?: Prisma.CourseUpsertWithoutLessonsInput
+  connect?: Prisma.CourseWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CourseUpdateToOneWithWhereWithoutLessonsInput, Prisma.CourseUpdateWithoutLessonsInput>, Prisma.CourseUncheckedUpdateWithoutLessonsInput>
 }
 
 export type CourseCreateNestedOneWithoutCartItemsInput = {
@@ -729,6 +778,7 @@ export type CourseCreateWithoutOwnerInput = {
   videoUrl?: string | null
   thumbnailUrl?: string | null
   durationMinutes?: number | null
+  previewSeconds?: number
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: string
@@ -738,6 +788,7 @@ export type CourseCreateWithoutOwnerInput = {
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutCourseInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutCourseInput
   certificates?: Prisma.CertificateCreateNestedManyWithoutCourseInput
+  lessons?: Prisma.LessonCreateNestedManyWithoutCourseInput
 }
 
 export type CourseUncheckedCreateWithoutOwnerInput = {
@@ -748,6 +799,7 @@ export type CourseUncheckedCreateWithoutOwnerInput = {
   videoUrl?: string | null
   thumbnailUrl?: string | null
   durationMinutes?: number | null
+  previewSeconds?: number
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: string
@@ -757,6 +809,7 @@ export type CourseUncheckedCreateWithoutOwnerInput = {
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutCourseInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutCourseInput
   certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutCourseInput
+  lessons?: Prisma.LessonUncheckedCreateNestedManyWithoutCourseInput
 }
 
 export type CourseCreateOrConnectWithoutOwnerInput = {
@@ -797,11 +850,110 @@ export type CourseScalarWhereInput = {
   videoUrl?: Prisma.StringNullableFilter<"Course"> | string | null
   thumbnailUrl?: Prisma.StringNullableFilter<"Course"> | string | null
   durationMinutes?: Prisma.IntNullableFilter<"Course"> | number | null
+  previewSeconds?: Prisma.IntFilter<"Course"> | number
   price?: Prisma.DecimalFilter<"Course"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: Prisma.DecimalNullableFilter<"Course"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFilter<"Course"> | string
   createdAt?: Prisma.DateTimeFilter<"Course"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Course"> | Date | string
+}
+
+export type CourseCreateWithoutLessonsInput = {
+  uuid?: string
+  name: string
+  description?: string | null
+  videoUrl?: string | null
+  thumbnailUrl?: string | null
+  durationMinutes?: number | null
+  previewSeconds?: number
+  price: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  status?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  owner: Prisma.UserCreateNestedOneWithoutCoursesInput
+  cartItems?: Prisma.CartItemCreateNestedManyWithoutCourseInput
+  orderItems?: Prisma.OrderItemCreateNestedManyWithoutCourseInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutCourseInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutCourseInput
+}
+
+export type CourseUncheckedCreateWithoutLessonsInput = {
+  courseId?: number
+  uuid?: string
+  ownerId: number
+  name: string
+  description?: string | null
+  videoUrl?: string | null
+  thumbnailUrl?: string | null
+  durationMinutes?: number | null
+  previewSeconds?: number
+  price: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  status?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutCourseInput
+  orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutCourseInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutCourseInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutCourseInput
+}
+
+export type CourseCreateOrConnectWithoutLessonsInput = {
+  where: Prisma.CourseWhereUniqueInput
+  create: Prisma.XOR<Prisma.CourseCreateWithoutLessonsInput, Prisma.CourseUncheckedCreateWithoutLessonsInput>
+}
+
+export type CourseUpsertWithoutLessonsInput = {
+  update: Prisma.XOR<Prisma.CourseUpdateWithoutLessonsInput, Prisma.CourseUncheckedUpdateWithoutLessonsInput>
+  create: Prisma.XOR<Prisma.CourseCreateWithoutLessonsInput, Prisma.CourseUncheckedCreateWithoutLessonsInput>
+  where?: Prisma.CourseWhereInput
+}
+
+export type CourseUpdateToOneWithWhereWithoutLessonsInput = {
+  where?: Prisma.CourseWhereInput
+  data: Prisma.XOR<Prisma.CourseUpdateWithoutLessonsInput, Prisma.CourseUncheckedUpdateWithoutLessonsInput>
+}
+
+export type CourseUpdateWithoutLessonsInput = {
+  uuid?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  durationMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  previewSeconds?: Prisma.IntFieldUpdateOperationsInput | number
+  price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  owner?: Prisma.UserUpdateOneRequiredWithoutCoursesNestedInput
+  cartItems?: Prisma.CartItemUpdateManyWithoutCourseNestedInput
+  orderItems?: Prisma.OrderItemUpdateManyWithoutCourseNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutCourseNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutCourseNestedInput
+}
+
+export type CourseUncheckedUpdateWithoutLessonsInput = {
+  courseId?: Prisma.IntFieldUpdateOperationsInput | number
+  uuid?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerId?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  durationMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  previewSeconds?: Prisma.IntFieldUpdateOperationsInput | number
+  price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutCourseNestedInput
+  orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutCourseNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutCourseNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutCourseNestedInput
 }
 
 export type CourseCreateWithoutCartItemsInput = {
@@ -811,6 +963,7 @@ export type CourseCreateWithoutCartItemsInput = {
   videoUrl?: string | null
   thumbnailUrl?: string | null
   durationMinutes?: number | null
+  previewSeconds?: number
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: string
@@ -820,6 +973,7 @@ export type CourseCreateWithoutCartItemsInput = {
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutCourseInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutCourseInput
   certificates?: Prisma.CertificateCreateNestedManyWithoutCourseInput
+  lessons?: Prisma.LessonCreateNestedManyWithoutCourseInput
 }
 
 export type CourseUncheckedCreateWithoutCartItemsInput = {
@@ -831,6 +985,7 @@ export type CourseUncheckedCreateWithoutCartItemsInput = {
   videoUrl?: string | null
   thumbnailUrl?: string | null
   durationMinutes?: number | null
+  previewSeconds?: number
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: string
@@ -839,6 +994,7 @@ export type CourseUncheckedCreateWithoutCartItemsInput = {
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutCourseInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutCourseInput
   certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutCourseInput
+  lessons?: Prisma.LessonUncheckedCreateNestedManyWithoutCourseInput
 }
 
 export type CourseCreateOrConnectWithoutCartItemsInput = {
@@ -864,6 +1020,7 @@ export type CourseUpdateWithoutCartItemsInput = {
   videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   durationMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  previewSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -873,6 +1030,7 @@ export type CourseUpdateWithoutCartItemsInput = {
   orderItems?: Prisma.OrderItemUpdateManyWithoutCourseNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutCourseNestedInput
   certificates?: Prisma.CertificateUpdateManyWithoutCourseNestedInput
+  lessons?: Prisma.LessonUpdateManyWithoutCourseNestedInput
 }
 
 export type CourseUncheckedUpdateWithoutCartItemsInput = {
@@ -884,6 +1042,7 @@ export type CourseUncheckedUpdateWithoutCartItemsInput = {
   videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   durationMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  previewSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -892,6 +1051,7 @@ export type CourseUncheckedUpdateWithoutCartItemsInput = {
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutCourseNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutCourseNestedInput
   certificates?: Prisma.CertificateUncheckedUpdateManyWithoutCourseNestedInput
+  lessons?: Prisma.LessonUncheckedUpdateManyWithoutCourseNestedInput
 }
 
 export type CourseCreateWithoutOrderItemsInput = {
@@ -901,6 +1061,7 @@ export type CourseCreateWithoutOrderItemsInput = {
   videoUrl?: string | null
   thumbnailUrl?: string | null
   durationMinutes?: number | null
+  previewSeconds?: number
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: string
@@ -910,6 +1071,7 @@ export type CourseCreateWithoutOrderItemsInput = {
   cartItems?: Prisma.CartItemCreateNestedManyWithoutCourseInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutCourseInput
   certificates?: Prisma.CertificateCreateNestedManyWithoutCourseInput
+  lessons?: Prisma.LessonCreateNestedManyWithoutCourseInput
 }
 
 export type CourseUncheckedCreateWithoutOrderItemsInput = {
@@ -921,6 +1083,7 @@ export type CourseUncheckedCreateWithoutOrderItemsInput = {
   videoUrl?: string | null
   thumbnailUrl?: string | null
   durationMinutes?: number | null
+  previewSeconds?: number
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: string
@@ -929,6 +1092,7 @@ export type CourseUncheckedCreateWithoutOrderItemsInput = {
   cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutCourseInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutCourseInput
   certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutCourseInput
+  lessons?: Prisma.LessonUncheckedCreateNestedManyWithoutCourseInput
 }
 
 export type CourseCreateOrConnectWithoutOrderItemsInput = {
@@ -954,6 +1118,7 @@ export type CourseUpdateWithoutOrderItemsInput = {
   videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   durationMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  previewSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -963,6 +1128,7 @@ export type CourseUpdateWithoutOrderItemsInput = {
   cartItems?: Prisma.CartItemUpdateManyWithoutCourseNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutCourseNestedInput
   certificates?: Prisma.CertificateUpdateManyWithoutCourseNestedInput
+  lessons?: Prisma.LessonUpdateManyWithoutCourseNestedInput
 }
 
 export type CourseUncheckedUpdateWithoutOrderItemsInput = {
@@ -974,6 +1140,7 @@ export type CourseUncheckedUpdateWithoutOrderItemsInput = {
   videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   durationMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  previewSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -982,6 +1149,7 @@ export type CourseUncheckedUpdateWithoutOrderItemsInput = {
   cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutCourseNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutCourseNestedInput
   certificates?: Prisma.CertificateUncheckedUpdateManyWithoutCourseNestedInput
+  lessons?: Prisma.LessonUncheckedUpdateManyWithoutCourseNestedInput
 }
 
 export type CourseCreateWithoutEnrollmentsInput = {
@@ -991,6 +1159,7 @@ export type CourseCreateWithoutEnrollmentsInput = {
   videoUrl?: string | null
   thumbnailUrl?: string | null
   durationMinutes?: number | null
+  previewSeconds?: number
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: string
@@ -1000,6 +1169,7 @@ export type CourseCreateWithoutEnrollmentsInput = {
   cartItems?: Prisma.CartItemCreateNestedManyWithoutCourseInput
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutCourseInput
   certificates?: Prisma.CertificateCreateNestedManyWithoutCourseInput
+  lessons?: Prisma.LessonCreateNestedManyWithoutCourseInput
 }
 
 export type CourseUncheckedCreateWithoutEnrollmentsInput = {
@@ -1011,6 +1181,7 @@ export type CourseUncheckedCreateWithoutEnrollmentsInput = {
   videoUrl?: string | null
   thumbnailUrl?: string | null
   durationMinutes?: number | null
+  previewSeconds?: number
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: string
@@ -1019,6 +1190,7 @@ export type CourseUncheckedCreateWithoutEnrollmentsInput = {
   cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutCourseInput
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutCourseInput
   certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutCourseInput
+  lessons?: Prisma.LessonUncheckedCreateNestedManyWithoutCourseInput
 }
 
 export type CourseCreateOrConnectWithoutEnrollmentsInput = {
@@ -1044,6 +1216,7 @@ export type CourseUpdateWithoutEnrollmentsInput = {
   videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   durationMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  previewSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1053,6 +1226,7 @@ export type CourseUpdateWithoutEnrollmentsInput = {
   cartItems?: Prisma.CartItemUpdateManyWithoutCourseNestedInput
   orderItems?: Prisma.OrderItemUpdateManyWithoutCourseNestedInput
   certificates?: Prisma.CertificateUpdateManyWithoutCourseNestedInput
+  lessons?: Prisma.LessonUpdateManyWithoutCourseNestedInput
 }
 
 export type CourseUncheckedUpdateWithoutEnrollmentsInput = {
@@ -1064,6 +1238,7 @@ export type CourseUncheckedUpdateWithoutEnrollmentsInput = {
   videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   durationMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  previewSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1072,6 +1247,7 @@ export type CourseUncheckedUpdateWithoutEnrollmentsInput = {
   cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutCourseNestedInput
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutCourseNestedInput
   certificates?: Prisma.CertificateUncheckedUpdateManyWithoutCourseNestedInput
+  lessons?: Prisma.LessonUncheckedUpdateManyWithoutCourseNestedInput
 }
 
 export type CourseCreateWithoutCertificatesInput = {
@@ -1081,6 +1257,7 @@ export type CourseCreateWithoutCertificatesInput = {
   videoUrl?: string | null
   thumbnailUrl?: string | null
   durationMinutes?: number | null
+  previewSeconds?: number
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: string
@@ -1090,6 +1267,7 @@ export type CourseCreateWithoutCertificatesInput = {
   cartItems?: Prisma.CartItemCreateNestedManyWithoutCourseInput
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutCourseInput
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutCourseInput
+  lessons?: Prisma.LessonCreateNestedManyWithoutCourseInput
 }
 
 export type CourseUncheckedCreateWithoutCertificatesInput = {
@@ -1101,6 +1279,7 @@ export type CourseUncheckedCreateWithoutCertificatesInput = {
   videoUrl?: string | null
   thumbnailUrl?: string | null
   durationMinutes?: number | null
+  previewSeconds?: number
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: string
@@ -1109,6 +1288,7 @@ export type CourseUncheckedCreateWithoutCertificatesInput = {
   cartItems?: Prisma.CartItemUncheckedCreateNestedManyWithoutCourseInput
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutCourseInput
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutCourseInput
+  lessons?: Prisma.LessonUncheckedCreateNestedManyWithoutCourseInput
 }
 
 export type CourseCreateOrConnectWithoutCertificatesInput = {
@@ -1134,6 +1314,7 @@ export type CourseUpdateWithoutCertificatesInput = {
   videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   durationMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  previewSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1143,6 +1324,7 @@ export type CourseUpdateWithoutCertificatesInput = {
   cartItems?: Prisma.CartItemUpdateManyWithoutCourseNestedInput
   orderItems?: Prisma.OrderItemUpdateManyWithoutCourseNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutCourseNestedInput
+  lessons?: Prisma.LessonUpdateManyWithoutCourseNestedInput
 }
 
 export type CourseUncheckedUpdateWithoutCertificatesInput = {
@@ -1154,6 +1336,7 @@ export type CourseUncheckedUpdateWithoutCertificatesInput = {
   videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   durationMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  previewSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1162,6 +1345,7 @@ export type CourseUncheckedUpdateWithoutCertificatesInput = {
   cartItems?: Prisma.CartItemUncheckedUpdateManyWithoutCourseNestedInput
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutCourseNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutCourseNestedInput
+  lessons?: Prisma.LessonUncheckedUpdateManyWithoutCourseNestedInput
 }
 
 export type CourseCreateManyOwnerInput = {
@@ -1172,6 +1356,7 @@ export type CourseCreateManyOwnerInput = {
   videoUrl?: string | null
   thumbnailUrl?: string | null
   durationMinutes?: number | null
+  previewSeconds?: number
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: string
@@ -1186,6 +1371,7 @@ export type CourseUpdateWithoutOwnerInput = {
   videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   durationMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  previewSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1195,6 +1381,7 @@ export type CourseUpdateWithoutOwnerInput = {
   orderItems?: Prisma.OrderItemUpdateManyWithoutCourseNestedInput
   enrollments?: Prisma.EnrollmentUpdateManyWithoutCourseNestedInput
   certificates?: Prisma.CertificateUpdateManyWithoutCourseNestedInput
+  lessons?: Prisma.LessonUpdateManyWithoutCourseNestedInput
 }
 
 export type CourseUncheckedUpdateWithoutOwnerInput = {
@@ -1205,6 +1392,7 @@ export type CourseUncheckedUpdateWithoutOwnerInput = {
   videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   durationMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  previewSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1214,6 +1402,7 @@ export type CourseUncheckedUpdateWithoutOwnerInput = {
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutCourseNestedInput
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutCourseNestedInput
   certificates?: Prisma.CertificateUncheckedUpdateManyWithoutCourseNestedInput
+  lessons?: Prisma.LessonUncheckedUpdateManyWithoutCourseNestedInput
 }
 
 export type CourseUncheckedUpdateManyWithoutOwnerInput = {
@@ -1224,6 +1413,7 @@ export type CourseUncheckedUpdateManyWithoutOwnerInput = {
   videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   durationMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  previewSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1241,6 +1431,7 @@ export type CourseCountOutputType = {
   orderItems: number
   enrollments: number
   certificates: number
+  lessons: number
 }
 
 export type CourseCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1248,6 +1439,7 @@ export type CourseCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   orderItems?: boolean | CourseCountOutputTypeCountOrderItemsArgs
   enrollments?: boolean | CourseCountOutputTypeCountEnrollmentsArgs
   certificates?: boolean | CourseCountOutputTypeCountCertificatesArgs
+  lessons?: boolean | CourseCountOutputTypeCountLessonsArgs
 }
 
 /**
@@ -1288,6 +1480,13 @@ export type CourseCountOutputTypeCountCertificatesArgs<ExtArgs extends runtime.T
   where?: Prisma.CertificateWhereInput
 }
 
+/**
+ * CourseCountOutputType without action
+ */
+export type CourseCountOutputTypeCountLessonsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LessonWhereInput
+}
+
 
 export type CourseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   courseId?: boolean
@@ -1298,6 +1497,7 @@ export type CourseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   videoUrl?: boolean
   thumbnailUrl?: boolean
   durationMinutes?: boolean
+  previewSeconds?: boolean
   price?: boolean
   discountPrice?: boolean
   status?: boolean
@@ -1308,6 +1508,7 @@ export type CourseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   orderItems?: boolean | Prisma.Course$orderItemsArgs<ExtArgs>
   enrollments?: boolean | Prisma.Course$enrollmentsArgs<ExtArgs>
   certificates?: boolean | Prisma.Course$certificatesArgs<ExtArgs>
+  lessons?: boolean | Prisma.Course$lessonsArgs<ExtArgs>
   _count?: boolean | Prisma.CourseCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["course"]>
 
@@ -1320,6 +1521,7 @@ export type CourseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   videoUrl?: boolean
   thumbnailUrl?: boolean
   durationMinutes?: boolean
+  previewSeconds?: boolean
   price?: boolean
   discountPrice?: boolean
   status?: boolean
@@ -1337,6 +1539,7 @@ export type CourseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   videoUrl?: boolean
   thumbnailUrl?: boolean
   durationMinutes?: boolean
+  previewSeconds?: boolean
   price?: boolean
   discountPrice?: boolean
   status?: boolean
@@ -1354,6 +1557,7 @@ export type CourseSelectScalar = {
   videoUrl?: boolean
   thumbnailUrl?: boolean
   durationMinutes?: boolean
+  previewSeconds?: boolean
   price?: boolean
   discountPrice?: boolean
   status?: boolean
@@ -1361,13 +1565,14 @@ export type CourseSelectScalar = {
   updatedAt?: boolean
 }
 
-export type CourseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"courseId" | "uuid" | "ownerId" | "name" | "description" | "videoUrl" | "thumbnailUrl" | "durationMinutes" | "price" | "discountPrice" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["course"]>
+export type CourseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"courseId" | "uuid" | "ownerId" | "name" | "description" | "videoUrl" | "thumbnailUrl" | "durationMinutes" | "previewSeconds" | "price" | "discountPrice" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["course"]>
 export type CourseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   cartItems?: boolean | Prisma.Course$cartItemsArgs<ExtArgs>
   orderItems?: boolean | Prisma.Course$orderItemsArgs<ExtArgs>
   enrollments?: boolean | Prisma.Course$enrollmentsArgs<ExtArgs>
   certificates?: boolean | Prisma.Course$certificatesArgs<ExtArgs>
+  lessons?: boolean | Prisma.Course$lessonsArgs<ExtArgs>
   _count?: boolean | Prisma.CourseCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CourseIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1385,6 +1590,7 @@ export type $CoursePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     orderItems: Prisma.$OrderItemPayload<ExtArgs>[]
     enrollments: Prisma.$EnrollmentPayload<ExtArgs>[]
     certificates: Prisma.$CertificatePayload<ExtArgs>[]
+    lessons: Prisma.$LessonPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     courseId: number
@@ -1395,6 +1601,7 @@ export type $CoursePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     videoUrl: string | null
     thumbnailUrl: string | null
     durationMinutes: number | null
+    previewSeconds: number
     price: runtime.Decimal
     discountPrice: runtime.Decimal | null
     status: string
@@ -1799,6 +2006,7 @@ export interface Prisma__CourseClient<T, Null = never, ExtArgs extends runtime.T
   orderItems<T extends Prisma.Course$orderItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Course$orderItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   enrollments<T extends Prisma.Course$enrollmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Course$enrollmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EnrollmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   certificates<T extends Prisma.Course$certificatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Course$certificatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CertificatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  lessons<T extends Prisma.Course$lessonsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Course$lessonsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1836,6 +2044,7 @@ export interface CourseFieldRefs {
   readonly videoUrl: Prisma.FieldRef<"Course", 'String'>
   readonly thumbnailUrl: Prisma.FieldRef<"Course", 'String'>
   readonly durationMinutes: Prisma.FieldRef<"Course", 'Int'>
+  readonly previewSeconds: Prisma.FieldRef<"Course", 'Int'>
   readonly price: Prisma.FieldRef<"Course", 'Decimal'>
   readonly discountPrice: Prisma.FieldRef<"Course", 'Decimal'>
   readonly status: Prisma.FieldRef<"Course", 'String'>
@@ -2335,6 +2544,30 @@ export type Course$certificatesArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.CertificateScalarFieldEnum | Prisma.CertificateScalarFieldEnum[]
+}
+
+/**
+ * Course.lessons
+ */
+export type Course$lessonsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Lesson
+   */
+  select?: Prisma.LessonSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Lesson
+   */
+  omit?: Prisma.LessonOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonInclude<ExtArgs> | null
+  where?: Prisma.LessonWhereInput
+  orderBy?: Prisma.LessonOrderByWithRelationInput | Prisma.LessonOrderByWithRelationInput[]
+  cursor?: Prisma.LessonWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LessonScalarFieldEnum | Prisma.LessonScalarFieldEnum[]
 }
 
 /**

@@ -57,6 +57,12 @@ beforeEach(() => {
     buscarUsuarioPorId: vi.fn().mockResolvedValue(admin),
     buscarRolPorNombre: vi.fn().mockResolvedValue({ roleId: 2 }),
     crearUsuario: vi.fn().mockResolvedValue({ ...admin, userId: 9, role: { roleId: 2, name: 'CLIENTE' } }),
+    actualizarPerfil: vi.fn(async (_userId: number, datos) => ({ ...admin, ...datos, phone: datos.phone ?? null })),
+    cambiarPassword: vi.fn().mockResolvedValue(undefined),
+    guardarAvatar: vi.fn(async (_userId: number, avatarUrl: string | null) => ({ ...admin, avatarUrl })),
+    revocarSesionesDe: vi.fn().mockResolvedValue(undefined),
+    guardarImagen: vi.fn().mockResolvedValue({ url: 'http://localhost:4000/uploads/imagenes/nueva.webp' }),
+    eliminarImagen: vi.fn().mockResolvedValue(undefined),
     registrarFallo: vi.fn().mockResolvedValue(undefined),
     registrarAccesoCorrecto: vi.fn().mockResolvedValue(undefined),
     crearSesion: vi.fn().mockResolvedValue(undefined),
@@ -302,5 +308,120 @@ describe('cerrarSesion', () => {
     vi.mocked(deps.buscarSesionPorHash).mockResolvedValue(null);
     await expect(servicio().cerrarSesion('inventado', contexto)).resolves.toBeUndefined();
     expect(deps.revocarFamilia).not.toHaveBeenCalled();
+  });
+});
+
+
+describe('perfil del usuario', () => {
+  it('guarda el nombre, el apellido y el telefono', async () => {
+    const usuario = await servicio().actualizarPerfil(
+      1,
+      { name: 'Esau', lastname: 'Morales Vega', phone: '+51 902 665 565' },
+      contexto
+    );
+
+    expect(deps.actualizarPerfil).toHaveBeenCalledWith(1, {
+      name: 'Esau',
+      lastname: 'Morales Vega',
+      phone: '+51 902 665 565',
+    });
+    expect(usuario.lastname).toBe('Morales Vega');
+    expect(usuario).not.toHaveProperty('passwordHash');
+    expect(tiposDeEvento()).toContain('PERFIL_ACTUALIZADO');
+  });
+
+  it('sin telefono se guarda tal cual, sin inventar uno', async () => {
+    await servicio().actualizarPerfil(1, { name: 'Esau', lastname: 'Morales' });
+
+    expect(deps.actualizarPerfil).toHaveBeenCalledWith(1, { name: 'Esau', lastname: 'Morales' });
+  });
+
+  it('falla si la cuenta ya no existe', async () => {
+    vi.mocked(deps.buscarUsuarioPorId).mockResolvedValue(null);
+
+    await expect(
+      servicio().actualizarPerfil(1, { name: 'Esau', lastname: 'Morales' })
+    ).rejects.toMatchObject({ statusCode: 404 });
+    expect(deps.actualizarPerfil).not.toHaveBeenCalled();
+  });
+});
+
+describe('cambiar la contrasena', () => {
+  const datos = { actual: 'correcta', nueva: 'brisa-tablero-19-norte' };
+
+  it('guarda el hash nuevo y cierra las demas sesiones', async () => {
+    await servicio().cambiarPassword(1, datos, { tokenSesionActual: 'token-sesion-1' }, contexto);
+
+    expect(deps.hashear).toHaveBeenCalledWith(datos.nueva);
+    expect(deps.cambiarPassword).toHaveBeenCalledWith(1, 'hash-nuevo');
+    // La sesion desde la que se cambia sigue viva; el resto no
+    expect(deps.revocarSesionesDe).toHaveBeenCalledWith(1, AHORA, hashToken('token-sesion-1'));
+    expect(tiposDeEvento()).toContain('PASSWORD_CAMBIADA');
+  });
+
+  it('sin la contrasena actual correcta no cambia nada', async () => {
+    await expect(
+      servicio().cambiarPassword(1, { actual: 'otra', nueva: 'brisa-tablero-19-norte' })
+    ).rejects.toMatchObject({ statusCode: 401 });
+
+    expect(deps.cambiarPassword).not.toHaveBeenCalled();
+    expect(deps.revocarSesionesDe).not.toHaveBeenCalled();
+  });
+
+  it('aplica la politica tambien con los datos de esta cuenta', async () => {
+    // Contiene el nombre del usuario: la politica la rechaza
+    await expect(
+      servicio().cambiarPassword(1, { actual: 'correcta', nueva: 'morales-morales-1' })
+    ).rejects.toMatchObject({ statusCode: 422 });
+
+    expect(deps.cambiarPassword).not.toHaveBeenCalled();
+  });
+
+  it('sin la cookie de sesion se cierran todas las sesiones', async () => {
+    await servicio().cambiarPassword(1, datos);
+
+    expect(deps.revocarSesionesDe).toHaveBeenCalledWith(1, AHORA, undefined);
+  });
+});
+
+describe('foto de perfil', () => {
+  const imagen = Buffer.from('imagen');
+
+  it('guarda la foto nueva y devuelve el usuario con su URL', async () => {
+    const usuario = await servicio().actualizarAvatar(1, imagen, contexto);
+
+    expect(deps.guardarImagen).toHaveBeenCalledWith(imagen);
+    expect(deps.guardarAvatar).toHaveBeenCalledWith(1, 'http://localhost:4000/uploads/imagenes/nueva.webp');
+    expect(usuario.avatarUrl).toBe('http://localhost:4000/uploads/imagenes/nueva.webp');
+    expect(tiposDeEvento()).toContain('AVATAR_ACTUALIZADO');
+  });
+
+  it('borra del disco la foto anterior', async () => {
+    const anterior = 'http://localhost:4000/uploads/imagenes/vieja.webp';
+    vi.mocked(deps.buscarUsuarioPorId).mockResolvedValue({ ...admin, avatarUrl: anterior });
+
+    await servicio().actualizarAvatar(1, imagen);
+
+    expect(deps.eliminarImagen).toHaveBeenCalledWith(anterior);
+  });
+
+  it('quitarla deja el perfil sin foto y limpia el archivo', async () => {
+    const anterior = 'http://localhost:4000/uploads/imagenes/vieja.webp';
+    vi.mocked(deps.buscarUsuarioPorId).mockResolvedValue({ ...admin, avatarUrl: anterior });
+
+    const usuario = await servicio().quitarAvatar(1);
+
+    expect(deps.guardarAvatar).toHaveBeenCalledWith(1, null);
+    expect(deps.eliminarImagen).toHaveBeenCalledWith(anterior);
+    expect(usuario.avatarUrl).toBeNull();
+  });
+
+  it('si no se puede borrar el archivo viejo, el cambio igual queda guardado', async () => {
+    vi.mocked(deps.buscarUsuarioPorId).mockResolvedValue({ ...admin, avatarUrl: 'http://x/vieja.webp' });
+    vi.mocked(deps.eliminarImagen).mockRejectedValue(new Error('archivo bloqueado'));
+
+    await expect(servicio().actualizarAvatar(1, imagen)).resolves.toMatchObject({
+      avatarUrl: 'http://localhost:4000/uploads/imagenes/nueva.webp',
+    });
   });
 });

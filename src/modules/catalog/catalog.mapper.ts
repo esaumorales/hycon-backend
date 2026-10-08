@@ -47,6 +47,7 @@ export const aProductoDetallePublico = (producto: ProductoBase): ProductoDetalle
 
 export const aCursoPublico = (curso: CursoBase): CursoPublico => ({
   uuid: curso.uuid,
+  previewSegundos: curso.previewSeconds,
   name: curso.name,
   description: curso.description,
   videoUrl: curso.videoUrl,
