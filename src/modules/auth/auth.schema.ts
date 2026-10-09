@@ -66,7 +66,17 @@ export const cambioPasswordSchema = z
     }
   });
 
+// El navegador sube la foto a Cloudinary y aqui solo llega su URL
+export const avatarSchema = z.object({
+  avatarUrl: z
+    .string({ message: 'Falta la direccion de la imagen' })
+    .trim()
+    .url('La direccion de la imagen no es valida')
+    .max(500, 'La direccion es demasiado larga'),
+});
+
 export type RegistroInput = z.infer<typeof registroSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type PerfilInput = z.infer<typeof perfilSchema>;
 export type CambioPasswordInput = z.infer<typeof cambioPasswordSchema>;
+export type AvatarInput = z.infer<typeof avatarSchema>;

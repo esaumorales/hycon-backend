@@ -450,6 +450,20 @@ export const crearServicioAuth = (deps: DependenciasAuth, politica: PoliticaAcce
       return aUsuarioPublico(actualizado);
     },
 
+    /** Guarda la foto que el navegador ya subio a Cloudinary. */
+    async fijarAvatar(
+      userId: number,
+      avatarUrl: string,
+      contexto: ContextoPeticion = {}
+    ): Promise<UsuarioPublico> {
+      const usuario = await exigirUsuario(userId);
+      const actualizado = await deps.guardarAvatar(userId, avatarUrl);
+
+      if (usuario.avatarUrl) await deps.eliminarImagen(usuario.avatarUrl).catch(() => undefined);
+      await registrar({ type: 'AVATAR_ACTUALIZADO', userId, ...contexto });
+      return aUsuarioPublico(actualizado);
+    },
+
     async quitarAvatar(userId: number, contexto: ContextoPeticion = {}): Promise<UsuarioPublico> {
       const usuario = await exigirUsuario(userId);
       const actualizado = await deps.guardarAvatar(userId, null);

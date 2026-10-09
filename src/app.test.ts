@@ -279,6 +279,8 @@ describe('documentacion', () => {
         '/auth/me',
         '/auth/me/password',
         '/auth/me/avatar',
+        '/uploads/firma/catalogo',
+        '/uploads/firma/avatar',
         '/lms/mis-cursos',
         '/catalog/courses/{uuid}/lecciones',
         '/catalog/courses/{uuid}/lecciones/{leccionUuid}',

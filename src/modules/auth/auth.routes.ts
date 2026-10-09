@@ -7,6 +7,7 @@ import { validate } from '../../core/middlewares/validate.middleware';
 import { recibirImagen } from '../uploads/uploads.middleware';
 import {
   actualizarAvatar,
+  fijarAvatar,
   actualizarPerfil,
   cambiarPassword,
   cerrarSesion,
@@ -16,7 +17,13 @@ import {
   registrar,
   renovarSesion,
 } from './auth.controller';
-import { cambioPasswordSchema, loginSchema, perfilSchema, registroSchema } from './auth.schema';
+import {
+  avatarSchema,
+  cambioPasswordSchema,
+  loginSchema,
+  perfilSchema,
+  registroSchema,
+} from './auth.schema';
 
 // Freno por IP: complementa el bloqueo por cuenta frente a ataques que prueban
 // muchas cuentas distintas desde el mismo origen
@@ -57,6 +64,9 @@ router.get('/me', protect, perfil);
 router.put('/me', protect, validate(perfilSchema), actualizarPerfil);
 // Cambiar la contrasena cierra las demas sesiones, por eso usa la cookie: mismo freno CSRF
 router.put('/me/password', protect, soloOrigenesPermitidos, limitePorIp, validate(cambioPasswordSchema), cambiarPassword);
+// Con Cloudinary la foto ya esta subida y solo llega su direccion
+router.put('/me/avatar', protect, validate(avatarSchema), fijarAvatar);
+// Sin Cloudinary, el archivo llega aqui y se guarda en disco
 router.post('/me/avatar', protect, recibirImagen, actualizarAvatar);
 router.delete('/me/avatar', protect, quitarAvatar);
 

@@ -311,6 +311,30 @@ const schemas = {
       },
     },
   },
+  FirmaSubida: {
+    type: 'object',
+    description:
+      'Permiso temporal para subir una imagen a Cloudinary desde el navegador. El api secret nunca sale del servidor.',
+    properties: {
+      cloudName: { type: 'string', example: 'hycon' },
+      apiKey: { type: 'string', example: '123456789012345' },
+      timestamp: { type: 'integer', description: 'Momento de la firma, en segundos' },
+      folder: { type: 'string', example: 'hycon/catalogo' },
+      signature: { type: 'string', description: 'sha1 de los parametros firmados' },
+    },
+  },
+  AvatarEntrada: {
+    type: 'object',
+    required: ['avatarUrl'],
+    properties: {
+      avatarUrl: {
+        type: 'string',
+        format: 'uri',
+        maxLength: 500,
+        description: 'Direccion que devolvio Cloudinary al subir la foto',
+      },
+    },
+  },
   PerfilEntrada: {
     type: 'object',
     required: ['name', 'lastname'],
@@ -726,9 +750,22 @@ export const openApiSpec = {
       },
     },
     '/auth/me/avatar': {
+      put: {
+        tags: ['Auth'],
+        summary: 'Guarda la foto de perfil ya subida a Cloudinary',
+        description:
+          'El navegador sube la imagen a Cloudinary con la firma y aqui solo envia su direccion. La foto anterior se borra.',
+        security: [{ bearerAuth: [] }],
+        requestBody: cuerpoJson('AvatarEntrada'),
+        responses: {
+          '200': sobre({ type: 'object', properties: { usuario: ref('Usuario') } }, 'Foto actualizada'),
+          '401': error('Falta el token, no es valido o expiro'),
+          '422': error('La direccion de la imagen no es valida'),
+        },
+      },
       post: {
         tags: ['Auth'],
-        summary: 'Cambia la foto de perfil',
+        summary: 'Cambia la foto de perfil subiendo el archivo',
         description:
           'Acepta JPG, PNG, WEBP o GIF de hasta 5 MB, comprobados por la firma del archivo. La foto anterior se borra del disco.',
         security: [{ bearerAuth: [] }],
@@ -1027,6 +1064,34 @@ export const openApiSpec = {
             'Cursos con acceso'
           ),
           '401': error('Falta el token, no es valido o expiro'),
+        },
+      },
+    },
+    '/uploads/firma/catalogo': {
+      post: {
+        tags: ['Archivos'],
+        summary: 'Firma una subida a Cloudinary (solo ADMIN)',
+        description:
+          'Devuelve los datos con los que el navegador sube la imagen directo a Cloudinary, en la carpeta del catalogo. Responde 503 si el servidor no tiene Cloudinary configurado; en ese caso se usa POST /uploads/imagenes.',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': sobre({ type: 'object', properties: { firma: ref('FirmaSubida') } }, 'Firma emitida'),
+          ...ERRORES_ADMIN,
+          '503': error('Cloudinary no esta configurado en el servidor'),
+        },
+      },
+    },
+    '/uploads/firma/avatar': {
+      post: {
+        tags: ['Archivos'],
+        summary: 'Firma la subida de una foto de perfil',
+        description:
+          'Igual que la del catalogo pero en la carpeta de avatares. La puede pedir cualquier usuario con sesion.',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': sobre({ type: 'object', properties: { firma: ref('FirmaSubida') } }, 'Firma emitida'),
+          '401': error('Falta el token, no es valido o expiro'),
+          '503': error('Cloudinary no esta configurado en el servidor'),
         },
       },
     },

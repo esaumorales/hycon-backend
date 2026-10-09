@@ -4,7 +4,13 @@ import { manejar } from '../../core/utils/controlador';
 import { authService } from './auth.service';
 import { borrarCookieSesion, escribirCookieSesion, NOMBRE_COOKIE_SESION } from './auth.cookies';
 import { exigirArchivo } from '../uploads/uploads.middleware';
-import type { CambioPasswordInput, LoginInput, PerfilInput, RegistroInput } from './auth.schema';
+import type {
+  AvatarInput,
+  CambioPasswordInput,
+  LoginInput,
+  PerfilInput,
+  RegistroInput,
+} from './auth.schema';
 import type { ContextoPeticion, SesionIniciada } from './auth.types';
 
 const contextoDe = (req: Request): ContextoPeticion => ({
@@ -92,6 +98,11 @@ export const actualizarAvatar = manejar(async (req, res) => {
     contextoDe(req)
   );
   responderUsuario(res, usuario);
+});
+
+export const fijarAvatar = manejar(async (req, res) => {
+  const { avatarUrl } = req.body as AvatarInput;
+  responderUsuario(res, await authService.fijarAvatar(idDelUsuario(req), avatarUrl, contextoDe(req)));
 });
 
 export const quitarAvatar = manejar(async (req, res) => {
