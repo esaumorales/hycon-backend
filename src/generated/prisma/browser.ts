@@ -122,3 +122,8 @@ export type Session = Prisma.SessionModel
  * 
  */
 export type AuthEvent = Prisma.AuthEventModel
+/**
+ * Model QuoteRequest
+ * 
+ */
+export type QuoteRequest = Prisma.QuoteRequestModel

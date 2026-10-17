@@ -401,3 +401,22 @@ model AuthEvent {
   @@index([type, createdAt])
   @@map("auth_events")
 }
+
+// Solicitudes de cotizacion de evaluaciones ergonomicas que llegan desde la web
+model QuoteRequest {
+  quoteId     Int      @id @default(autoincrement()) @map("quote_id")
+  uuid        String   @unique @default(uuid(7)) @db.Uuid
+  name        String   @db.VarChar(120)
+  company     String?  @db.VarChar(150)
+  phone       String   @db.VarChar(30)
+  email       String   @db.VarChar(150)
+  message     String?  @db.Text
+  // Codigos de las evaluaciones pedidas; los precios salen del servidor
+  evaluations String[] @db.VarChar(40)
+  total       Decimal  @db.Decimal(10, 2)
+  status      String   @default("nuevo") @db.VarChar(20)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@map("quote_requests")
+}

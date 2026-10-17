@@ -71,7 +71,8 @@ export const ModelName = {
   FormSubmission: 'FormSubmission',
   FormAnswer: 'FormAnswer',
   Session: 'Session',
-  AuthEvent: 'AuthEvent'
+  AuthEvent: 'AuthEvent',
+  QuoteRequest: 'QuoteRequest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -377,6 +378,23 @@ export const AuthEventScalarFieldEnum = {
 } as const
 
 export type AuthEventScalarFieldEnum = (typeof AuthEventScalarFieldEnum)[keyof typeof AuthEventScalarFieldEnum]
+
+
+export const QuoteRequestScalarFieldEnum = {
+  quoteId: 'quoteId',
+  uuid: 'uuid',
+  name: 'name',
+  company: 'company',
+  phone: 'phone',
+  email: 'email',
+  message: 'message',
+  evaluations: 'evaluations',
+  total: 'total',
+  status: 'status',
+  createdAt: 'createdAt'
+} as const
+
+export type QuoteRequestScalarFieldEnum = (typeof QuoteRequestScalarFieldEnum)[keyof typeof QuoteRequestScalarFieldEnum]
 
 
 export const SortOrder = {
