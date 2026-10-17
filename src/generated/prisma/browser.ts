@@ -33,6 +33,11 @@ export type User = Prisma.UserModel
  */
 export type Course = Prisma.CourseModel
 /**
+ * Model Lesson
+ * 
+ */
+export type Lesson = Prisma.LessonModel
+/**
  * Model Product
  * 
  */
@@ -117,3 +122,8 @@ export type Session = Prisma.SessionModel
  * 
  */
 export type AuthEvent = Prisma.AuthEventModel
+/**
+ * Model QuoteRequest
+ * 
+ */
+export type QuoteRequest = Prisma.QuoteRequestModel

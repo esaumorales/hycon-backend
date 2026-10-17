@@ -209,6 +209,11 @@ const schemas = {
       },
       thumbnailUrl: { type: 'string', nullable: true },
       durationMinutes: { type: 'integer', nullable: true, example: 90 },
+      previewSegundos: {
+        type: 'integer',
+        description: 'Segundos de la leccion de muestra que ve quien no ha comprado el curso',
+        example: 60,
+      },
       price: { type: 'number', example: 120 },
       discountPrice: { type: 'number', nullable: true, example: 99 },
       status: { type: 'string', enum: ['active', 'inactive'] },
@@ -238,6 +243,184 @@ const schemas = {
       price: { type: 'number', exclusiveMinimum: 0, example: 120 },
       discountPrice: { type: 'number', exclusiveMinimum: 0, example: 99 },
       status: { type: 'string', enum: ['active', 'inactive'], default: 'active' },
+    },
+  },
+  Leccion: {
+    type: 'object',
+    properties: {
+      uuid: { type: 'string', format: 'uuid' },
+      titulo: { type: 'string', example: 'Introduccion al metodo' },
+      descripcion: { type: 'string', nullable: true },
+      duracionMinutos: { type: 'integer', nullable: true, example: 8 },
+      posicion: { type: 'integer', example: 1 },
+      esMuestra: { type: 'boolean', description: 'La unica leccion que ve quien no ha comprado' },
+      bloqueada: { type: 'boolean', description: 'true cuando hay que comprar el curso para verla' },
+      videoUrl: {
+        type: 'string',
+        nullable: true,
+        description: 'Solo llega si quien pregunta puede ver la leccion; si no, es null',
+      },
+      youtubeId: { type: 'string', nullable: true },
+      limiteSegundos: {
+        type: 'integer',
+        nullable: true,
+        description: 'Segundos que se dejan ver de la muestra. null cuando se puede ver entera',
+        example: 60,
+      },
+    },
+  },
+  Temario: {
+    type: 'object',
+    properties: {
+      cursoUuid: { type: 'string', format: 'uuid' },
+      tieneAcceso: { type: 'boolean', description: 'Si el usuario de la sesion compro el curso' },
+      previewSegundos: { type: 'integer', example: 60 },
+      lecciones: { type: 'array', items: ref('Leccion') },
+    },
+  },
+  LeccionEntrada: {
+    type: 'object',
+    required: ['title'],
+    properties: {
+      title: { type: 'string', minLength: 2, maxLength: 200, example: 'Introduccion al metodo' },
+      description: { type: 'string', maxLength: 2000 },
+      videoUrl: { type: 'string', description: 'Link de YouTube de esta parte del curso' },
+      durationMinutes: { type: 'integer', minimum: 1, maximum: 1000, example: 8 },
+      esMuestra: {
+        type: 'boolean',
+        default: false,
+        description:
+          'Marca la leccion gratuita. Solo puede haber una por curso: al marcar otra, la anterior se desmarca.',
+      },
+    },
+  },
+  CursoComprado: {
+    type: 'object',
+    properties: {
+      uuid: { type: 'string', format: 'uuid' },
+      name: { type: 'string', example: 'Logistica de ultima milla' },
+      description: { type: 'string', nullable: true },
+      videoUrl: { type: 'string', nullable: true },
+      youtubeId: { type: 'string', nullable: true, description: 'Id del video para incrustarlo' },
+      thumbnailUrl: { type: 'string', nullable: true },
+      durationMinutes: { type: 'integer', nullable: true, example: 150 },
+      compradoEl: {
+        type: 'string',
+        format: 'date-time',
+        description: 'Fecha del pedido mas reciente que incluye este curso',
+      },
+    },
+  },
+  FirmaSubida: {
+    type: 'object',
+    description:
+      'Permiso temporal para subir una imagen a Cloudinary desde el navegador. El api secret nunca sale del servidor.',
+    properties: {
+      cloudName: { type: 'string', example: 'hycon' },
+      apiKey: { type: 'string', example: '123456789012345' },
+      timestamp: { type: 'integer', description: 'Momento de la firma, en segundos' },
+      folder: { type: 'string', example: 'hycon/catalogo' },
+      signature: { type: 'string', description: 'sha1 de los parametros firmados' },
+    },
+  },
+  AvatarEntrada: {
+    type: 'object',
+    required: ['avatarUrl'],
+    properties: {
+      avatarUrl: {
+        type: 'string',
+        format: 'uri',
+        maxLength: 500,
+        description: 'Direccion que devolvio Cloudinary al subir la foto',
+      },
+    },
+  },
+  PerfilEntrada: {
+    type: 'object',
+    required: ['name', 'lastname'],
+    properties: {
+      name: { type: 'string', minLength: 2, maxLength: 100, example: 'Ana' },
+      lastname: { type: 'string', minLength: 2, maxLength: 100, example: 'Quispe Rojas' },
+      phone: {
+        type: 'string',
+        maxLength: 30,
+        description: 'Solo numeros y los signos + ( ) -. Vacio deja la columna sin valor.',
+        example: '+51 902 665 565',
+      },
+    },
+  },
+  CambioPasswordEntrada: {
+    type: 'object',
+    required: ['actual', 'nueva'],
+    properties: {
+      actual: { type: 'string', description: 'La contrasena con la que entra hoy' },
+      nueva: {
+        type: 'string',
+        minLength: 12,
+        description:
+          'Minimo 12 caracteres. Se rechazan las comunes, las repeticiones, las secuencias y las que contienen su nombre o su correo.',
+        example: 'brisa-tablero-19-norte',
+      },
+    },
+  },
+  LineaPedido: {
+    type: 'object',
+    properties: {
+      tipo: { type: 'string', enum: ['producto', 'curso'] },
+      nombre: { type: 'string', example: 'Caja de carton reforzada 40x40' },
+      cantidad: { type: 'integer', example: 2 },
+      precio: { type: 'number', description: 'Precio cobrado por unidad', example: 19.9 },
+      total: { type: 'number', example: 39.8 },
+    },
+  },
+  Pedido: {
+    type: 'object',
+    properties: {
+      uuid: { type: 'string', format: 'uuid' },
+      codigo: {
+        type: 'string',
+        description: 'Codigo corto del pedido, el que ve el cliente',
+        example: 'PED-0192F0',
+      },
+      estadoPago: {
+        type: 'string',
+        enum: ['pagado', 'pendiente'],
+        description: 'Con tarjeta o Yape queda pagado; por WhatsApp queda pendiente de cobro',
+      },
+      metodoPago: { type: 'string', enum: ['tarjeta', 'yape', 'whatsapp'] },
+      subtotal: { type: 'number', description: 'Suma de los precios de lista', example: 51.8 },
+      descuento: { type: 'number', description: 'Lo que se ahorro por las ofertas', example: 12 },
+      total: { type: 'number', example: 39.8 },
+      createdAt: { type: 'string', format: 'date-time' },
+      items: { type: 'array', items: ref('LineaPedido') },
+    },
+  },
+  PedidoEntrada: {
+    type: 'object',
+    description:
+      'Solo se envian las referencias y las cantidades: el precio, el descuento y el total los calcula el servidor con el catalogo.',
+    required: ['metodoPago', 'items'],
+    properties: {
+      metodoPago: { type: 'string', enum: ['tarjeta', 'yape', 'whatsapp'] },
+      items: {
+        type: 'array',
+        minItems: 1,
+        maxItems: 50,
+        items: {
+          type: 'object',
+          required: ['tipo', 'uuid', 'cantidad'],
+          properties: {
+            tipo: { type: 'string', enum: ['producto', 'curso'] },
+            uuid: { type: 'string', format: 'uuid' },
+            cantidad: {
+              type: 'integer',
+              minimum: 1,
+              maximum: 99,
+              description: 'En los cursos siempre 1: es una sola inscripcion',
+            },
+          },
+        },
+      },
     },
   },
   Publicacion: {
@@ -421,6 +604,8 @@ export const openApiSpec = {
     { name: 'Auth', description: 'Registro, inicio de sesion y usuario actual' },
     { name: 'Catalogo', description: 'Productos, cursos y agencias de envio' },
     { name: 'Publicaciones', description: 'Articulos del blog' },
+    { name: 'Pedidos', description: 'Compras del usuario que tiene la sesion abierta' },
+    { name: 'Aprendizaje', description: 'Los cursos a los que el usuario tiene acceso' },
     { name: 'Archivos', description: 'Subida de imagenes para el catalogo y las publicaciones' },
   ],
   components: {
@@ -531,6 +716,85 @@ export const openApiSpec = {
         security: [{ bearerAuth: [] }],
         responses: {
           '200': sobre({ type: 'object', properties: { usuario: ref('Usuario') } }, 'Usuario autenticado'),
+          '401': error('Falta el token, no es valido o expiro'),
+        },
+      },
+      put: {
+        tags: ['Auth'],
+        summary: 'Edita los datos del perfil',
+        description:
+          'Cambia nombre, apellido y telefono del usuario de la sesion. El correo no se edita aqui: cambiarlo sin verificar el buzon nuevo permitiria secuestrar la cuenta.',
+        security: [{ bearerAuth: [] }],
+        requestBody: cuerpoJson('PerfilEntrada'),
+        responses: {
+          '200': sobre({ type: 'object', properties: { usuario: ref('Usuario') } }, 'Perfil actualizado'),
+          '401': error('Falta el token, no es valido o expiro'),
+          '422': error('Datos invalidos: el mensaje indica el campo'),
+        },
+      },
+    },
+    '/auth/me/password': {
+      put: {
+        tags: ['Auth'],
+        summary: 'Cambia la contrasena',
+        description:
+          'Pide la contrasena actual y aplica la misma politica que el registro. Al terminar cierra las demas sesiones del usuario; la sesion desde la que se cambia sigue abierta.',
+        security: [{ bearerAuth: [] }],
+        requestBody: cuerpoJson('CambioPasswordEntrada'),
+        responses: {
+          '204': { description: 'Contrasena cambiada. Sin cuerpo' },
+          '401': error('La contrasena actual no es correcta, o falta el token'),
+          '422': error('La contrasena nueva no cumple la politica'),
+          '429': error('Demasiados intentos desde esta conexion'),
+        },
+      },
+    },
+    '/auth/me/avatar': {
+      put: {
+        tags: ['Auth'],
+        summary: 'Guarda la foto de perfil ya subida a Cloudinary',
+        description:
+          'El navegador sube la imagen a Cloudinary con la firma y aqui solo envia su direccion. La foto anterior se borra.',
+        security: [{ bearerAuth: [] }],
+        requestBody: cuerpoJson('AvatarEntrada'),
+        responses: {
+          '200': sobre({ type: 'object', properties: { usuario: ref('Usuario') } }, 'Foto actualizada'),
+          '401': error('Falta el token, no es valido o expiro'),
+          '422': error('La direccion de la imagen no es valida'),
+        },
+      },
+      post: {
+        tags: ['Auth'],
+        summary: 'Cambia la foto de perfil subiendo el archivo',
+        description:
+          'Acepta JPG, PNG, WEBP o GIF de hasta 5 MB, comprobados por la firma del archivo. La foto anterior se borra del disco.',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                required: ['imagen'],
+                properties: { imagen: { type: 'string', format: 'binary' } },
+              },
+            },
+          },
+        },
+        responses: {
+          '200': sobre({ type: 'object', properties: { usuario: ref('Usuario') } }, 'Foto actualizada'),
+          '400': error('No se adjunto el archivo en el campo imagen'),
+          '401': error('Falta el token, no es valido o expiro'),
+          '413': error('La imagen supera 5 MB'),
+          '415': error('El archivo no es una imagen permitida'),
+        },
+      },
+      delete: {
+        tags: ['Auth'],
+        summary: 'Quita la foto de perfil',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': sobre({ type: 'object', properties: { usuario: ref('Usuario') } }, 'Perfil sin foto'),
           '401': error('Falta el token, no es valido o expiro'),
         },
       },
@@ -653,6 +917,181 @@ export const openApiSpec = {
           '400': error('El identificador no es un uuid valido'),
           ...ERRORES_ADMIN,
           '404': error('No existe la publicacion'),
+        },
+      },
+    },
+    '/orders': {
+      post: {
+        tags: ['Pedidos'],
+        summary: 'Registra una compra',
+        description:
+          'Guarda el pedido a nombre del usuario de la sesion. El servidor vuelve a leer cada articulo del catalogo para calcular el precio, el descuento y el total, y rechaza el pedido si algo dejo de estar disponible o si se piden mas unidades de las que hay.',
+        security: [{ bearerAuth: [] }],
+        requestBody: cuerpoJson('PedidoEntrada'),
+        responses: {
+          '201': sobre({ type: 'object', properties: { pedido: ref('Pedido') } }, 'Pedido guardado'),
+          '401': error('Falta el token o no es valido'),
+          '409': error('Un articulo ya no esta disponible o no hay unidades suficientes'),
+          '422': error('Datos invalidos: el mensaje indica el campo'),
+        },
+      },
+    },
+    '/orders/mios': {
+      get: {
+        tags: ['Pedidos'],
+        summary: 'Lista las compras del usuario',
+        description: 'Solo devuelve los pedidos del usuario de la sesion, del mas reciente al mas antiguo.',
+        security: [{ bearerAuth: [] }],
+        parameters: PARAMETROS_LISTADO.filter((parametro) => parametro.name !== 'estado'),
+        responses: {
+          '200': sobre(
+            {
+              type: 'object',
+              properties: {
+                pedidos: { type: 'array', items: ref('Pedido') },
+                paginacion: ref('Paginacion'),
+              },
+            },
+            'Compras del usuario'
+          ),
+          '401': error('Falta el token o no es valido'),
+        },
+      },
+    },
+    '/catalog/courses/{uuid}/lecciones': {
+      get: {
+        tags: ['Catalogo'],
+        summary: 'Temario del curso',
+        description:
+          'Publico. Devuelve los titulos de todas las lecciones, pero el video solo de las que ese visitante puede ver: la marcada como muestra y, si envia su token, las del curso que compro. Lo bloqueado llega con videoUrl y youtubeId en null, asi el contenido no se filtra mirando la respuesta.',
+        parameters: [parametroUuid('curso')],
+        responses: {
+          '200': sobre({ type: 'object', properties: { temario: ref('Temario') } }, 'Temario del curso'),
+          '400': error('El identificador no es un uuid valido'),
+          '404': error('No existe el curso'),
+        },
+      },
+      post: {
+        tags: ['Catalogo'],
+        summary: 'Agrega una leccion al curso (solo ADMIN)',
+        security: [{ bearerAuth: [] }],
+        parameters: [parametroUuid('curso')],
+        requestBody: cuerpoJson('LeccionEntrada'),
+        responses: {
+          '201': sobre({ type: 'object', properties: { leccion: ref('Leccion') } }, 'Leccion agregada'),
+          ...ERRORES_ADMIN,
+          '404': error('No existe el curso'),
+          '422': error('Datos invalidos: el mensaje indica el campo'),
+        },
+      },
+    },
+    '/catalog/courses/{uuid}/lecciones/admin': {
+      get: {
+        tags: ['Catalogo'],
+        summary: 'Temario completo para el panel (solo ADMIN)',
+        description: 'Igual que el temario publico pero con el video de todas las lecciones.',
+        security: [{ bearerAuth: [] }],
+        parameters: [parametroUuid('curso')],
+        responses: {
+          '200': sobre({ type: 'object', properties: { temario: ref('Temario') } }, 'Temario completo'),
+          ...ERRORES_ADMIN,
+          '404': error('No existe el curso'),
+        },
+      },
+    },
+    '/catalog/courses/{uuid}/lecciones/orden': {
+      put: {
+        tags: ['Catalogo'],
+        summary: 'Reordena las lecciones (solo ADMIN)',
+        description: 'Se envian los uuid de las lecciones en el orden deseado.',
+        security: [{ bearerAuth: [] }],
+        parameters: [parametroUuid('curso')],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['orden'],
+                properties: { orden: { type: 'array', items: { type: 'string', format: 'uuid' } } },
+              },
+            },
+          },
+        },
+        responses: {
+          '200': sobre({ type: 'object', properties: { temario: ref('Temario') } }, 'Temario ordenado'),
+          ...ERRORES_ADMIN,
+          '422': error('El orden enviado no es valido'),
+        },
+      },
+    },
+    '/catalog/courses/{uuid}/lecciones/{leccionUuid}': {
+      put: {
+        tags: ['Catalogo'],
+        summary: 'Edita una leccion (solo ADMIN)',
+        security: [{ bearerAuth: [] }],
+        parameters: [parametroUuid('curso'), { ...parametroUuid('leccion'), name: 'leccionUuid' }],
+        requestBody: cuerpoJson('LeccionEntrada'),
+        responses: {
+          '200': sobre({ type: 'object', properties: { leccion: ref('Leccion') } }, 'Leccion actualizada'),
+          ...ERRORES_ADMIN,
+          '404': error('No existe el curso o la leccion'),
+          '422': error('Datos invalidos: el mensaje indica el campo'),
+        },
+      },
+      delete: {
+        tags: ['Catalogo'],
+        summary: 'Elimina una leccion (solo ADMIN)',
+        security: [{ bearerAuth: [] }],
+        parameters: [parametroUuid('curso'), { ...parametroUuid('leccion'), name: 'leccionUuid' }],
+        responses: {
+          '204': { description: 'Eliminada. Sin cuerpo' },
+          ...ERRORES_ADMIN,
+          '404': error('No existe el curso o la leccion'),
+        },
+      },
+    },
+    '/lms/mis-cursos': {
+      get: {
+        tags: ['Aprendizaje'],
+        summary: 'Lista los cursos comprados por el usuario',
+        description:
+          'Los cursos que aparecen en algun pedido del usuario de la sesion, sin repetirse y del mas reciente al mas antiguo.',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': sobre(
+            { type: 'object', properties: { cursos: { type: 'array', items: ref('CursoComprado') } } },
+            'Cursos con acceso'
+          ),
+          '401': error('Falta el token, no es valido o expiro'),
+        },
+      },
+    },
+    '/uploads/firma/catalogo': {
+      post: {
+        tags: ['Archivos'],
+        summary: 'Firma una subida a Cloudinary (solo ADMIN)',
+        description:
+          'Devuelve los datos con los que el navegador sube la imagen directo a Cloudinary, en la carpeta del catalogo. Responde 503 si el servidor no tiene Cloudinary configurado; en ese caso se usa POST /uploads/imagenes.',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': sobre({ type: 'object', properties: { firma: ref('FirmaSubida') } }, 'Firma emitida'),
+          ...ERRORES_ADMIN,
+          '503': error('Cloudinary no esta configurado en el servidor'),
+        },
+      },
+    },
+    '/uploads/firma/avatar': {
+      post: {
+        tags: ['Archivos'],
+        summary: 'Firma la subida de una foto de perfil',
+        description:
+          'Igual que la del catalogo pero en la carpeta de avatares. La puede pedir cualquier usuario con sesion.',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': sobre({ type: 'object', properties: { firma: ref('FirmaSubida') } }, 'Firma emitida'),
+          '401': error('Falta el token, no es valido o expiro'),
+          '503': error('Cloudinary no esta configurado en el servidor'),
         },
       },
     },

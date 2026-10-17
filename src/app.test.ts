@@ -274,6 +274,16 @@ describe('documentacion', () => {
         '/uploads/imagenes',
         '/posts',
         '/posts/{referencia}',
+        '/orders',
+        '/orders/mios',
+        '/auth/me',
+        '/auth/me/password',
+        '/auth/me/avatar',
+        '/uploads/firma/catalogo',
+        '/uploads/firma/avatar',
+        '/lms/mis-cursos',
+        '/catalog/courses/{uuid}/lecciones',
+        '/catalog/courses/{uuid}/lecciones/{leccionUuid}',
       ])
     );
     const paths = openApiSpec.paths as Record<string, object>;

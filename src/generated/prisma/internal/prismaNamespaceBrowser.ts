@@ -54,6 +54,7 @@ export const ModelName = {
   Role: 'Role',
   User: 'User',
   Course: 'Course',
+  Lesson: 'Lesson',
   Product: 'Product',
   ProductImage: 'ProductImage',
   Cart: 'Cart',
@@ -70,7 +71,8 @@ export const ModelName = {
   FormSubmission: 'FormSubmission',
   FormAnswer: 'FormAnswer',
   Session: 'Session',
-  AuthEvent: 'AuthEvent'
+  AuthEvent: 'AuthEvent',
+  QuoteRequest: 'QuoteRequest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -126,6 +128,7 @@ export const CourseScalarFieldEnum = {
   videoUrl: 'videoUrl',
   thumbnailUrl: 'thumbnailUrl',
   durationMinutes: 'durationMinutes',
+  previewSeconds: 'previewSeconds',
   price: 'price',
   discountPrice: 'discountPrice',
   status: 'status',
@@ -134,6 +137,23 @@ export const CourseScalarFieldEnum = {
 } as const
 
 export type CourseScalarFieldEnum = (typeof CourseScalarFieldEnum)[keyof typeof CourseScalarFieldEnum]
+
+
+export const LessonScalarFieldEnum = {
+  lessonId: 'lessonId',
+  uuid: 'uuid',
+  courseId: 'courseId',
+  title: 'title',
+  description: 'description',
+  videoUrl: 'videoUrl',
+  durationMinutes: 'durationMinutes',
+  position: 'position',
+  isPreview: 'isPreview',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LessonScalarFieldEnum = (typeof LessonScalarFieldEnum)[keyof typeof LessonScalarFieldEnum]
 
 
 export const ProductScalarFieldEnum = {
@@ -192,6 +212,7 @@ export type CartItemScalarFieldEnum = (typeof CartItemScalarFieldEnum)[keyof typ
 
 export const OrderScalarFieldEnum = {
   orderId: 'orderId',
+  uuid: 'uuid',
   userId: 'userId',
   subtotal: 'subtotal',
   discount: 'discount',
@@ -357,6 +378,23 @@ export const AuthEventScalarFieldEnum = {
 } as const
 
 export type AuthEventScalarFieldEnum = (typeof AuthEventScalarFieldEnum)[keyof typeof AuthEventScalarFieldEnum]
+
+
+export const QuoteRequestScalarFieldEnum = {
+  quoteId: 'quoteId',
+  uuid: 'uuid',
+  name: 'name',
+  company: 'company',
+  phone: 'phone',
+  email: 'email',
+  message: 'message',
+  evaluations: 'evaluations',
+  total: 'total',
+  status: 'status',
+  createdAt: 'createdAt'
+} as const
+
+export type QuoteRequestScalarFieldEnum = (typeof QuoteRequestScalarFieldEnum)[keyof typeof QuoteRequestScalarFieldEnum]
 
 
 export const SortOrder = {

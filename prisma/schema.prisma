@@ -65,6 +65,8 @@ model Course {
   videoUrl        String?  @map("video_url") @db.VarChar(500)
   thumbnailUrl    String?  @map("thumbnail_url") @db.VarChar(500)
   durationMinutes Int?     @map("duration_minutes")
+  // Cuanto se deja ver de la leccion de muestra a quien no ha comprado
+  previewSeconds  Int      @default(60) @map("preview_seconds")
   price           Decimal  @db.Decimal(10, 2)
   discountPrice   Decimal? @map("discount_price") @db.Decimal(10, 2)
   status          String   @default("active") @db.VarChar(20)
@@ -77,8 +79,30 @@ model Course {
   orderItems   OrderItem[]
   enrollments  Enrollment[]
   certificates Certificate[]
+  lessons      Lesson[]
 
   @@map("courses")
+}
+
+// Cada parte del curso. El orden lo da "position" y la marcada como muestra
+// es la unica cuyo video ve quien todavia no compro.
+model Lesson {
+  lessonId        Int      @id @default(autoincrement()) @map("lesson_id")
+  uuid            String   @unique @default(uuid(7)) @db.Uuid
+  courseId        Int      @map("course_id")
+  title           String   @db.VarChar(200)
+  description     String?  @db.Text
+  videoUrl        String?  @map("video_url") @db.VarChar(500)
+  durationMinutes Int?     @map("duration_minutes")
+  position        Int
+  isPreview       Boolean  @default(false) @map("is_preview")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  course Course @relation(fields: [courseId], references: [courseId])
+
+  @@index([courseId, position])
+  @@map("lessons")
 }
 
 model Product {
@@ -148,6 +172,8 @@ model CartItem {
 
 model Order {
   orderId         Int      @id @default(autoincrement()) @map("order_id")
+  // Identificador publico del pedido: es el que ve el cliente y viaja por la API
+  uuid            String   @unique @default(uuid(7)) @db.Uuid
   userId          Int      @map("user_id")
   subtotal        Decimal  @db.Decimal(10, 2)
   discount        Decimal  @db.Decimal(10, 2)
@@ -369,4 +395,23 @@ model AuthEvent {
   @@index([userId, createdAt])
   @@index([type, createdAt])
   @@map("auth_events")
+}
+
+// Solicitudes de cotizacion de evaluaciones ergonomicas que llegan desde la web
+model QuoteRequest {
+  quoteId     Int      @id @default(autoincrement()) @map("quote_id")
+  uuid        String   @unique @default(uuid(7)) @db.Uuid
+  name        String   @db.VarChar(120)
+  company     String?  @db.VarChar(150)
+  phone       String   @db.VarChar(30)
+  email       String   @db.VarChar(150)
+  message     String?  @db.Text
+  // Codigos de las evaluaciones pedidas; los precios salen del servidor
+  evaluations String[] @db.VarChar(40)
+  total       Decimal  @db.Decimal(10, 2)
+  status      String   @default("nuevo") @db.VarChar(20)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@map("quote_requests")
 }

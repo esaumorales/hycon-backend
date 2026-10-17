@@ -3,10 +3,12 @@ import { createHash, randomBytes, randomUUID } from 'crypto';
 import { prisma } from '../../core/database/prisma';
 import { env } from '../../core/config/env';
 import { AppError, ErrorDemasiadosIntentos } from '../../core/errors/AppError';
+import { almacenImagenes } from '../uploads/uploads.service';
 import { firmarToken } from '../../core/utils/jwt';
 import { crearRegistroIntentos, type RegistroIntentos } from './auth.intentos';
 import { aUsuarioPublico } from './auth.mapper';
-import type { LoginInput, RegistroInput } from './auth.schema';
+import { evaluarPassword } from './auth.politica';
+import type { CambioPasswordInput, LoginInput, PerfilInput, RegistroInput } from './auth.schema';
 import type {
   ContextoPeticion,
   EventoAcceso,
@@ -60,6 +62,14 @@ export interface DependenciasAuth {
     phone?: string;
     roleId: number;
   }): Promise<UsuarioConRol>;
+  actualizarPerfil(userId: number, datos: PerfilInput): Promise<UsuarioConRol>;
+  cambiarPassword(userId: number, passwordHash: string): Promise<void>;
+  guardarAvatar(userId: number, avatarUrl: string | null): Promise<UsuarioConRol>;
+  // Cierra todas las sesiones del usuario salvo, si se indica, la que esta usando ahora
+  revocarSesionesDe(userId: number, cuando: Date, salvoTokenHash?: string): Promise<void>;
+  // Guarda la imagen subida y devuelve su URL publica
+  guardarImagen(contenido: Buffer): Promise<{ url: string }>;
+  eliminarImagen(url: string): Promise<unknown>;
   registrarFallo(userId: number, intentos: number, bloqueadoHasta: Date | null): Promise<void>;
   registrarAccesoCorrecto(userId: number, cuando: Date, nuevoHash?: string): Promise<void>;
 
@@ -115,6 +125,29 @@ export const dependenciasReales: DependenciasAuth = {
     return roles[0] ? { roleId: roles[0].roleId } : null;
   },
   crearUsuario: (datos) => prisma.user.create({ data: datos, select: seleccionConRol }),
+  actualizarPerfil: (userId, { name, lastname, phone }) =>
+    prisma.user.update({
+      where: { userId },
+      data: { name, lastname, phone: phone ?? null },
+      select: seleccionConRol,
+    }),
+  cambiarPassword: async (userId, passwordHash) => {
+    await prisma.user.update({ where: { userId }, data: { passwordHash } });
+  },
+  guardarAvatar: (userId, avatarUrl) =>
+    prisma.user.update({ where: { userId }, data: { avatarUrl }, select: seleccionConRol }),
+  revocarSesionesDe: async (userId, cuando, salvoTokenHash) => {
+    await prisma.session.updateMany({
+      where: {
+        userId,
+        revokedAt: null,
+        ...(salvoTokenHash ? { NOT: { tokenHash: salvoTokenHash } } : {}),
+      },
+      data: { revokedAt: cuando },
+    });
+  },
+  guardarImagen: (contenido) => almacenImagenes.guardar(contenido),
+  eliminarImagen: (url) => almacenImagenes.eliminar(url),
   registrarFallo: async (userId, intentos, bloqueadoHasta) => {
     await prisma.user.update({
       where: { userId },
@@ -193,6 +226,12 @@ export const crearServicioAuth = (deps: DependenciasAuth, politica: PoliticaAcce
     } catch (error) {
       console.error('No se pudo registrar el evento de acceso', evento.type, error);
     }
+  };
+
+  const exigirUsuario = async (userId: number): Promise<UsuarioConRol> => {
+    const usuario = await deps.buscarUsuarioPorId(userId);
+    if (!usuario) throw new AppError('El usuario ya no existe', 404);
+    return usuario;
   };
 
   const abrirSesion = async (
@@ -353,11 +392,85 @@ export const crearServicioAuth = (deps: DependenciasAuth, politica: PoliticaAcce
     },
 
     async obtenerPerfil(userId: number): Promise<UsuarioPublico> {
-      const usuario = await deps.buscarUsuarioPorId(userId);
-      if (!usuario) {
-        throw new AppError('El usuario ya no existe', 404);
+      return aUsuarioPublico(await exigirUsuario(userId));
+    },
+
+    async actualizarPerfil(
+      userId: number,
+      datos: PerfilInput,
+      contexto: ContextoPeticion = {}
+    ): Promise<UsuarioPublico> {
+      await exigirUsuario(userId);
+      const actualizado = await deps.actualizarPerfil(userId, datos);
+      await registrar({ type: 'PERFIL_ACTUALIZADO', userId, ...contexto });
+      return aUsuarioPublico(actualizado);
+    },
+
+    /**
+     * Cambia la contrasena pidiendo la actual. Al terminar cierra las demas sesiones:
+     * si alguien habia entrado con la contrasena vieja, deja de tener acceso.
+     */
+    async cambiarPassword(
+      userId: number,
+      { actual, nueva }: CambioPasswordInput,
+      opciones: { tokenSesionActual?: string } = {},
+      contexto: ContextoPeticion = {}
+    ): Promise<void> {
+      const usuario = await exigirUsuario(userId);
+
+      if (!(await deps.comparar(actual, usuario.passwordHash))) {
+        throw new AppError('La contrasena actual no es correcta', 401);
       }
-      return aUsuarioPublico(usuario);
+
+      // La politica tambien mira el nombre y el correo de este usuario
+      const motivo = evaluarPassword(nueva, usuario);
+      if (motivo) throw new AppError(motivo, 422);
+
+      await deps.cambiarPassword(userId, await deps.hashear(nueva));
+      await deps.revocarSesionesDe(
+        userId,
+        deps.ahora(),
+        opciones.tokenSesionActual ? hashToken(opciones.tokenSesionActual) : undefined
+      );
+      await registrar({ type: 'PASSWORD_CAMBIADA', userId, email: usuario.email, ...contexto });
+    },
+
+    /** Guarda la foto nueva y borra del disco la anterior. */
+    async actualizarAvatar(
+      userId: number,
+      contenido: Buffer,
+      contexto: ContextoPeticion = {}
+    ): Promise<UsuarioPublico> {
+      const usuario = await exigirUsuario(userId);
+      const { url } = await deps.guardarImagen(contenido);
+      const actualizado = await deps.guardarAvatar(userId, url);
+
+      if (usuario.avatarUrl) await deps.eliminarImagen(usuario.avatarUrl).catch(() => undefined);
+      await registrar({ type: 'AVATAR_ACTUALIZADO', userId, ...contexto });
+      return aUsuarioPublico(actualizado);
+    },
+
+    /** Guarda la foto que el navegador ya subio a Cloudinary. */
+    async fijarAvatar(
+      userId: number,
+      avatarUrl: string,
+      contexto: ContextoPeticion = {}
+    ): Promise<UsuarioPublico> {
+      const usuario = await exigirUsuario(userId);
+      const actualizado = await deps.guardarAvatar(userId, avatarUrl);
+
+      if (usuario.avatarUrl) await deps.eliminarImagen(usuario.avatarUrl).catch(() => undefined);
+      await registrar({ type: 'AVATAR_ACTUALIZADO', userId, ...contexto });
+      return aUsuarioPublico(actualizado);
+    },
+
+    async quitarAvatar(userId: number, contexto: ContextoPeticion = {}): Promise<UsuarioPublico> {
+      const usuario = await exigirUsuario(userId);
+      const actualizado = await deps.guardarAvatar(userId, null);
+
+      if (usuario.avatarUrl) await deps.eliminarImagen(usuario.avatarUrl).catch(() => undefined);
+      await registrar({ type: 'AVATAR_ACTUALIZADO', userId, ...contexto });
+      return aUsuarioPublico(actualizado);
     },
   };
 };

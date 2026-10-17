@@ -400,6 +400,7 @@ export const ModelName = {
   Role: 'Role',
   User: 'User',
   Course: 'Course',
+  Lesson: 'Lesson',
   Product: 'Product',
   ProductImage: 'ProductImage',
   Cart: 'Cart',
@@ -416,7 +417,8 @@ export const ModelName = {
   FormSubmission: 'FormSubmission',
   FormAnswer: 'FormAnswer',
   Session: 'Session',
-  AuthEvent: 'AuthEvent'
+  AuthEvent: 'AuthEvent',
+  QuoteRequest: 'QuoteRequest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -432,7 +434,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "role" | "user" | "course" | "product" | "productImage" | "cart" | "cartItem" | "order" | "orderItem" | "payment" | "enrollment" | "courseProgress" | "certificate" | "post" | "company" | "form" | "formSubmission" | "formAnswer" | "session" | "authEvent"
+    modelProps: "role" | "user" | "course" | "lesson" | "product" | "productImage" | "cart" | "cartItem" | "order" | "orderItem" | "payment" | "enrollment" | "courseProgress" | "certificate" | "post" | "company" | "form" | "formSubmission" | "formAnswer" | "session" | "authEvent" | "quoteRequest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -655,6 +657,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.CourseCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.CourseCountAggregateOutputType> | number
+        }
+      }
+    }
+    Lesson: {
+      payload: Prisma.$LessonPayload<ExtArgs>
+      fields: Prisma.LessonFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LessonFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LessonFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonPayload>
+        }
+        findFirst: {
+          args: Prisma.LessonFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LessonFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonPayload>
+        }
+        findMany: {
+          args: Prisma.LessonFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonPayload>[]
+        }
+        create: {
+          args: Prisma.LessonCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonPayload>
+        }
+        createMany: {
+          args: Prisma.LessonCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LessonCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonPayload>[]
+        }
+        delete: {
+          args: Prisma.LessonDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonPayload>
+        }
+        update: {
+          args: Prisma.LessonUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonPayload>
+        }
+        deleteMany: {
+          args: Prisma.LessonDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LessonUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LessonUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonPayload>[]
+        }
+        upsert: {
+          args: Prisma.LessonUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonPayload>
+        }
+        aggregate: {
+          args: Prisma.LessonAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLesson>
+        }
+        groupBy: {
+          args: Prisma.LessonGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LessonGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LessonCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LessonCountAggregateOutputType> | number
         }
       }
     }
@@ -1916,6 +1992,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    QuoteRequest: {
+      payload: Prisma.$QuoteRequestPayload<ExtArgs>
+      fields: Prisma.QuoteRequestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.QuoteRequestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuoteRequestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.QuoteRequestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuoteRequestPayload>
+        }
+        findFirst: {
+          args: Prisma.QuoteRequestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuoteRequestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.QuoteRequestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuoteRequestPayload>
+        }
+        findMany: {
+          args: Prisma.QuoteRequestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuoteRequestPayload>[]
+        }
+        create: {
+          args: Prisma.QuoteRequestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuoteRequestPayload>
+        }
+        createMany: {
+          args: Prisma.QuoteRequestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.QuoteRequestCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuoteRequestPayload>[]
+        }
+        delete: {
+          args: Prisma.QuoteRequestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuoteRequestPayload>
+        }
+        update: {
+          args: Prisma.QuoteRequestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuoteRequestPayload>
+        }
+        deleteMany: {
+          args: Prisma.QuoteRequestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.QuoteRequestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.QuoteRequestUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuoteRequestPayload>[]
+        }
+        upsert: {
+          args: Prisma.QuoteRequestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuoteRequestPayload>
+        }
+        aggregate: {
+          args: Prisma.QuoteRequestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateQuoteRequest>
+        }
+        groupBy: {
+          args: Prisma.QuoteRequestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.QuoteRequestGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.QuoteRequestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.QuoteRequestCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1992,6 +2142,7 @@ export const CourseScalarFieldEnum = {
   videoUrl: 'videoUrl',
   thumbnailUrl: 'thumbnailUrl',
   durationMinutes: 'durationMinutes',
+  previewSeconds: 'previewSeconds',
   price: 'price',
   discountPrice: 'discountPrice',
   status: 'status',
@@ -2000,6 +2151,23 @@ export const CourseScalarFieldEnum = {
 } as const
 
 export type CourseScalarFieldEnum = (typeof CourseScalarFieldEnum)[keyof typeof CourseScalarFieldEnum]
+
+
+export const LessonScalarFieldEnum = {
+  lessonId: 'lessonId',
+  uuid: 'uuid',
+  courseId: 'courseId',
+  title: 'title',
+  description: 'description',
+  videoUrl: 'videoUrl',
+  durationMinutes: 'durationMinutes',
+  position: 'position',
+  isPreview: 'isPreview',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LessonScalarFieldEnum = (typeof LessonScalarFieldEnum)[keyof typeof LessonScalarFieldEnum]
 
 
 export const ProductScalarFieldEnum = {
@@ -2058,6 +2226,7 @@ export type CartItemScalarFieldEnum = (typeof CartItemScalarFieldEnum)[keyof typ
 
 export const OrderScalarFieldEnum = {
   orderId: 'orderId',
+  uuid: 'uuid',
   userId: 'userId',
   subtotal: 'subtotal',
   discount: 'discount',
@@ -2223,6 +2392,23 @@ export const AuthEventScalarFieldEnum = {
 } as const
 
 export type AuthEventScalarFieldEnum = (typeof AuthEventScalarFieldEnum)[keyof typeof AuthEventScalarFieldEnum]
+
+
+export const QuoteRequestScalarFieldEnum = {
+  quoteId: 'quoteId',
+  uuid: 'uuid',
+  name: 'name',
+  company: 'company',
+  phone: 'phone',
+  email: 'email',
+  message: 'message',
+  evaluations: 'evaluations',
+  total: 'total',
+  status: 'status',
+  createdAt: 'createdAt'
+} as const
+
+export type QuoteRequestScalarFieldEnum = (typeof QuoteRequestScalarFieldEnum)[keyof typeof QuoteRequestScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -2485,6 +2671,7 @@ export type GlobalOmitConfig = {
   role?: Prisma.RoleOmit
   user?: Prisma.UserOmit
   course?: Prisma.CourseOmit
+  lesson?: Prisma.LessonOmit
   product?: Prisma.ProductOmit
   productImage?: Prisma.ProductImageOmit
   cart?: Prisma.CartOmit
@@ -2502,6 +2689,7 @@ export type GlobalOmitConfig = {
   formAnswer?: Prisma.FormAnswerOmit
   session?: Prisma.SessionOmit
   authEvent?: Prisma.AuthEventOmit
+  quoteRequest?: Prisma.QuoteRequestOmit
 }
 
 /* Types for Logging */

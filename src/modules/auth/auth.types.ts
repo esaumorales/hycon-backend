@@ -62,7 +62,10 @@ export type TipoEventoAcceso =
   | 'REGISTRO'
   | 'REFRESH'
   | 'REUSO_TOKEN'
-  | 'LOGOUT';
+  | 'LOGOUT'
+  | 'PERFIL_ACTUALIZADO'
+  | 'PASSWORD_CAMBIADA'
+  | 'AVATAR_ACTUALIZADO';
 
 export interface EventoAcceso extends ContextoPeticion {
   type: TipoEventoAcceso;

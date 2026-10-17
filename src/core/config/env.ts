@@ -71,4 +71,18 @@ export const env = {
   COOKIE_SAMESITE: sameSite(process.env.COOKIE_SAMESITE),
   // Numero de proxies delante (Nginx, balanceador) para leer la IP real del cliente
   TRUST_PROXY: numero(process.env.TRUST_PROXY, 0),
+
+  // ---- Cloudinary ----
+  // Con las tres claves puestas, las imagenes se suben alli; si faltan,
+  // se guardan en disco como hasta ahora
+  CLOUDINARY: {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME ?? '',
+    apiKey: process.env.CLOUDINARY_API_KEY ?? '',
+    apiSecret: process.env.CLOUDINARY_API_SECRET ?? '',
+    carpeta: process.env.CLOUDINARY_CARPETA ?? 'hycon',
+  },
 };
+
+/** Cloudinary solo se usa si estan las tres credenciales. */
+export const cloudinaryActivo = (): boolean =>
+  Boolean(env.CLOUDINARY.cloudName && env.CLOUDINARY.apiKey && env.CLOUDINARY.apiSecret);

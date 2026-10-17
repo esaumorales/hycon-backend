@@ -36,5 +36,47 @@ export const loginSchema = z.object({
   recordar: z.boolean().default(false),
 });
 
+// Datos que el usuario puede cambiar de su perfil. El correo no esta aqui:
+// cambiarlo sin verificar el nuevo buzon permitiria secuestrar la cuenta.
+export const perfilSchema = z.object({
+  name: z.string().trim().min(2, 'El nombre debe tener al menos 2 caracteres').max(100),
+  lastname: z.string().trim().min(2, 'El apellido debe tener al menos 2 caracteres').max(100),
+  phone: z
+    .string()
+    .trim()
+    .max(30, 'El telefono es demasiado largo')
+    .regex(/^[\d+()\s-]*$/, 'El telefono solo admite numeros y los signos + ( ) -')
+    .optional(),
+});
+
+export const cambioPasswordSchema = z
+  .object({
+    actual: z.string({ message: 'Escribe tu contrasena actual' }).min(1, 'Escribe tu contrasena actual'),
+    nueva: z.string({ message: 'La contrasena es obligatoria' }),
+  })
+  .superRefine((datos, contexto) => {
+    const motivo = evaluarPassword(datos.nueva);
+    if (motivo) contexto.addIssue({ code: 'custom', path: ['nueva'], message: motivo });
+    if (datos.actual === datos.nueva) {
+      contexto.addIssue({
+        code: 'custom',
+        path: ['nueva'],
+        message: 'La contrasena nueva debe ser distinta de la actual',
+      });
+    }
+  });
+
+// El navegador sube la foto a Cloudinary y aqui solo llega su URL
+export const avatarSchema = z.object({
+  avatarUrl: z
+    .string({ message: 'Falta la direccion de la imagen' })
+    .trim()
+    .url('La direccion de la imagen no es valida')
+    .max(500, 'La direccion es demasiado larga'),
+});
+
 export type RegistroInput = z.infer<typeof registroSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type PerfilInput = z.infer<typeof perfilSchema>;
+export type CambioPasswordInput = z.infer<typeof cambioPasswordSchema>;
+export type AvatarInput = z.infer<typeof avatarSchema>;

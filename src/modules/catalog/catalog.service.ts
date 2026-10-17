@@ -67,6 +67,7 @@ const seleccionProducto = {
 const seleccionCurso = {
   courseId: true,
   uuid: true,
+  previewSeconds: true,
   ownerId: true,
   name: true,
   description: true,
@@ -105,6 +106,7 @@ const columnasProducto = (datos: Omit<ProductoInput, 'imageUrl'>) => ({
 
 const columnasCurso = (datos: CursoInput) => ({
   name: datos.name,
+  previewSeconds: datos.previewSegundos,
   description: datos.description ?? null,
   videoUrl: datos.videoUrl ?? null,
   thumbnailUrl: datos.thumbnailUrl ?? null,
