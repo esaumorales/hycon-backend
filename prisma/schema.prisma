@@ -59,6 +59,7 @@ model User {
 
 model Course {
   courseId        Int      @id @default(autoincrement()) @map("course_id")
+  uuid            String   @unique @default(uuid(7)) @db.Uuid
   ownerId         Int      @map("owner_id")
   name            String   @db.VarChar(200)
   description     String?  @db.Text
@@ -107,6 +108,7 @@ model Lesson {
 
 model Product {
   productId     Int      @id @default(autoincrement()) @map("product_id")
+  uuid          String   @unique @default(uuid(7)) @db.Uuid
   ownerId       Int      @map("owner_id")
   name          String   @db.VarChar(200)
   description   String?  @db.Text
@@ -273,6 +275,7 @@ model Certificate {
 
 model Post {
   postId      Int      @id @default(autoincrement()) @map("post_id")
+  uuid        String   @unique @default(uuid(7)) @db.Uuid
   authorId    Int      @map("author_id")
   title       String   @db.VarChar(200)
   // Identificador legible para la URL publica del articulo

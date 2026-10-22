@@ -59,6 +59,7 @@ export type FormCountAggregateOutputType = {
   companyId: number
   name: number
   description: number
+  payload: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -98,6 +99,7 @@ export type FormCountAggregateInputType = {
   companyId?: true
   name?: true
   description?: true
+  payload?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -194,6 +196,7 @@ export type FormGroupByOutputType = {
   companyId: number
   name: string
   description: string | null
+  payload: runtime.JsonValue | null
   createdAt: Date
   updatedAt: Date
   _count: FormCountAggregateOutputType | null
@@ -226,6 +229,7 @@ export type FormWhereInput = {
   companyId?: Prisma.IntFilter<"Form"> | number
   name?: Prisma.StringFilter<"Form"> | string
   description?: Prisma.StringNullableFilter<"Form"> | string | null
+  payload?: Prisma.JsonNullableFilter<"Form">
   createdAt?: Prisma.DateTimeFilter<"Form"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Form"> | Date | string
   company?: Prisma.XOR<Prisma.CompanyScalarRelationFilter, Prisma.CompanyWhereInput>
@@ -237,6 +241,7 @@ export type FormOrderByWithRelationInput = {
   companyId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  payload?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   company?: Prisma.CompanyOrderByWithRelationInput
@@ -251,6 +256,7 @@ export type FormWhereUniqueInput = Prisma.AtLeast<{
   companyId?: Prisma.IntFilter<"Form"> | number
   name?: Prisma.StringFilter<"Form"> | string
   description?: Prisma.StringNullableFilter<"Form"> | string | null
+  payload?: Prisma.JsonNullableFilter<"Form">
   createdAt?: Prisma.DateTimeFilter<"Form"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Form"> | Date | string
   company?: Prisma.XOR<Prisma.CompanyScalarRelationFilter, Prisma.CompanyWhereInput>
@@ -262,6 +268,7 @@ export type FormOrderByWithAggregationInput = {
   companyId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  payload?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.FormCountOrderByAggregateInput
@@ -279,6 +286,7 @@ export type FormScalarWhereWithAggregatesInput = {
   companyId?: Prisma.IntWithAggregatesFilter<"Form"> | number
   name?: Prisma.StringWithAggregatesFilter<"Form"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"Form"> | string | null
+  payload?: Prisma.JsonNullableWithAggregatesFilter<"Form">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Form"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Form"> | Date | string
 }
@@ -286,6 +294,7 @@ export type FormScalarWhereWithAggregatesInput = {
 export type FormCreateInput = {
   name: string
   description?: string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   company: Prisma.CompanyCreateNestedOneWithoutFormsInput
@@ -297,6 +306,7 @@ export type FormUncheckedCreateInput = {
   companyId: number
   name: string
   description?: string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.FormSubmissionUncheckedCreateNestedManyWithoutFormInput
@@ -305,6 +315,7 @@ export type FormUncheckedCreateInput = {
 export type FormUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   company?: Prisma.CompanyUpdateOneRequiredWithoutFormsNestedInput
@@ -316,6 +327,7 @@ export type FormUncheckedUpdateInput = {
   companyId?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.FormSubmissionUncheckedUpdateManyWithoutFormNestedInput
@@ -326,6 +338,7 @@ export type FormCreateManyInput = {
   companyId: number
   name: string
   description?: string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -333,6 +346,7 @@ export type FormCreateManyInput = {
 export type FormUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -342,6 +356,7 @@ export type FormUncheckedUpdateManyInput = {
   companyId?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -361,6 +376,7 @@ export type FormCountOrderByAggregateInput = {
   companyId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  payload?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -457,6 +473,7 @@ export type FormUpdateOneRequiredWithoutSubmissionsNestedInput = {
 export type FormCreateWithoutCompanyInput = {
   name: string
   description?: string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.FormSubmissionCreateNestedManyWithoutFormInput
@@ -466,6 +483,7 @@ export type FormUncheckedCreateWithoutCompanyInput = {
   formId?: number
   name: string
   description?: string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.FormSubmissionUncheckedCreateNestedManyWithoutFormInput
@@ -505,6 +523,7 @@ export type FormScalarWhereInput = {
   companyId?: Prisma.IntFilter<"Form"> | number
   name?: Prisma.StringFilter<"Form"> | string
   description?: Prisma.StringNullableFilter<"Form"> | string | null
+  payload?: Prisma.JsonNullableFilter<"Form">
   createdAt?: Prisma.DateTimeFilter<"Form"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Form"> | Date | string
 }
@@ -512,6 +531,7 @@ export type FormScalarWhereInput = {
 export type FormCreateWithoutSubmissionsInput = {
   name: string
   description?: string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   company: Prisma.CompanyCreateNestedOneWithoutFormsInput
@@ -522,6 +542,7 @@ export type FormUncheckedCreateWithoutSubmissionsInput = {
   companyId: number
   name: string
   description?: string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -545,6 +566,7 @@ export type FormUpdateToOneWithWhereWithoutSubmissionsInput = {
 export type FormUpdateWithoutSubmissionsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   company?: Prisma.CompanyUpdateOneRequiredWithoutFormsNestedInput
@@ -555,6 +577,7 @@ export type FormUncheckedUpdateWithoutSubmissionsInput = {
   companyId?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -563,6 +586,7 @@ export type FormCreateManyCompanyInput = {
   formId?: number
   name: string
   description?: string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -570,6 +594,7 @@ export type FormCreateManyCompanyInput = {
 export type FormUpdateWithoutCompanyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.FormSubmissionUpdateManyWithoutFormNestedInput
@@ -579,6 +604,7 @@ export type FormUncheckedUpdateWithoutCompanyInput = {
   formId?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.FormSubmissionUncheckedUpdateManyWithoutFormNestedInput
@@ -588,6 +614,7 @@ export type FormUncheckedUpdateManyWithoutCompanyInput = {
   formId?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payload?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -628,6 +655,7 @@ export type FormSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   companyId?: boolean
   name?: boolean
   description?: boolean
+  payload?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
@@ -640,6 +668,7 @@ export type FormSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   companyId?: boolean
   name?: boolean
   description?: boolean
+  payload?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
@@ -650,6 +679,7 @@ export type FormSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   companyId?: boolean
   name?: boolean
   description?: boolean
+  payload?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
@@ -660,11 +690,12 @@ export type FormSelectScalar = {
   companyId?: boolean
   name?: boolean
   description?: boolean
+  payload?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type FormOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"formId" | "companyId" | "name" | "description" | "createdAt" | "updatedAt", ExtArgs["result"]["form"]>
+export type FormOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"formId" | "companyId" | "name" | "description" | "payload" | "createdAt" | "updatedAt", ExtArgs["result"]["form"]>
 export type FormInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
   submissions?: boolean | Prisma.Form$submissionsArgs<ExtArgs>
@@ -688,6 +719,7 @@ export type $FormPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     companyId: number
     name: string
     description: string | null
+    payload: runtime.JsonValue | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["form"]>
@@ -1119,6 +1151,7 @@ export interface FormFieldRefs {
   readonly companyId: Prisma.FieldRef<"Form", 'Int'>
   readonly name: Prisma.FieldRef<"Form", 'String'>
   readonly description: Prisma.FieldRef<"Form", 'String'>
+  readonly payload: Prisma.FieldRef<"Form", 'Json'>
   readonly createdAt: Prisma.FieldRef<"Form", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Form", 'DateTime'>
 }
