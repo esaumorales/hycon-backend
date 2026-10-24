@@ -35,6 +35,8 @@ export interface CursoBase {
   discountPrice: DecimalCompatible | null;
   status: string;
   createdAt: Date;
+  // Numero de partes del temario; Prisma lo cuenta al listar
+  _count?: { lessons: number };
 }
 
 export interface AgenciaEnvio {
@@ -74,6 +76,8 @@ export interface CursoPublico {
   youtubeId: string | null;
   thumbnailUrl: string | null;
   durationMinutes: number | null;
+  // Partes del temario: 0 cuando el curso todavia no tiene contenido
+  partes: number;
   price: number;
   discountPrice: number | null;
   status: string;

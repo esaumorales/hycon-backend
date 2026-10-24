@@ -3,6 +3,7 @@ import {
   crearServicioLecciones,
   type DependenciasLecciones,
   type LeccionBase,
+  type VideosDeLecciones,
 } from './lecciones.service';
 
 const CURSO = 'b7b299d8-ee8f-4bea-a618-0a5f8261136f';
@@ -27,8 +28,11 @@ const crearDeps = (cambios: Partial<DependenciasLecciones> = {}): DependenciasLe
   listar: vi.fn().mockResolvedValue([muestra, segunda]),
   comproElCurso: vi.fn().mockResolvedValue(false),
   crear: vi.fn(async (_courseId, datos) => leccion({ title: datos.title, position: datos.position })),
-  actualizar: vi.fn(async (uuid, datos) => leccion({ uuid, title: datos.title })),
-  eliminar: vi.fn().mockResolvedValue(true),
+  actualizar: vi.fn(async (uuid, datos) => ({
+    leccion: leccion({ uuid, title: datos.title }),
+    videoAnterior: VIDEO,
+  })),
+  eliminar: vi.fn().mockResolvedValue({ videoAnterior: VIDEO }),
   quitarMuestras: vi.fn().mockResolvedValue(undefined),
   reordenar: vi.fn().mockResolvedValue(undefined),
   siguientePosicion: vi.fn().mockResolvedValue(3),
@@ -146,7 +150,7 @@ describe('administrar lecciones', () => {
   });
 
   it('eliminar algo que ya no esta responde 404', async () => {
-    const servicio = crearServicioLecciones(crearDeps({ eliminar: vi.fn().mockResolvedValue(false) }));
+    const servicio = crearServicioLecciones(crearDeps({ eliminar: vi.fn().mockResolvedValue(null) }));
 
     await expect(servicio.eliminar(CURSO, 'otra')).rejects.toMatchObject({ statusCode: 404 });
   });
@@ -158,5 +162,115 @@ describe('administrar lecciones', () => {
 
     expect(deps.reordenar).toHaveBeenCalledWith(3, [segunda.uuid, muestra.uuid]);
     expect(temario.lecciones).toHaveLength(2);
+  });
+});
+
+// Doble del almacen: no firma nada de verdad, solo cuenta a quien se le pide
+const crearVideosFalsos = (): VideosDeLecciones & {
+  reproducir: ReturnType<typeof vi.fn>;
+  eliminar: ReturnType<typeof vi.fn>;
+} => ({
+  reproducir: vi.fn(async (valor: string | null) =>
+    valor === null ? null : { tipo: 'archivo' as const, url: `${valor}?firma=abc`, youtubeId: null }
+  ),
+  eliminar: vi.fn().mockResolvedValue(true),
+});
+
+describe('videos guardados en nuestro almacen', () => {
+  const R2 = 'r2:cursos/b7b2/parte-1.mp4';
+
+  it('la muestra llega con el enlace firmado y su tipo', async () => {
+    const videos = crearVideosFalsos();
+    const deps = crearDeps({ listar: vi.fn().mockResolvedValue([{ ...muestra, videoUrl: R2 }]) });
+
+    const { lecciones } = await crearServicioLecciones(deps, videos).listarPublicas(CURSO);
+
+    expect(lecciones[0]).toMatchObject({
+      tipoVideo: 'archivo',
+      videoUrl: `${R2}?firma=abc`,
+      youtubeId: null,
+      limiteSegundos: 60,
+    });
+  });
+
+  it('de una leccion bloqueada no se firma nada', async () => {
+    const videos = crearVideosFalsos();
+    const deps = crearDeps({ listar: vi.fn().mockResolvedValue([{ ...segunda, videoUrl: R2 }]) });
+
+    const { lecciones } = await crearServicioLecciones(deps, videos).listarPublicas(CURSO);
+
+    expect(lecciones[0]).toMatchObject({ bloqueada: true, tipoVideo: null, videoUrl: null });
+    expect(videos.reproducir).not.toHaveBeenCalled();
+  });
+
+  it('si el almacen falla la leccion sale sin video en vez de romper el temario', async () => {
+    const videos = crearVideosFalsos();
+    videos.reproducir.mockRejectedValue(new Error('almacen sin configurar'));
+    const deps = crearDeps({ listar: vi.fn().mockResolvedValue([{ ...muestra, videoUrl: R2 }]) });
+
+    const { lecciones } = await crearServicioLecciones(deps, videos).listarPublicas(CURSO);
+
+    expect(lecciones[0]).toMatchObject({ bloqueada: false, tipoVideo: null, videoUrl: null });
+  });
+
+  it('el panel ve la referencia guardada, no el enlace firmado', async () => {
+    const videos = crearVideosFalsos();
+    const deps = crearDeps({ listar: vi.fn().mockResolvedValue([{ ...muestra, videoUrl: R2 }]) });
+
+    const { lecciones } = await crearServicioLecciones(deps, videos).listarParaAdmin(CURSO);
+
+    expect(lecciones[0].referencia).toBe(R2);
+  });
+
+  it('el temario publico no revela la referencia', async () => {
+    const videos = crearVideosFalsos();
+    const deps = crearDeps({ listar: vi.fn().mockResolvedValue([{ ...muestra, videoUrl: R2 }]) });
+
+    const { lecciones } = await crearServicioLecciones(deps, videos).listarPublicas(CURSO);
+
+    expect(lecciones[0].referencia).toBeUndefined();
+  });
+
+  it('al cambiar de video se borra el archivo que queda sin usar', async () => {
+    const videos = crearVideosFalsos();
+    const deps = crearDeps({
+      actualizar: vi.fn().mockResolvedValue({
+        leccion: { ...muestra, videoUrl: 'r2:cursos/b7b2/parte-1-nueva.mp4' },
+        videoAnterior: R2,
+      }),
+    });
+
+    await crearServicioLecciones(deps, videos).actualizar(CURSO, muestra.uuid, {
+      title: 'Muestra gratis',
+      esMuestra: false,
+    } as never);
+
+    expect(videos.eliminar).toHaveBeenCalledWith(R2);
+  });
+
+  it('guardar sin tocar el video no borra nada', async () => {
+    const videos = crearVideosFalsos();
+    const deps = crearDeps({
+      actualizar: vi.fn().mockResolvedValue({
+        leccion: { ...muestra, videoUrl: R2 },
+        videoAnterior: R2,
+      }),
+    });
+
+    await crearServicioLecciones(deps, videos).actualizar(CURSO, muestra.uuid, {
+      title: 'Otro titulo',
+      esMuestra: false,
+    } as never);
+
+    expect(videos.eliminar).not.toHaveBeenCalled();
+  });
+
+  it('al eliminar la leccion tambien se borra su archivo', async () => {
+    const videos = crearVideosFalsos();
+    const deps = crearDeps({ eliminar: vi.fn().mockResolvedValue({ videoAnterior: R2 }) });
+
+    await crearServicioLecciones(deps, videos).eliminar(CURSO, muestra.uuid);
+
+    expect(videos.eliminar).toHaveBeenCalledWith(R2);
   });
 });

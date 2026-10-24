@@ -9,7 +9,7 @@ export type EmpresaInput = z.infer<typeof empresaSchema>;
 export const fichaSchema = z.object({
   nombre: z.string().min(2).max(200),
   description: z.string().optional(),
-  payload: z.record(z.any()),
+  payload: z.record(z.string(), z.any()),
 });
 
 export type FichaInput = z.infer<typeof fichaSchema>;

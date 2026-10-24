@@ -22,6 +22,7 @@ import { paymentRoutes } from './modules/payments/payments.routes';
 import { lmsRoutes } from './modules/lms/lms.routes';
 import { ergoRoutes } from './modules/ergo/ergo.routes';
 import { uploadRoutes } from './modules/uploads/uploads.routes';
+import { mediaRoutes } from './modules/media/media.routes';
 import { postsRoutes } from './modules/posts/posts.routes';
 import { cotizacionesRoutes } from './modules/cotizaciones/cotizaciones.routes';
 import { RUTA_PUBLICA_UPLOADS } from './modules/uploads/uploads.service';
@@ -63,8 +64,8 @@ app.use(
   })
 );
 
-// Logging Middleware
-app.use(morgan('dev'));
+// Registro de peticiones: en produccion el formato estandar, con fecha y agente
+app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // Body Parser Middleware
 // Limite de tamano: un cuerpo gigante no debe poder agotar la memoria
@@ -75,19 +76,30 @@ app.use(express.urlencoded({ extended: true }));
 // API Routes Registration
 const API_PREFIX = '/api/v1';
 
-// Documentación de la API (Scalar)
-app.use(
-  '/docs-secrets-a1b2c3d4e5f6',
-  apiReference({
-    spec: {
-      content: openApiSpec,
-    },
-  })
-);
+/**
+ * Documentacion de la API (Scalar). Fuera de produccion unicamente: publicarla
+ * seria regalar el mapa de todo lo que acepta el servidor. Se puede abrir en un
+ * despliegue concreto poniendo API_DOCS=true.
+ */
+if (env.API_DOCS) {
+  app.use(
+    '/docs-secrets-a1b2c3d4e5f6',
+    apiReference({
+      spec: {
+        content: openApiSpec,
+      },
+    })
+  );
+}
 
-// Sonda de salud para comprobar que el servidor responde
+// Sonda de salud para comprobar que el servidor responde. En produccion no
+// cuenta nada de la instalacion: solo que esta en pie.
 app.get('/health', (_req, res) => {
-  res.status(200).json({ success: true, estado: 'ok', entorno: env.NODE_ENV });
+  res.status(200).json({
+    success: true,
+    estado: 'ok',
+    ...(env.NODE_ENV === 'production' ? {} : { entorno: env.NODE_ENV }),
+  });
 });
 
 // Imagenes subidas desde el panel. Helmet marca por defecto los recursos como
@@ -104,6 +116,7 @@ app.use(
 
 app.use(`${API_PREFIX}/auth`, authRoutes);
 app.use(`${API_PREFIX}/uploads`, uploadRoutes);
+app.use(`${API_PREFIX}/media`, mediaRoutes);
 app.use(`${API_PREFIX}/catalog`, catalogRoutes);
 app.use(`${API_PREFIX}/posts`, postsRoutes);
 app.use(`${API_PREFIX}/cart`, cartRoutes);

@@ -2,8 +2,7 @@ import { Router } from 'express';
 import { protect } from '../../core/middlewares/auth.middleware';
 import { validate } from '../../core/middlewares/validate.middleware';
 import { manejar, obtenerUsuarioId } from '../../core/utils/controlador';
-import { listadoQuerySchema } from '../catalog/catalog.schema';
-import { pedidoSchema, type PedidoInput } from './orders.schema';
+import { misPedidosQuerySchema, pedidoSchema, type PedidoInput } from './orders.schema';
 import { ordersService } from './orders.service';
 
 const crear = manejar(async (req, res) => {
@@ -13,11 +12,11 @@ const crear = manejar(async (req, res) => {
 
 // Cada quien ve solo sus compras: el usuario sale del token, nunca de la URL
 const listarMios = manejar(async (req, res) => {
-  const { pagina, porPagina } = listadoQuerySchema.parse(req.query);
-  const { elementos, paginacion } = await ordersService.listarMios(obtenerUsuarioId(req), {
-    pagina,
-    porPagina,
-  });
+  const consulta = misPedidosQuerySchema.parse(req.query);
+  const { elementos, paginacion } = await ordersService.listarMios(
+    obtenerUsuarioId(req),
+    consulta
+  );
   res.status(200).json({ success: true, data: { pedidos: elementos, paginacion } });
 });
 

@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
+import { ZodError } from 'zod';
 import { AppError, ErrorDemasiadosIntentos } from '../errors/AppError';
 import { comoAppError, SEGUNDOS_REINTENTO } from '../errors/errores-prisma';
 import { env } from '../config/env';
@@ -24,6 +25,21 @@ export const errorHandler = (
   }
 
   // Un fallo de base de datos se traduce aqui una sola vez, no en cada endpoint
+  /**
+   * Un filtro mal formado en la URL (?desde=2026-06-30&hasta=2026-01-01) es un
+   * error de quien pregunta, no del servidor. El cuerpo lo valida antes el
+   * middleware de validacion, que responde 422.
+   */
+  if (err instanceof ZodError) {
+    const primero = err.issues[0];
+    const campo = primero?.path.join('.');
+    res.status(400).json({
+      success: false,
+      error: campo ? `${campo}: ${primero.message}` : (primero?.message ?? 'Consulta invalida'),
+    });
+    return;
+  }
+
   const deLaBase = err instanceof AppError ? null : comoAppError(err);
   if (deLaBase) {
     console.error('Error de base de datos:', err);

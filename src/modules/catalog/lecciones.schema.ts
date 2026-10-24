@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { esEnlaceYoutube } from '../../core/utils/youtube';
+import { esVideoValido } from '../media/referencias';
 
 const textoOpcional = (maximo: number) =>
   z
@@ -12,8 +12,9 @@ const textoOpcional = (maximo: number) =>
 export const leccionSchema = z.object({
   title: z.string().trim().min(2, 'El titulo debe tener al menos 2 caracteres').max(200),
   description: textoOpcional(2000),
-  videoUrl: textoOpcional(500).refine((valor) => !valor || esEnlaceYoutube(valor), {
-    message: 'El video debe ser un link de YouTube valido',
+  // Vale un enlace de YouTube o la referencia de un video ya subido a nuestro almacen
+  videoUrl: textoOpcional(500).refine((valor) => !valor || esVideoValido(valor), {
+    message: 'El video debe ser un link de YouTube o un archivo subido',
   }),
   durationMinutes: z.number().int().min(1).max(1000).optional(),
   // La leccion de muestra es la unica que ve quien aun no compro el curso

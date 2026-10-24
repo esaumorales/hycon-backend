@@ -55,6 +55,8 @@ export const aCursoPublico = (curso: CursoBase): CursoPublico => ({
   youtubeId: extraerIdYoutube(curso.videoUrl),
   thumbnailUrl: curso.thumbnailUrl,
   durationMinutes: curso.durationMinutes,
+  // Partes del temario; sirve para saber de un vistazo si el curso tiene contenido
+  partes: curso._count?.lessons ?? 0,
   price: aNumero(curso.price) as number,
   discountPrice: aNumero(curso.discountPrice),
   status: curso.status,

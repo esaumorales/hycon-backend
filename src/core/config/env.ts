@@ -39,6 +39,22 @@ export const resolverSecretoJwt = (valor: string | undefined, produccion: boolea
 const sameSite = (valor: string | undefined): 'lax' | 'strict' | 'none' =>
   valor === 'strict' || valor === 'none' ? valor : 'lax';
 
+const PROVEEDORES_VIDEO = ['youtube', 'r2', 'stream'] as const;
+export type ProveedorPedido = (typeof PROVEEDORES_VIDEO)[number];
+
+// Un valor desconocido no debe dejar el servidor a medias: se avisa y se usa youtube
+export const proveedorPedido = (valor: string | undefined): ProveedorPedido => {
+  const pedido = (valor ?? 'youtube').trim().toLowerCase();
+  if ((PROVEEDORES_VIDEO as readonly string[]).includes(pedido)) return pedido as ProveedorPedido;
+
+  if (process.env.VITEST === undefined) {
+    console.error(
+      `[video] VIDEO_PROVEEDOR="${valor}" no existe. Usa youtube, r2 o stream. Se queda en youtube.`
+    );
+  }
+  return 'youtube';
+};
+
 export const env = {
   NODE_ENV,
   PORT,
@@ -71,6 +87,8 @@ export const env = {
   COOKIE_SAMESITE: sameSite(process.env.COOKIE_SAMESITE),
   // Numero de proxies delante (Nginx, balanceador) para leer la IP real del cliente
   TRUST_PROXY: numero(process.env.TRUST_PROXY, 0),
+  // La documentacion de la API solo se publica fuera de produccion
+  API_DOCS: process.env.API_DOCS ? process.env.API_DOCS === 'true' : !EN_PRODUCCION,
 
   // ---- Cloudinary ----
   // Con las tres claves puestas, las imagenes se suben alli; si faltan,
@@ -81,8 +99,64 @@ export const env = {
     apiSecret: process.env.CLOUDINARY_API_SECRET ?? '',
     carpeta: process.env.CLOUDINARY_CARPETA ?? 'hycon',
   },
+
+  // ---- Video de los cursos ----
+  // Donde se guardan los videos nuevos: 'youtube' (solo enlaces), 'r2' o 'stream'.
+  // Cambiar esto no toca los videos ya subidos: cada leccion recuerda de donde
+  // sale el suyo, asi que conviven los tres sin migrar nada.
+  VIDEO_PROVEEDOR: proveedorPedido(process.env.VIDEO_PROVEEDOR),
+  // Minutos que vive el enlace firmado de un video
+  VIDEO_FIRMA_MINUTOS: numero(process.env.VIDEO_FIRMA_MINUTOS, 120),
+  // Peso maximo de un video subido desde el panel
+  VIDEO_MAXIMO_MB: numero(process.env.VIDEO_MAXIMO_MB, 1024),
+  // Duracion maxima que acepta Cloudflare Stream por video
+  VIDEO_MAXIMO_MINUTOS: numero(process.env.VIDEO_MAXIMO_MINUTOS, 240),
+
+  R2: {
+    accountId: process.env.R2_ACCOUNT_ID ?? '',
+    accessKeyId: process.env.R2_ACCESS_KEY_ID ?? '',
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY ?? '',
+    bucket: process.env.R2_BUCKET ?? '',
+    carpeta: process.env.R2_CARPETA ?? 'cursos',
+  },
+
+  STREAM: {
+    accountId: process.env.STREAM_ACCOUNT_ID ?? '',
+    apiToken: process.env.STREAM_API_TOKEN ?? '',
+    dominio: (process.env.STREAM_DOMINIO ?? '').replace(/^https?:\/\//, '').replace(/\/+$/, ''),
+  },
 };
 
 /** Cloudinary solo se usa si estan las tres credenciales. */
 export const cloudinaryActivo = (): boolean =>
   Boolean(env.CLOUDINARY.cloudName && env.CLOUDINARY.apiKey && env.CLOUDINARY.apiSecret);
+
+/** Las tres credenciales de R2 y el bucket son imprescindibles. */
+export const r2Completo = (): boolean =>
+  Boolean(env.R2.accountId && env.R2.accessKeyId && env.R2.secretAccessKey && env.R2.bucket);
+
+/** Stream necesita la cuenta, un token con permiso de Stream y el dominio del reproductor. */
+export const streamCompleto = (): boolean =>
+  Boolean(env.STREAM.accountId && env.STREAM.apiToken && env.STREAM.dominio);
+
+/**
+ * Proveedor que de verdad se puede usar. Si se pide uno sin terminar de
+ * configurar, se avisa en el arranque y los videos nuevos siguen siendo
+ * enlaces de YouTube en vez de fallar al subir.
+ */
+export const proveedorVideoActivo = (): ProveedorPedido => {
+  const pedido = env.VIDEO_PROVEEDOR;
+  if (pedido === 'r2' && !r2Completo()) {
+    if (process.env.VITEST === undefined) {
+      console.error('[video] VIDEO_PROVEEDOR=r2 pero faltan las claves R2_*. Se queda en youtube.');
+    }
+    return 'youtube';
+  }
+  if (pedido === 'stream' && !streamCompleto()) {
+    if (process.env.VITEST === undefined) {
+      console.error('[video] VIDEO_PROVEEDOR=stream pero faltan las claves STREAM_*. Se queda en youtube.');
+    }
+    return 'youtube';
+  }
+  return pedido;
+};

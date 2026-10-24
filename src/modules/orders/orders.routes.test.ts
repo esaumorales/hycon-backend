@@ -85,7 +85,52 @@ describe('/api/v1/orders', () => {
 
     expect(respuesta.status).toBe(200);
     expect(respuesta.body.data).toHaveProperty('pedidos');
-    expect(ordersService.listarMios).toHaveBeenCalledWith(7, { pagina: 2, porPagina: 6 });
+    expect(ordersService.listarMios).toHaveBeenCalledWith(7, {
+      buscar: undefined,
+      estado: 'todos',
+      orden: 'recientes',
+      desde: undefined,
+      hasta: undefined,
+      pagina: 2,
+      porPagina: 6,
+    });
+  });
+
+  it('traslada los filtros de la URL', async () => {
+    await request(app)
+      .get('/api/v1/orders/mios?buscar=caja&estado=pendiente&orden=antiguos&desde=2026-01-01&hasta=2026-06-30')
+      .set('Authorization', cliente);
+
+    expect(ordersService.listarMios).toHaveBeenCalledWith(7, {
+      buscar: 'caja',
+      estado: 'pendiente',
+      orden: 'antiguos',
+      desde: '2026-01-01',
+      hasta: '2026-06-30',
+      pagina: 1,
+      porPagina: 6,
+    });
+  });
+
+  it('un filtro invalido cae al valor por defecto en vez de fallar', async () => {
+    const respuesta = await request(app)
+      .get('/api/v1/orders/mios?estado=loquesea&pagina=abc')
+      .set('Authorization', cliente);
+
+    expect(respuesta.status).toBe(200);
+    expect(ordersService.listarMios).toHaveBeenCalledWith(
+      7,
+      expect.objectContaining({ estado: 'todos', pagina: 1 })
+    );
+  });
+
+  // Un rango de fechas al reves si se rechaza: es un error del formulario
+  it('rechaza un rango de fechas invertido', async () => {
+    const respuesta = await request(app)
+      .get('/api/v1/orders/mios?desde=2026-06-30&hasta=2026-01-01')
+      .set('Authorization', cliente);
+
+    expect(respuesta.status).toBe(400);
   });
 
   it('propaga el conflicto de stock del servicio', async () => {

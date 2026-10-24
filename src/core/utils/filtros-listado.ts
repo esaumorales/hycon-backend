@@ -15,3 +15,10 @@ export const fechaFiltro = z.preprocess(
     return !Number.isNaN(fecha.getTime()) && fecha.toISOString().slice(0, 10) === v;
   }, 'La fecha no es válida').optional()
 );
+
+// Paginacion de cualquier listado: un valor invalido cae al por defecto en vez
+// de tumbar la consulta entera
+export const paginaSchema = z.coerce.number().int().min(1).catch(1);
+
+export const porPaginaSchema = (defecto: number, maximo: number) =>
+  z.coerce.number().int().min(1).max(maximo).catch(defecto);

@@ -2,9 +2,9 @@ import { prisma } from '../../core/database/prisma';
 import { listarConTotal } from '../../core/database/consultas';
 import { AppError } from '../../core/errors/AppError';
 import { aPaginacion } from '../catalog/catalog.mapper';
-import type { ConsultaListado, Listado } from '../catalog/catalog.service';
+import type { Listado } from '../catalog/catalog.service';
 import type { PaginaDe } from '../catalog/catalog.types';
-import type { MetodoPago, PedidoInput } from './orders.schema';
+import type { MetodoPago, MisPedidosQuery, PedidoInput } from './orders.schema';
 import type {
   ArticuloCobrable,
   LineaNueva,
@@ -13,11 +13,17 @@ import type {
   PedidoPublico,
 } from './orders.types';
 
+// Lo que la base necesita para listar las compras de una cuenta
+export interface ConsultaPedidos extends Omit<MisPedidosQuery, 'pagina' | 'porPagina'> {
+  saltar: number;
+  tomar: number;
+}
+
 export interface DependenciasPedidos {
   buscarProductos(uuids: string[]): Promise<ArticuloCobrable[]>;
   buscarCursos(uuids: string[]): Promise<ArticuloCobrable[]>;
   crear(datos: PedidoNuevo): Promise<PedidoBase>;
-  listarDelUsuario(userId: number, consulta: ConsultaListado): Promise<PaginaDe<PedidoBase>>;
+  listarDelUsuario(userId: number, consulta: ConsultaPedidos): Promise<PaginaDe<PedidoBase>>;
 }
 
 const aNumero = (valor: { toString(): string }): number => Number(valor.toString());
@@ -108,18 +114,46 @@ export const dependenciasReales: DependenciasPedidos = {
       select: seleccionPedido,
     }),
 
-  listarDelUsuario: (userId, { saltar, tomar }) =>
-    listarConTotal(
+  listarDelUsuario: (userId, { saltar, tomar, buscar, estado, orden, desde, hasta }) => {
+    const where = {
+      userId,
+      ...(estado !== 'todos' ? { paymentStatus: estado } : {}),
+      ...(desde || hasta
+        ? {
+            createdAt: {
+              ...(desde ? { gte: new Date(`${desde}T00:00:00.000Z`) } : {}),
+              // El dia "hasta" entra entero
+              ...(hasta ? { lte: new Date(`${hasta}T23:59:59.999Z`) } : {}),
+            },
+          }
+        : {}),
+      // Se busca por lo que el cliente recuerda: el nombre del articulo
+      ...(buscar
+        ? {
+            items: {
+              some: {
+                OR: [
+                  { product: { name: { contains: buscar, mode: 'insensitive' as const } } },
+                  { course: { name: { contains: buscar, mode: 'insensitive' as const } } },
+                ],
+              },
+            },
+          }
+        : {}),
+    };
+
+    return listarConTotal(
       () =>
         prisma.order.findMany({
-          where: { userId },
+          where,
           select: seleccionPedido,
-          orderBy: { createdAt: 'desc' },
+          orderBy: { createdAt: orden === 'antiguos' ? 'asc' : 'desc' },
           skip: saltar,
           take: tomar,
         }),
-      () => prisma.order.count({ where: { userId } })
-    ),
+      () => prisma.order.count({ where })
+    );
+  },
 };
 
 // El codigo sale del final del uuid: su cabecera es la hora de creacion y dos
@@ -207,12 +241,10 @@ export const crearServicioPedidos = (deps: DependenciasPedidos) => ({
     return aPedidoPublico(pedido);
   },
 
-  async listarMios(
-    userId: number,
-    { pagina, porPagina }: { pagina: number; porPagina: number }
-  ): Promise<Listado<PedidoPublico>> {
+  async listarMios(userId: number, consulta: MisPedidosQuery): Promise<Listado<PedidoPublico>> {
+    const { pagina, porPagina, ...filtros } = consulta;
     const { filas, total } = await deps.listarDelUsuario(userId, {
-      estado: 'todos',
+      ...filtros,
       saltar: (pagina - 1) * porPagina,
       tomar: porPagina,
     });

@@ -9,7 +9,7 @@ export const crearEmpresa = manejar(async (req: Request, res: Response) => {
   
   const validacion = empresaSchema.safeParse(req.body);
   if (!validacion.success) {
-    throw new AppError(validacion.error.errors[0].message, 400);
+    throw new AppError(validacion.error.issues[0].message, 400);
   }
   
   const empresa = await ergoService.crearEmpresa(userId, validacion.data.nombre);
@@ -38,7 +38,7 @@ export const obtenerEmpresas = manejar(async (req: Request, res: Response) => {
 
 export const obtenerFichas = manejar(async (req: Request, res: Response) => {
   const userId = obtenerUsuarioId(req);
-  const companyId = parseInt(req.params.id, 10);
+  const companyId = Number.parseInt(String(req.params.id), 10);
   if (isNaN(companyId)) throw new AppError('ID de empresa inválido', 400);
 
   const fichas = await ergoService.obtenerFichas(companyId, userId);
@@ -56,13 +56,13 @@ export const obtenerFichas = manejar(async (req: Request, res: Response) => {
 
 export const crearFicha = manejar(async (req: Request, res: Response) => {
   const userId = obtenerUsuarioId(req);
-  const companyId = parseInt(req.params.id, 10);
+  const companyId = Number.parseInt(String(req.params.id), 10);
   if (isNaN(companyId)) throw new AppError('ID de empresa inválido', 400);
 
   const validacion = fichaSchema.safeParse(req.body);
   if (!validacion.success) {
-    console.error("ERROR ZOD:", JSON.stringify(validacion.error.errors, null, 2));
-    throw new AppError(validacion.error.errors[0].message, 400);
+    console.error("ERROR ZOD:", JSON.stringify(validacion.error.issues, null, 2));
+    throw new AppError(validacion.error.issues[0].message, 400);
   }
 
   try {
@@ -86,5 +86,4 @@ export const crearFicha = manejar(async (req: Request, res: Response) => {
     console.error("ERROR CREAR FICHA:", error.message);
     throw error;
   }
-});
 });

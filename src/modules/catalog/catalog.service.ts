@@ -78,6 +78,8 @@ const seleccionCurso = {
   discountPrice: true,
   status: true,
   createdAt: true,
+  // Cuantas partes tiene el curso: el panel lo muestra sin pedir el temario
+  _count: { select: { lessons: true } },
 } as const;
 
 // Codigos de Prisma: P2025 registro inexistente, P2003 clave foranea en uso

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { codigoDePedido, crearServicioPedidos, type DependenciasPedidos } from './orders.service';
 import type { ArticuloCobrable, PedidoBase, PedidoNuevo } from './orders.types';
-import type { PedidoInput } from './orders.schema';
+import type { MisPedidosQuery, PedidoInput } from './orders.schema';
 
 const UUID_CAJA = '7b73989c-0719-4c06-bd1e-8c7ae193a432';
 const UUID_SILLA = '01a0e08a-6cf7-726e-bf81-60859ae9882b';
@@ -195,18 +195,72 @@ describe('pedidos: crear', () => {
   });
 });
 
+// La consulta tal como llega del esquema, con todo en su valor por defecto
+const consultaMisCompras = (cambios: Partial<MisPedidosQuery> = {}): MisPedidosQuery => ({
+  buscar: undefined,
+  estado: 'todos',
+  orden: 'recientes',
+  desde: undefined,
+  hasta: undefined,
+  pagina: 1,
+  porPagina: 6,
+  ...cambios,
+});
+
 describe('pedidos: mis compras', () => {
   it('pide solo los pedidos del usuario de la sesion', async () => {
     const deps = crearDeps();
     const servicio = crearServicioPedidos(deps);
 
-    await servicio.listarMios(7, { pagina: 2, porPagina: 6 });
+    await servicio.listarMios(7, consultaMisCompras({ pagina: 2 }));
 
     expect(deps.listarDelUsuario).toHaveBeenCalledWith(7, {
+      buscar: undefined,
       estado: 'todos',
+      orden: 'recientes',
+      desde: undefined,
+      hasta: undefined,
       saltar: 6,
       tomar: 6,
     });
+  });
+
+  // Los filtros se resuelven en la base: la pagina no se recorta despues
+  it('traslada los filtros a la consulta de la base', async () => {
+    const deps = crearDeps();
+
+    await crearServicioPedidos(deps).listarMios(
+      7,
+      consultaMisCompras({
+        buscar: 'ergonomia',
+        estado: 'pendiente',
+        orden: 'antiguos',
+        desde: '2026-01-01',
+        hasta: '2026-06-30',
+        pagina: 3,
+        porPagina: 12,
+      })
+    );
+
+    expect(deps.listarDelUsuario).toHaveBeenCalledWith(7, {
+      buscar: 'ergonomia',
+      estado: 'pendiente',
+      orden: 'antiguos',
+      desde: '2026-01-01',
+      hasta: '2026-06-30',
+      saltar: 24,
+      tomar: 12,
+    });
+  });
+
+  it('la paginacion sale del total que informa la base', async () => {
+    const servicio = crearServicioPedidos(
+      crearDeps({ listarDelUsuario: vi.fn().mockResolvedValue({ filas: [], total: 25 }) })
+    );
+
+    const { paginacion } = await servicio.listarMios(7, consultaMisCompras({ porPagina: 6 }));
+
+    expect(paginacion).toMatchObject({ pagina: 1, porPagina: 6, total: 25, totalPaginas: 5 });
   });
 
   it('devuelve cada compra con su codigo corto y su detalle', async () => {
@@ -223,7 +277,7 @@ describe('pedidos: mis compras', () => {
       crearDeps({ listarDelUsuario: vi.fn().mockResolvedValue({ filas: [guardado], total: 1 }) })
     );
 
-    const { elementos, paginacion } = await servicio.listarMios(4, { pagina: 1, porPagina: 6 });
+    const { elementos, paginacion } = await servicio.listarMios(4, consultaMisCompras());
 
     expect(elementos[0]).toMatchObject({
       codigo: 'PED-C91E77',
