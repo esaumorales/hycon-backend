@@ -5,8 +5,11 @@ WORKDIR /app
 RUN corepack enable
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
-COPY tsconfig.json ./
+COPY tsconfig.json prisma7.config.ts ./
+COPY prisma ./prisma
 COPY src ./src
+# El cliente de Prisma se genera aqui para que siempre coincida con el esquema
+RUN DATABASE_URL=postgresql://sin-uso pnpm exec prisma generate --config prisma7.config.ts
 RUN pnpm exec tsc
 
 FROM node:22-alpine AS deps
