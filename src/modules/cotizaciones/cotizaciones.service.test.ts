@@ -135,3 +135,36 @@ describe('validacion del formulario', () => {
     expect(leido.email).toBe('ana@empresa.com');
   });
 });
+
+describe('aviso por correo al crear', () => {
+  const avisoFalso = () => ({ nueva: vi.fn().mockResolvedValue(undefined) });
+
+  it('avisa con la cotizacion ya guardada, con su codigo y su total', async () => {
+    const aviso = avisoFalso();
+
+    await crearServicioCotizaciones(crearDeps(), aviso).crear({
+      ...datos,
+      evaluaciones: ['levantamiento-cargas'],
+    });
+
+    expect(aviso.nueva).toHaveBeenCalledWith(
+      expect.objectContaining({ codigo: 'COT-C91E77', correo: 'ana@empresa.com', total: 200 })
+    );
+  });
+
+  // Lo importante es no perder la solicitud: el correo es secundario
+  it('si el aviso falla, la solicitud igual queda guardada y se responde', async () => {
+    const aviso = { nueva: vi.fn().mockRejectedValue(new Error('Resend caido')) };
+    const registro = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const deps = crearDeps();
+
+    const cotizacion = await crearServicioCotizaciones(deps, aviso).crear({
+      ...datos,
+      evaluaciones: ['levantamiento-cargas'],
+    });
+
+    expect(deps.crear).toHaveBeenCalled();
+    expect(cotizacion.codigo).toBe('COT-C91E77');
+    expect(registro.mock.calls[0][0]).toContain('COT-C91E77');
+  });
+});

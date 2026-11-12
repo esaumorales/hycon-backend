@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { env } from '../../core/config/env';
+import { correo } from '../../core/correo/correo.service';
 import { prisma } from '../../core/database/prisma';
 import { listarConTotal } from '../../core/database/consultas';
 import { AppError } from '../../core/errors/AppError';
@@ -11,6 +13,7 @@ import {
   EVALUACIONES,
   type EvaluacionErgonomica,
 } from './cotizaciones.constants';
+import { crearAvisoCotizaciones, type AvisoCotizaciones } from './cotizaciones.correo';
 
 export const cotizacionSchema = z.object({
   name: z.string().trim().min(2, 'Escribe tu nombre').max(120),
@@ -121,7 +124,10 @@ export const aCotizacionPublica = (cotizacion: CotizacionBase): CotizacionPublic
   createdAt: cotizacion.createdAt.toISOString(),
 });
 
-export const crearServicioCotizaciones = (deps: DependenciasCotizaciones) => ({
+export const crearServicioCotizaciones = (
+  deps: DependenciasCotizaciones,
+  aviso: AvisoCotizaciones = crearAvisoCotizaciones(correo, env.CORREO.avisos)
+) => ({
   /** Las evaluaciones que se ofrecen, con sus normas y precios. */
   evaluaciones: (): EvaluacionErgonomica[] => EVALUACIONES,
 
@@ -146,7 +152,16 @@ export const crearServicioCotizaciones = (deps: DependenciasCotizaciones) => ({
       evaluations: codigos,
       total,
     });
-    return aCotizacionPublica(guardada);
+
+    const publica = aCotizacionPublica(guardada);
+    // El aviso va aparte: si el correo falla, la solicitud ya esta guardada
+    try {
+      await aviso.nueva(publica);
+    } catch (fallo) {
+      console.error(`[cotizaciones] ${publica.codigo} guardada, pero el aviso fallo:`, fallo);
+    }
+
+    return publica;
   },
 
   async listar({

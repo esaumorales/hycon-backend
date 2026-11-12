@@ -100,6 +100,16 @@ export const env = {
     carpeta: process.env.CLOUDINARY_CARPETA ?? 'hycon',
   },
 
+  // ---- Correo saliente ----
+  // Sin estas dos, las solicitudes se siguen guardando pero no se avisa a nadie
+  CORREO: {
+    apiKey: process.env.RESEND_API_KEY ?? '',
+    // Remitente verificado en Resend, por ejemplo: Hycon <no-responder@hycon.lat>
+    remitente: process.env.CORREO_REMITENTE ?? '',
+    // Buzon del equipo que atiende las cotizaciones
+    avisos: process.env.CORREO_AVISOS ?? '',
+  },
+
   // ---- Video de los cursos ----
   // Donde se guardan los videos nuevos: 'youtube' (solo enlaces), 'r2' o 'stream'.
   // Cambiar esto no toca los videos ya subidos: cada leccion recuerda de donde
@@ -160,3 +170,7 @@ export const proveedorVideoActivo = (): ProveedorPedido => {
   }
   return pedido;
 };
+
+/** Hay correo saliente solo con la clave y el remitente puestos. */
+export const correoActivo = (): boolean =>
+  Boolean(env.CORREO.apiKey && env.CORREO.remitente);
