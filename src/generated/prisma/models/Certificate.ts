@@ -43,6 +43,7 @@ export type CertificateMinAggregateOutputType = {
   userId: number | null
   courseId: number | null
   certificateCode: string | null
+  holderName: string | null
   templateUrl: string | null
   pdfUrl: string | null
   issuedAt: Date | null
@@ -53,6 +54,7 @@ export type CertificateMaxAggregateOutputType = {
   userId: number | null
   courseId: number | null
   certificateCode: string | null
+  holderName: string | null
   templateUrl: string | null
   pdfUrl: string | null
   issuedAt: Date | null
@@ -63,6 +65,7 @@ export type CertificateCountAggregateOutputType = {
   userId: number
   courseId: number
   certificateCode: number
+  holderName: number
   templateUrl: number
   pdfUrl: number
   issuedAt: number
@@ -87,6 +90,7 @@ export type CertificateMinAggregateInputType = {
   userId?: true
   courseId?: true
   certificateCode?: true
+  holderName?: true
   templateUrl?: true
   pdfUrl?: true
   issuedAt?: true
@@ -97,6 +101,7 @@ export type CertificateMaxAggregateInputType = {
   userId?: true
   courseId?: true
   certificateCode?: true
+  holderName?: true
   templateUrl?: true
   pdfUrl?: true
   issuedAt?: true
@@ -107,6 +112,7 @@ export type CertificateCountAggregateInputType = {
   userId?: true
   courseId?: true
   certificateCode?: true
+  holderName?: true
   templateUrl?: true
   pdfUrl?: true
   issuedAt?: true
@@ -204,6 +210,7 @@ export type CertificateGroupByOutputType = {
   userId: number
   courseId: number
   certificateCode: string
+  holderName: string
   templateUrl: string | null
   pdfUrl: string | null
   issuedAt: Date
@@ -237,6 +244,7 @@ export type CertificateWhereInput = {
   userId?: Prisma.IntFilter<"Certificate"> | number
   courseId?: Prisma.IntFilter<"Certificate"> | number
   certificateCode?: Prisma.StringFilter<"Certificate"> | string
+  holderName?: Prisma.StringFilter<"Certificate"> | string
   templateUrl?: Prisma.StringNullableFilter<"Certificate"> | string | null
   pdfUrl?: Prisma.StringNullableFilter<"Certificate"> | string | null
   issuedAt?: Prisma.DateTimeFilter<"Certificate"> | Date | string
@@ -249,6 +257,7 @@ export type CertificateOrderByWithRelationInput = {
   userId?: Prisma.SortOrder
   courseId?: Prisma.SortOrder
   certificateCode?: Prisma.SortOrder
+  holderName?: Prisma.SortOrder
   templateUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   pdfUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   issuedAt?: Prisma.SortOrder
@@ -264,6 +273,7 @@ export type CertificateWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.CertificateWhereInput | Prisma.CertificateWhereInput[]
   userId?: Prisma.IntFilter<"Certificate"> | number
   courseId?: Prisma.IntFilter<"Certificate"> | number
+  holderName?: Prisma.StringFilter<"Certificate"> | string
   templateUrl?: Prisma.StringNullableFilter<"Certificate"> | string | null
   pdfUrl?: Prisma.StringNullableFilter<"Certificate"> | string | null
   issuedAt?: Prisma.DateTimeFilter<"Certificate"> | Date | string
@@ -276,6 +286,7 @@ export type CertificateOrderByWithAggregationInput = {
   userId?: Prisma.SortOrder
   courseId?: Prisma.SortOrder
   certificateCode?: Prisma.SortOrder
+  holderName?: Prisma.SortOrder
   templateUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   pdfUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   issuedAt?: Prisma.SortOrder
@@ -294,6 +305,7 @@ export type CertificateScalarWhereWithAggregatesInput = {
   userId?: Prisma.IntWithAggregatesFilter<"Certificate"> | number
   courseId?: Prisma.IntWithAggregatesFilter<"Certificate"> | number
   certificateCode?: Prisma.StringWithAggregatesFilter<"Certificate"> | string
+  holderName?: Prisma.StringWithAggregatesFilter<"Certificate"> | string
   templateUrl?: Prisma.StringNullableWithAggregatesFilter<"Certificate"> | string | null
   pdfUrl?: Prisma.StringNullableWithAggregatesFilter<"Certificate"> | string | null
   issuedAt?: Prisma.DateTimeWithAggregatesFilter<"Certificate"> | Date | string
@@ -301,6 +313,7 @@ export type CertificateScalarWhereWithAggregatesInput = {
 
 export type CertificateCreateInput = {
   certificateCode: string
+  holderName: string
   templateUrl?: string | null
   pdfUrl?: string | null
   issuedAt?: Date | string
@@ -313,6 +326,7 @@ export type CertificateUncheckedCreateInput = {
   userId: number
   courseId: number
   certificateCode: string
+  holderName: string
   templateUrl?: string | null
   pdfUrl?: string | null
   issuedAt?: Date | string
@@ -320,6 +334,7 @@ export type CertificateUncheckedCreateInput = {
 
 export type CertificateUpdateInput = {
   certificateCode?: Prisma.StringFieldUpdateOperationsInput | string
+  holderName?: Prisma.StringFieldUpdateOperationsInput | string
   templateUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pdfUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issuedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -332,6 +347,7 @@ export type CertificateUncheckedUpdateInput = {
   userId?: Prisma.IntFieldUpdateOperationsInput | number
   courseId?: Prisma.IntFieldUpdateOperationsInput | number
   certificateCode?: Prisma.StringFieldUpdateOperationsInput | string
+  holderName?: Prisma.StringFieldUpdateOperationsInput | string
   templateUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pdfUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issuedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -342,6 +358,7 @@ export type CertificateCreateManyInput = {
   userId: number
   courseId: number
   certificateCode: string
+  holderName: string
   templateUrl?: string | null
   pdfUrl?: string | null
   issuedAt?: Date | string
@@ -349,6 +366,7 @@ export type CertificateCreateManyInput = {
 
 export type CertificateUpdateManyMutationInput = {
   certificateCode?: Prisma.StringFieldUpdateOperationsInput | string
+  holderName?: Prisma.StringFieldUpdateOperationsInput | string
   templateUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pdfUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issuedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -359,6 +377,7 @@ export type CertificateUncheckedUpdateManyInput = {
   userId?: Prisma.IntFieldUpdateOperationsInput | number
   courseId?: Prisma.IntFieldUpdateOperationsInput | number
   certificateCode?: Prisma.StringFieldUpdateOperationsInput | string
+  holderName?: Prisma.StringFieldUpdateOperationsInput | string
   templateUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pdfUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issuedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -379,6 +398,7 @@ export type CertificateCountOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   courseId?: Prisma.SortOrder
   certificateCode?: Prisma.SortOrder
+  holderName?: Prisma.SortOrder
   templateUrl?: Prisma.SortOrder
   pdfUrl?: Prisma.SortOrder
   issuedAt?: Prisma.SortOrder
@@ -395,6 +415,7 @@ export type CertificateMaxOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   courseId?: Prisma.SortOrder
   certificateCode?: Prisma.SortOrder
+  holderName?: Prisma.SortOrder
   templateUrl?: Prisma.SortOrder
   pdfUrl?: Prisma.SortOrder
   issuedAt?: Prisma.SortOrder
@@ -405,6 +426,7 @@ export type CertificateMinOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   courseId?: Prisma.SortOrder
   certificateCode?: Prisma.SortOrder
+  holderName?: Prisma.SortOrder
   templateUrl?: Prisma.SortOrder
   pdfUrl?: Prisma.SortOrder
   issuedAt?: Prisma.SortOrder
@@ -502,6 +524,7 @@ export type CertificateUncheckedUpdateManyWithoutCourseNestedInput = {
 
 export type CertificateCreateWithoutUserInput = {
   certificateCode: string
+  holderName: string
   templateUrl?: string | null
   pdfUrl?: string | null
   issuedAt?: Date | string
@@ -512,6 +535,7 @@ export type CertificateUncheckedCreateWithoutUserInput = {
   certificateId?: number
   courseId: number
   certificateCode: string
+  holderName: string
   templateUrl?: string | null
   pdfUrl?: string | null
   issuedAt?: Date | string
@@ -551,6 +575,7 @@ export type CertificateScalarWhereInput = {
   userId?: Prisma.IntFilter<"Certificate"> | number
   courseId?: Prisma.IntFilter<"Certificate"> | number
   certificateCode?: Prisma.StringFilter<"Certificate"> | string
+  holderName?: Prisma.StringFilter<"Certificate"> | string
   templateUrl?: Prisma.StringNullableFilter<"Certificate"> | string | null
   pdfUrl?: Prisma.StringNullableFilter<"Certificate"> | string | null
   issuedAt?: Prisma.DateTimeFilter<"Certificate"> | Date | string
@@ -558,6 +583,7 @@ export type CertificateScalarWhereInput = {
 
 export type CertificateCreateWithoutCourseInput = {
   certificateCode: string
+  holderName: string
   templateUrl?: string | null
   pdfUrl?: string | null
   issuedAt?: Date | string
@@ -568,6 +594,7 @@ export type CertificateUncheckedCreateWithoutCourseInput = {
   certificateId?: number
   userId: number
   certificateCode: string
+  holderName: string
   templateUrl?: string | null
   pdfUrl?: string | null
   issuedAt?: Date | string
@@ -603,6 +630,7 @@ export type CertificateCreateManyUserInput = {
   certificateId?: number
   courseId: number
   certificateCode: string
+  holderName: string
   templateUrl?: string | null
   pdfUrl?: string | null
   issuedAt?: Date | string
@@ -610,6 +638,7 @@ export type CertificateCreateManyUserInput = {
 
 export type CertificateUpdateWithoutUserInput = {
   certificateCode?: Prisma.StringFieldUpdateOperationsInput | string
+  holderName?: Prisma.StringFieldUpdateOperationsInput | string
   templateUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pdfUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issuedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -620,6 +649,7 @@ export type CertificateUncheckedUpdateWithoutUserInput = {
   certificateId?: Prisma.IntFieldUpdateOperationsInput | number
   courseId?: Prisma.IntFieldUpdateOperationsInput | number
   certificateCode?: Prisma.StringFieldUpdateOperationsInput | string
+  holderName?: Prisma.StringFieldUpdateOperationsInput | string
   templateUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pdfUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issuedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -629,6 +659,7 @@ export type CertificateUncheckedUpdateManyWithoutUserInput = {
   certificateId?: Prisma.IntFieldUpdateOperationsInput | number
   courseId?: Prisma.IntFieldUpdateOperationsInput | number
   certificateCode?: Prisma.StringFieldUpdateOperationsInput | string
+  holderName?: Prisma.StringFieldUpdateOperationsInput | string
   templateUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pdfUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issuedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -638,6 +669,7 @@ export type CertificateCreateManyCourseInput = {
   certificateId?: number
   userId: number
   certificateCode: string
+  holderName: string
   templateUrl?: string | null
   pdfUrl?: string | null
   issuedAt?: Date | string
@@ -645,6 +677,7 @@ export type CertificateCreateManyCourseInput = {
 
 export type CertificateUpdateWithoutCourseInput = {
   certificateCode?: Prisma.StringFieldUpdateOperationsInput | string
+  holderName?: Prisma.StringFieldUpdateOperationsInput | string
   templateUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pdfUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issuedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -655,6 +688,7 @@ export type CertificateUncheckedUpdateWithoutCourseInput = {
   certificateId?: Prisma.IntFieldUpdateOperationsInput | number
   userId?: Prisma.IntFieldUpdateOperationsInput | number
   certificateCode?: Prisma.StringFieldUpdateOperationsInput | string
+  holderName?: Prisma.StringFieldUpdateOperationsInput | string
   templateUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pdfUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issuedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -664,6 +698,7 @@ export type CertificateUncheckedUpdateManyWithoutCourseInput = {
   certificateId?: Prisma.IntFieldUpdateOperationsInput | number
   userId?: Prisma.IntFieldUpdateOperationsInput | number
   certificateCode?: Prisma.StringFieldUpdateOperationsInput | string
+  holderName?: Prisma.StringFieldUpdateOperationsInput | string
   templateUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pdfUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issuedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -676,6 +711,7 @@ export type CertificateSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   userId?: boolean
   courseId?: boolean
   certificateCode?: boolean
+  holderName?: boolean
   templateUrl?: boolean
   pdfUrl?: boolean
   issuedAt?: boolean
@@ -688,6 +724,7 @@ export type CertificateSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   userId?: boolean
   courseId?: boolean
   certificateCode?: boolean
+  holderName?: boolean
   templateUrl?: boolean
   pdfUrl?: boolean
   issuedAt?: boolean
@@ -700,6 +737,7 @@ export type CertificateSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   userId?: boolean
   courseId?: boolean
   certificateCode?: boolean
+  holderName?: boolean
   templateUrl?: boolean
   pdfUrl?: boolean
   issuedAt?: boolean
@@ -712,12 +750,13 @@ export type CertificateSelectScalar = {
   userId?: boolean
   courseId?: boolean
   certificateCode?: boolean
+  holderName?: boolean
   templateUrl?: boolean
   pdfUrl?: boolean
   issuedAt?: boolean
 }
 
-export type CertificateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"certificateId" | "userId" | "courseId" | "certificateCode" | "templateUrl" | "pdfUrl" | "issuedAt", ExtArgs["result"]["certificate"]>
+export type CertificateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"certificateId" | "userId" | "courseId" | "certificateCode" | "holderName" | "templateUrl" | "pdfUrl" | "issuedAt", ExtArgs["result"]["certificate"]>
 export type CertificateInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
@@ -742,6 +781,7 @@ export type $CertificatePayload<ExtArgs extends runtime.Types.Extensions.Interna
     userId: number
     courseId: number
     certificateCode: string
+    holderName: string
     templateUrl: string | null
     pdfUrl: string | null
     issuedAt: Date
@@ -1174,6 +1214,7 @@ export interface CertificateFieldRefs {
   readonly userId: Prisma.FieldRef<"Certificate", 'Int'>
   readonly courseId: Prisma.FieldRef<"Certificate", 'Int'>
   readonly certificateCode: Prisma.FieldRef<"Certificate", 'String'>
+  readonly holderName: Prisma.FieldRef<"Certificate", 'String'>
   readonly templateUrl: Prisma.FieldRef<"Certificate", 'String'>
   readonly pdfUrl: Prisma.FieldRef<"Certificate", 'String'>
   readonly issuedAt: Prisma.FieldRef<"Certificate", 'DateTime'>

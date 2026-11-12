@@ -64,6 +64,7 @@ export const ModelName = {
   Payment: 'Payment',
   Enrollment: 'Enrollment',
   CourseProgress: 'CourseProgress',
+  LessonProgress: 'LessonProgress',
   Certificate: 'Certificate',
   Post: 'Post',
   Company: 'Company',
@@ -276,11 +277,22 @@ export const CourseProgressScalarFieldEnum = {
 export type CourseProgressScalarFieldEnum = (typeof CourseProgressScalarFieldEnum)[keyof typeof CourseProgressScalarFieldEnum]
 
 
+export const LessonProgressScalarFieldEnum = {
+  lessonProgressId: 'lessonProgressId',
+  userId: 'userId',
+  lessonId: 'lessonId',
+  completedAt: 'completedAt'
+} as const
+
+export type LessonProgressScalarFieldEnum = (typeof LessonProgressScalarFieldEnum)[keyof typeof LessonProgressScalarFieldEnum]
+
+
 export const CertificateScalarFieldEnum = {
   certificateId: 'certificateId',
   userId: 'userId',
   courseId: 'courseId',
   certificateCode: 'certificateCode',
+  holderName: 'holderName',
   templateUrl: 'templateUrl',
   pdfUrl: 'pdfUrl',
   issuedAt: 'issuedAt'

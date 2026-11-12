@@ -13,6 +13,11 @@ export interface CursoCompradoBase {
   thumbnailUrl: string | null;
   durationMinutes: number | null;
   compradoEl: Date;
+  // Avance del alumno en ese curso
+  partes: number;
+  vistas: number;
+  // Codigo del certificado si ya lo emitio
+  certificado: string | null;
 }
 
 export interface CursoComprado {
@@ -24,6 +29,11 @@ export interface CursoComprado {
   thumbnailUrl: string | null;
   durationMinutes: number | null;
   compradoEl: string;
+  partes: number;
+  vistas: number;
+  // true cuando vio todas las partes y ya puede pedir el certificado
+  completado: boolean;
+  certificado: string | null;
 }
 
 export interface DependenciasLms {
@@ -38,12 +48,14 @@ export const dependenciasReales: DependenciasLms = {
         order: { select: { createdAt: true } },
         course: {
           select: {
+            courseId: true,
             uuid: true,
             name: true,
             description: true,
             videoUrl: true,
             thumbnailUrl: true,
             durationMinutes: true,
+            _count: { select: { lessons: true } },
           },
         },
       },
@@ -51,13 +63,54 @@ export const dependenciasReales: DependenciasLms = {
     });
 
     // Un mismo curso puede aparecer en varios pedidos: se queda la compra mas reciente
-    const vistos = new Map<string, CursoCompradoBase>();
+    const vistos = new Map<number, { curso: (typeof lineas)[number]['course']; compradoEl: Date }>();
     for (const linea of lineas) {
-      if (linea.course && !vistos.has(linea.course.uuid)) {
-        vistos.set(linea.course.uuid, { ...linea.course, compradoEl: linea.order.createdAt });
+      if (linea.course && !vistos.has(linea.course.courseId)) {
+        vistos.set(linea.course.courseId, { curso: linea.course, compradoEl: linea.order.createdAt });
       }
     }
-    return [...vistos.values()];
+
+    const cursoIds = [...vistos.keys()];
+    if (cursoIds.length === 0) return [];
+
+    // Dos consultas mas, no una por curso: el avance y los certificados de toda la cuenta
+    const [avance, certificados] = await Promise.all([
+      prisma.lessonProgress.groupBy({
+        by: ['lessonId'],
+        where: { userId, lesson: { courseId: { in: cursoIds } } },
+        _count: true,
+      }),
+      prisma.certificate.findMany({
+        where: { userId, courseId: { in: cursoIds } },
+        select: { courseId: true, certificateCode: true },
+      }),
+    ]);
+
+    const leccionesVistas = await prisma.lesson.findMany({
+      where: { lessonId: { in: avance.map((fila) => fila.lessonId) } },
+      select: { lessonId: true, courseId: true },
+    });
+
+    const vistasPorCurso = new Map<number, number>();
+    for (const leccion of leccionesVistas) {
+      vistasPorCurso.set(leccion.courseId, (vistasPorCurso.get(leccion.courseId) ?? 0) + 1);
+    }
+    const certificadoPorCurso = new Map(
+      certificados.map((fila) => [fila.courseId, fila.certificateCode])
+    );
+
+    return [...vistos.entries()].map(([courseId, { curso, compradoEl }]) => ({
+      uuid: curso!.uuid,
+      name: curso!.name,
+      description: curso!.description,
+      videoUrl: curso!.videoUrl,
+      thumbnailUrl: curso!.thumbnailUrl,
+      durationMinutes: curso!.durationMinutes,
+      compradoEl,
+      partes: curso!._count.lessons,
+      vistas: vistasPorCurso.get(courseId) ?? 0,
+      certificado: certificadoPorCurso.get(courseId) ?? null,
+    }));
   },
 };
 
@@ -71,6 +124,11 @@ export const aCursoComprado = (curso: CursoCompradoBase): CursoComprado => ({
   thumbnailUrl: curso.thumbnailUrl,
   durationMinutes: curso.durationMinutes,
   compradoEl: curso.compradoEl.toISOString(),
+  partes: curso.partes,
+  vistas: curso.vistas,
+  // Un curso sin partes no se puede dar por terminado
+  completado: curso.partes > 0 && curso.vistas >= curso.partes,
+  certificado: curso.certificado,
 });
 
 // Busca en el nombre y en la descripcion, sin distinguir mayusculas ni acentos

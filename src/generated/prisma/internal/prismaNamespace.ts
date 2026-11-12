@@ -410,6 +410,7 @@ export const ModelName = {
   Payment: 'Payment',
   Enrollment: 'Enrollment',
   CourseProgress: 'CourseProgress',
+  LessonProgress: 'LessonProgress',
   Certificate: 'Certificate',
   Post: 'Post',
   Company: 'Company',
@@ -434,7 +435,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "role" | "user" | "course" | "lesson" | "product" | "productImage" | "cart" | "cartItem" | "order" | "orderItem" | "payment" | "enrollment" | "courseProgress" | "certificate" | "post" | "company" | "form" | "formSubmission" | "formAnswer" | "session" | "authEvent" | "quoteRequest"
+    modelProps: "role" | "user" | "course" | "lesson" | "product" | "productImage" | "cart" | "cartItem" | "order" | "orderItem" | "payment" | "enrollment" | "courseProgress" | "lessonProgress" | "certificate" | "post" | "company" | "form" | "formSubmission" | "formAnswer" | "session" | "authEvent" | "quoteRequest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1400,6 +1401,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    LessonProgress: {
+      payload: Prisma.$LessonProgressPayload<ExtArgs>
+      fields: Prisma.LessonProgressFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LessonProgressFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonProgressPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LessonProgressFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonProgressPayload>
+        }
+        findFirst: {
+          args: Prisma.LessonProgressFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonProgressPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LessonProgressFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonProgressPayload>
+        }
+        findMany: {
+          args: Prisma.LessonProgressFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonProgressPayload>[]
+        }
+        create: {
+          args: Prisma.LessonProgressCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonProgressPayload>
+        }
+        createMany: {
+          args: Prisma.LessonProgressCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LessonProgressCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonProgressPayload>[]
+        }
+        delete: {
+          args: Prisma.LessonProgressDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonProgressPayload>
+        }
+        update: {
+          args: Prisma.LessonProgressUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonProgressPayload>
+        }
+        deleteMany: {
+          args: Prisma.LessonProgressDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LessonProgressUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LessonProgressUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonProgressPayload>[]
+        }
+        upsert: {
+          args: Prisma.LessonProgressUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LessonProgressPayload>
+        }
+        aggregate: {
+          args: Prisma.LessonProgressAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLessonProgress>
+        }
+        groupBy: {
+          args: Prisma.LessonProgressGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LessonProgressGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LessonProgressCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LessonProgressCountAggregateOutputType> | number
+        }
+      }
+    }
     Certificate: {
       payload: Prisma.$CertificatePayload<ExtArgs>
       fields: Prisma.CertificateFieldRefs
@@ -2290,11 +2365,22 @@ export const CourseProgressScalarFieldEnum = {
 export type CourseProgressScalarFieldEnum = (typeof CourseProgressScalarFieldEnum)[keyof typeof CourseProgressScalarFieldEnum]
 
 
+export const LessonProgressScalarFieldEnum = {
+  lessonProgressId: 'lessonProgressId',
+  userId: 'userId',
+  lessonId: 'lessonId',
+  completedAt: 'completedAt'
+} as const
+
+export type LessonProgressScalarFieldEnum = (typeof LessonProgressScalarFieldEnum)[keyof typeof LessonProgressScalarFieldEnum]
+
+
 export const CertificateScalarFieldEnum = {
   certificateId: 'certificateId',
   userId: 'userId',
   courseId: 'courseId',
   certificateCode: 'certificateCode',
+  holderName: 'holderName',
   templateUrl: 'templateUrl',
   pdfUrl: 'pdfUrl',
   issuedAt: 'issuedAt'
@@ -2713,6 +2799,7 @@ export type GlobalOmitConfig = {
   payment?: Prisma.PaymentOmit
   enrollment?: Prisma.EnrollmentOmit
   courseProgress?: Prisma.CourseProgressOmit
+  lessonProgress?: Prisma.LessonProgressOmit
   certificate?: Prisma.CertificateOmit
   post?: Prisma.PostOmit
   company?: Prisma.CompanyOmit

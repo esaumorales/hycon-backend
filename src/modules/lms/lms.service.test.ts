@@ -10,6 +10,9 @@ const base = (cambios: Partial<CursoCompradoBase> = {}): CursoCompradoBase => ({
   thumbnailUrl: null,
   durationMinutes: 150,
   compradoEl: new Date('2026-10-07T12:00:00.000Z'),
+  partes: 3,
+  vistas: 0,
+  certificado: null,
   ...cambios,
 });
 
@@ -162,5 +165,32 @@ describe('paginacion de mis cursos', () => {
     const { paginacion } = await listar(cursos, { buscar: 'Curso 1', porPagina: 3 });
 
     expect(paginacion.total).toBe(1);
+  });
+});
+
+describe('avance y certificado en mis cursos', () => {
+  it('informa cuantas partes lleva vistas', async () => {
+    const { elementos } = await listar([base({ partes: 3, vistas: 2 })]);
+
+    expect(elementos[0]).toMatchObject({ partes: 3, vistas: 2, completado: false });
+  });
+
+  it('con todas las partes vistas el curso queda terminado', async () => {
+    const { elementos } = await listar([base({ partes: 3, vistas: 3 })]);
+
+    expect(elementos[0].completado).toBe(true);
+  });
+
+  // Sin contenido cargado no se puede dar por terminado
+  it('un curso sin partes nunca esta completado', async () => {
+    const { elementos } = await listar([base({ partes: 0, vistas: 0 })]);
+
+    expect(elementos[0].completado).toBe(false);
+  });
+
+  it('lleva el codigo del certificado cuando ya se emitio', async () => {
+    const { elementos } = await listar([base({ partes: 1, vistas: 1, certificado: 'HY-ABCD1234' })]);
+
+    expect(elementos[0].certificado).toBe('HY-ABCD1234');
   });
 });

@@ -83,6 +83,11 @@ export type Enrollment = Prisma.EnrollmentModel
  */
 export type CourseProgress = Prisma.CourseProgressModel
 /**
+ * Model LessonProgress
+ * 
+ */
+export type LessonProgress = Prisma.LessonProgressModel
+/**
  * Model Certificate
  * 
  */
